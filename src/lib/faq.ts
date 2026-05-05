@@ -1,23 +1,23 @@
 export const FAQS = [
   {
     q: "¿Cuánto tarda en estar funcionando en mi clínica?",
-    a: "Te acompañamos en una sesión de configuración guiada con nuestro equipo. Creamos contigo tus sucursales, usuarios y roles con sus permisos. La operación arranca el mismo día.",
+    a: "Te acompañamos paso a paso en una sesión de configuración inicial. Dejamos listas tus sucursales y los accesos de tu equipo, y empiezas a operar el mismo día.",
   },
   {
     q: "¿Mi información clínica está segura?",
-    a: "Sí. Los datos viajan cifrados (HTTPS/TLS) y se almacenan en infraestructura con respaldos automáticos diarios. Cada usuario entra con su propio acceso y se le asignan permisos granulares por roles. Solo ve lo que su función requiere.",
+    a: "Sí. Toda la información viaja protegida y se respalda automáticamente todos los días. Cada miembro de tu equipo entra con su propio usuario y solo ve lo que necesita para su trabajo.",
   },
   {
     q: "¿Funciona si tengo varias sucursales?",
-    a: "Está pensado para multi-sucursal desde el primer día. Cada sucursal opera con sus propios pacientes, agenda, caja e inventario. Puedes transferir stock entre locales, y el administrador alterna entre sucursales desde un selector en el header — con permisos asignados por rol.",
+    a: "Sí, está pensado para varias sucursales desde el primer día. Cada local maneja sus propios pacientes, agenda, caja e inventario. Puedes mover stock entre sucursales y, como administrador, cambias de una a otra con un solo clic.",
   },
   {
     q: "¿Necesito instalar algo o comprar servidores?",
-    a: "No. Es 100% en la nube y se accede desde cualquier navegador moderno (Chrome, Edge, Firefox, Safari) en computador, tablet o celular. No requiere licencias de Windows, ni VPN, ni mantenimiento de servidores.",
+    a: "No. Funciona en la nube: solo necesitas internet y un navegador (Chrome, Edge, Firefox o Safari) en tu computador, tablet o celular. Sin instalaciones, sin servidores y sin mantenimiento.",
   },
   {
     q: "¿Qué incluye el soporte?",
-    a: "Soporte en español por WhatsApp y email en horario laboral, capacitación inicial para todo tu equipo, actualizaciones continuas sin costo adicional y acceso a una base de conocimiento con tutoriales en video.",
+    a: "Atención en español por WhatsApp y correo en horario laboral, capacitación inicial para todo tu equipo, actualizaciones sin costo adicional y un centro con tutoriales en video disponibles cuando los necesites.",
   },
   {
     q: "¿Hay permanencia o contrato anual obligatorio?",
@@ -25,6 +25,6 @@ export const FAQS = [
   },
   {
     q: "¿Cuánto cuesta?",
-    a: "El precio depende del tamaño de tu operación (cantidad de sucursales y usuarios). Escríbenos por WhatsApp con esa información y te enviamos una propuesta a medida con plan, alcance y tiempos.",
+    a: "El precio se ajusta al tamaño de tu negocio (cantidad de sucursales y usuarios). Escríbenos por WhatsApp con esos datos y te preparamos una propuesta a tu medida.",
   },
 ];

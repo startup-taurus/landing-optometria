@@ -18,7 +18,7 @@ const withSystem = [
   "Ficha única del paciente con foto, historial y refracciones en línea",
   "Órdenes a laboratorio con especificaciones precisas y trazabilidad",
   "Inventario en tiempo real, alertas de stock bajo automáticas",
-  "WhatsApp Business integrado: confirmaciones y recordatorios automáticos",
+  "WhatsApp integrado: confirmaciones y recordatorios automáticos al paciente",
   "Multi-sucursal con stock transferible y vista del admin por sucursal",
   "Dashboard en tiempo real: ventas, citas, diagnósticos frecuentes",
 ];
@@ -49,8 +49,8 @@ export default function Comparison() {
           </Reveal>
           <Reveal variant="up" delay={0.1}>
             <p className="font-inter text-text-muted text-lg">
-              Si todavía gestionas tu óptica con planillas, libretas y un ERP genérico
-              que no entiende de refracciones, esto es lo que cambia.
+              Si todavía gestionas tu óptica con planillas, libretas y herramientas
+              genéricas que no entienden de refracciones, esto es lo que cambia.
             </p>
           </Reveal>
         </div>
@@ -70,7 +70,7 @@ export default function Comparison() {
               </div>
               <div>
                 <p className="font-inter text-xs uppercase tracking-widest text-text-muted">Sin sistema especializado</p>
-                <h3 className="font-jakarta font-bold text-navy text-lg">Excel, papel o ERP genérico</h3>
+                <h3 className="font-jakarta font-bold text-navy text-lg">Excel, papel o herramientas genéricas</h3>
               </div>
             </div>
             <ul className="space-y-3.5">

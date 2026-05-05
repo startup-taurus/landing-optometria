@@ -26,7 +26,7 @@ const differentiators: Differentiator[] = [
     icon: ScanEye,
     title: "Historia clínica especializada",
     description:
-      "Diseñada por y para optometría: refracción, queratometría, biomicroscopía y fondo de ojo en un flujo natural.",
+      "Diseñada por y para optometría: refracción, queratometría y diagnóstico clínico en un flujo pensado para tu día a día.",
     accent: "from-teal/30 to-teal/5",
     iconColor: "text-teal",
   },
@@ -40,9 +40,9 @@ const differentiators: Differentiator[] = [
   },
   {
     icon: MessageSquareHeart,
-    title: "WhatsApp Business nativo",
+    title: "WhatsApp integrado",
     description:
-      "Recordatorios, confirmaciones y postventa directo desde la ficha del paciente. Sin integraciones de terceros frágiles.",
+      "Recordatorios, confirmaciones y mensajes a pacientes directo desde su ficha. Conectas tu cuenta en minutos y empiezas a enviar.",
     accent: "from-teal/30 to-navy/10",
     iconColor: "text-teal",
   },
@@ -77,8 +77,8 @@ export default function Differentiators() {
               className="font-jakarta font-bold text-navy"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
-              No es un ERP genérico.{" "}
-              <span className="text-aurora">Es para ópticas.</span>
+              No es un sistema genérico.{" "}
+              <span className="text-aurora">Está hecho para ópticas.</span>
             </h2>
           </Reveal>
         </div>

@@ -41,7 +41,7 @@ const features = [
   {
     icon: ShoppingCart,
     title: "Órdenes de compra",
-    description: "Gestión de proveedores, cotizaciones y facturación con integración a sistema de billing.",
+    description: "Gestión de proveedores, cotizaciones y facturación electrónica al SRI desde el mismo sistema.",
     color: "from-navy/20 to-navy/5",
     iconColor: "text-navy",
   },

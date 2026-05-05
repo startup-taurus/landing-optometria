@@ -40,7 +40,7 @@ const modules: ModuleData[] = [
     tag: "Historia clínica",
     title: "Refracción y diagnóstico",
     description:
-      "Agudeza visual, queratometría, biomicroscopía y fondo de ojo en un único formulario digital.",
+      "Agudeza visual, refracción, diagnóstico clínico y mucho mas en un único formulario digital.",
     accent: "from-teal/30 to-teal/5",
     preview: () => <ClinicalPreview />,
   },
@@ -58,7 +58,7 @@ const modules: ModuleData[] = [
     tag: "Inventario",
     title: "Stock en tiempo real",
     description:
-      "Monturas, lentes y accesorios con alertas automáticas, kardex y stock por sucursal.",
+      "Monturas, lentes y accesorios con alertas automáticas, control de movimientos y stock por sucursal.",
     accent: "from-navy/20 to-sky/10",
     preview: () => <InventoryPreview />,
   },
@@ -67,7 +67,7 @@ const modules: ModuleData[] = [
     tag: "Facturación",
     title: "Facturación electrónica",
     description:
-      "Cotizaciones, ventas y notas de crédito integradas con tu sistema de billing local.",
+      "Cotizaciones, ventas y notas de crédito con facturación electrónica al SRI desde el mismo flujo.",
     accent: "from-teal/30 to-navy/10",
     preview: () => <BillingPreview />,
   },
