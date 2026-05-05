@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Fabricio\\\\Desktop\\\\trabajo\\\\landing\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(ConvertTo-Json -Depth 10)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Fabricio\\\\Desktop\\\\trabajo\\\\landing\" -Force -Depth 1)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Fabricio\\\\Desktop\\\\trabajo\\\\landing\" -Force -Depth 1 | Where-Object { -not $_.PSIsContainer } | Select-Object Name, FullName)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXITCODE=$?\")",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"/ %{http_code}\\\\n\" http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"/sitemap.xml %{http_code}\\\\n\" http://localhost:3001/sitemap.xml)",
+      "Bash(curl -s -o /dev/null -w \"/robots.txt %{http_code}\\\\n\" http://localhost:3001/robots.txt)",
+      "Bash(curl -s -o /dev/null -w \"/manifest.webmanifest %{http_code}\\\\n\" http://localhost:3001/manifest.webmanifest)",
+      "Bash(curl -s -o /dev/null -w \"/icon.svg %{http_code}\\\\n\" http://localhost:3001/icon.svg)"
+    ]
+  }
+}
