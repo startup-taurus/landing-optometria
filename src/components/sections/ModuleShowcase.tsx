@@ -12,9 +12,8 @@ import {
   LineChart,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
-import { fadeInUp, staggerCards, VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface ModuleData {
   icon: LucideIcon;
@@ -83,151 +82,163 @@ const modules: ModuleData[] = [
 ];
 
 export default function ModuleShowcase() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(true);
-
-  const updateState = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const max = track.scrollWidth - track.clientWidth;
-    const p = max <= 0 ? 0 : track.scrollLeft / max;
-    setProgress(p);
-    setCanPrev(track.scrollLeft > 4);
-    setCanNext(track.scrollLeft < max - 4);
-  }, []);
+  const [active, setActive] = useState(0);
+  const [xBase, setXBase] = useState(310);
+  const total = modules.length;
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    updateState();
-    const onScroll = () => updateState();
-    track.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", updateState);
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", updateState);
+    const update = () => {
+      const cardW = Math.min(460, window.innerWidth * 0.82);
+      setXBase(Math.round(cardW * 0.68));
     };
-  }, [updateState]);
-
-  const scrollBy = useCallback((dir: 1 | -1) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector<HTMLElement>("[data-card]");
-    const step = card ? card.offsetWidth + 24 : track.clientWidth * 0.8;
-    track.scrollBy({ left: dir * step, behavior: "smooth" });
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
+
+  const go = (i: number) => setActive(Math.max(0, Math.min(total - 1, i)));
 
   return (
     <section className="relative bg-gradient-to-b from-white via-bg-soft to-white py-24 sm:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10 sm:mb-14">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-          <div className="max-w-2xl">
-            <Reveal variant="up">
-              <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-3">
-                Recorre los módulos
-              </span>
-            </Reveal>
-            <Reveal variant="up" delay={0.05}>
-              <h2
-                className="font-jakarta font-bold text-navy"
-                style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
-              >
-                Una plataforma,{" "}
-                <span className="text-aurora">seis ejes operativos</span>
-              </h2>
-            </Reveal>
-            <Reveal variant="up" delay={0.1}>
-              <p className="font-inter text-text-muted text-lg mt-3">
-                Desliza para ver cómo cada módulo se conecta con el siguiente.
-              </p>
-            </Reveal>
-          </div>
-
-          <Reveal variant="up" delay={0.15}>
-            <div className="hidden sm:flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => scrollBy(-1)}
-                disabled={!canPrev}
-                aria-label="Módulo anterior"
-                className="w-11 h-11 rounded-full border border-border bg-white flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-navy"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollBy(1)}
-                disabled={!canNext}
-                aria-label="Siguiente módulo"
-                className="w-11 h-11 rounded-full border border-border bg-white flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-navy"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+        <div className="max-w-2xl">
+          <Reveal variant="up">
+            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-3">
+              Recorre los módulos
+            </span>
+          </Reveal>
+          <Reveal variant="up" delay={0.05}>
+            <h2
+              className="font-jakarta font-bold text-navy"
+              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+            >
+              Una plataforma,{" "}
+              <span className="text-aurora">seis ejes operativos</span>
+            </h2>
+          </Reveal>
+          <Reveal variant="up" delay={0.1}>
+            <p className="font-inter text-text-muted text-lg mt-3">
+              Explora cómo cada módulo se conecta con el siguiente.
+            </p>
           </Reveal>
         </div>
       </div>
 
-      <motion.div
-        variants={staggerCards}
-        initial="hidden"
-        whileInView="visible"
-        viewport={VIEWPORT_DEFAULT}
-        ref={trackRef}
-        className="module-track flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pl-6 pr-6 sm:pl-12 sm:pr-12 lg:pl-[max(3rem,calc((100vw-1280px)/2+1.5rem))] pb-4"
-        style={{ scrollPaddingLeft: "1.5rem" }}
-      >
-        {modules.map((m, i) => {
-          const Icon = m.icon;
-          return (
-            <motion.article
-              key={m.title}
-              data-card
-              variants={fadeInUp}
-              className="snap-start shrink-0 w-[85vw] sm:w-[420px] lg:w-[480px] rounded-card border border-border bg-white shadow-card relative overflow-hidden"
-            >
-              <div
-                aria-hidden
-                className={`absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br ${m.accent} blur-2xl pointer-events-none`}
-              />
-              <div className="relative p-7 flex flex-col gap-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky/15 to-teal/10 flex items-center justify-center ring-1 ring-sky/15">
-                    <Icon className="w-5 h-5 text-sky" />
-                  </div>
-                  <div>
-                    <p className="font-inter text-xs font-semibold uppercase tracking-widest text-text-muted">
-                      Módulo {String(i + 1).padStart(2, "0")}
-                    </p>
-                    <p className="font-jakarta font-semibold text-navy">{m.tag}</p>
-                  </div>
-                </div>
-                <h3 className="font-jakarta font-bold text-navy text-2xl leading-tight">
-                  {m.title}
-                </h3>
-                <p className="font-inter text-text-muted text-sm leading-relaxed">
-                  {m.description}
-                </p>
-                <div className="rounded-xl border border-border bg-bg-soft/80 p-4 h-56 sm:h-64 overflow-hidden">
-                  {m.preview()}
-                </div>
-              </div>
-            </motion.article>
-          );
-        })}
-        <div aria-hidden className="shrink-0 w-2 sm:w-12" />
-      </motion.div>
+      {/* Coverflow carousel */}
+      <div className="relative h-[560px] sm:h-[600px] lg:h-[620px] flex items-center">
+        {/* Left button */}
+        <button
+          type="button"
+          onClick={() => go(active - 1)}
+          disabled={active === 0}
+          aria-label="Módulo anterior"
+          className="absolute left-2 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
 
-      <div className="max-w-7xl mx-auto px-6 mt-8">
-        <div className="h-1 rounded-full bg-bg-slate overflow-hidden max-w-md mx-auto">
-          <motion.div
-            className="h-full bg-gradient-to-r from-sky to-teal"
-            style={{ width: `${Math.max(8, progress * 100)}%` }}
-            transition={{ type: "tween", duration: 0.2 }}
-          />
+        {/* Cards with perspective */}
+        <div
+          className="relative w-full h-full flex items-center justify-center"
+          style={{ perspective: "1400px" }}
+        >
+          {modules.map((m, i) => {
+            const offset = i - active;
+            const absOffset = Math.abs(offset);
+            if (absOffset > 2) return null;
+
+            const Icon = m.icon;
+            const isCenter = offset === 0;
+            const scale = 1 - absOffset * 0.13;
+            const opacity = 1 - absOffset * 0.22;
+            const brightness = isCenter ? 1 : 1 - absOffset * 0.13;
+
+            return (
+              <motion.article
+                key={m.title}
+                data-card
+                animate={{
+                  x: offset * xBase,
+                  scale,
+                  opacity,
+                  zIndex: 10 - absOffset * 3,
+                  rotateY: offset * 10,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                drag={isCenter ? "x" : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.08}
+                onDragEnd={(_, { offset: drag, velocity }) => {
+                  if (drag.x < -60 || velocity.x < -400) go(active + 1);
+                  else if (drag.x > 60 || velocity.x > 400) go(active - 1);
+                }}
+                onClick={() => !isCenter && go(i)}
+                className="absolute w-[82vw] sm:w-[400px] lg:w-[460px] rounded-card border border-border bg-white overflow-hidden select-none"
+                style={{
+                  transformStyle: "preserve-3d",
+                  cursor: isCenter ? "grab" : "pointer",
+                  boxShadow: isCenter
+                    ? "0 24px 64px rgba(0,0,0,0.13), 0 8px 24px rgba(0,0,0,0.08)"
+                    : "0 8px 24px rgba(0,0,0,0.06)",
+                  filter: `brightness(${brightness})`,
+                }}
+              >
+                <div
+                  aria-hidden
+                  className={`absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br ${m.accent} blur-2xl pointer-events-none`}
+                />
+                <div className="relative p-7 flex flex-col gap-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky/15 to-teal/10 flex items-center justify-center ring-1 ring-sky/15">
+                      <Icon className="w-5 h-5 text-sky" />
+                    </div>
+                    <div>
+                      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-text-muted">
+                        Módulo {String(i + 1).padStart(2, "0")}
+                      </p>
+                      <p className="font-jakarta font-semibold text-navy">{m.tag}</p>
+                    </div>
+                  </div>
+                  <h3 className="font-jakarta font-bold text-navy text-2xl leading-tight">
+                    {m.title}
+                  </h3>
+                  <p className="font-inter text-text-muted text-sm leading-relaxed">
+                    {m.description}
+                  </p>
+                  <div className="rounded-xl border border-border bg-bg-soft/80 p-4 h-52 sm:h-60 overflow-hidden">
+                    {m.preview()}
+                  </div>
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
+
+        {/* Right button */}
+        <button
+          type="button"
+          onClick={() => go(active + 1)}
+          disabled={active === total - 1}
+          aria-label="Siguiente módulo"
+          className="absolute right-2 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center gap-2 mt-8">
+        {modules.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Ir al módulo ${i + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === active ? "w-6 bg-sky" : "w-2 bg-black/15"
+            }`}
+          />
+        ))}
       </div>
     </section>
   );
@@ -249,7 +260,9 @@ function AgendaPreview() {
             <span className="w-10 text-[10px] font-mono text-text-muted">{h}</span>
             <div className="flex-1 h-7 rounded-md bg-white border border-border relative overflow-hidden">
               {ev && (
-                <div className={`absolute inset-y-0 left-0 w-3/4 ${ev.color} text-white text-[10px] flex items-center px-2 rounded-md`}>
+                <div
+                  className={`absolute inset-y-0 left-0 w-3/4 ${ev.color} text-white text-[10px] flex items-center px-2 rounded-md`}
+                >
                   {ev.label}
                 </div>
               )}
@@ -273,7 +286,10 @@ function ClinicalPreview() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         {["OD esf -1.25", "OI esf -1.50", "OD cil -0.50", "OI cil -0.75"].map((t) => (
-          <div key={t} className="rounded-md bg-white border border-border px-2 py-1.5 text-[10px] font-mono text-navy">
+          <div
+            key={t}
+            className="rounded-md bg-white border border-border px-2 py-1.5 text-[10px] font-mono text-navy"
+          >
             {t}
           </div>
         ))}
@@ -297,7 +313,10 @@ function LabPreview() {
   return (
     <div className="h-full flex flex-col gap-2">
       {orders.map((o) => (
-        <div key={o.id} className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-2">
+        <div
+          key={o.id}
+          className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-2"
+        >
           <span className="font-mono text-[10px] text-text-muted">{o.id}</span>
           <div className="flex-1 h-1.5 bg-bg-slate rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-sky to-teal w-3/4" />
@@ -319,12 +338,19 @@ function InventoryPreview() {
   return (
     <div className="h-full flex flex-col gap-1.5">
       {items.map((it) => (
-        <div key={it.name} className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-1.5">
+        <div
+          key={it.name}
+          className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-1.5"
+        >
           <div className="flex-1">
             <div className="h-2 w-3/4 bg-navy/70 rounded-full mb-1" />
             <div className="h-1.5 w-1/2 bg-text-muted/30 rounded-full" />
           </div>
-          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${it.low ? "bg-red-500/15 text-red-600" : "bg-teal/15 text-teal"}`}>
+          <span
+            className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+              it.low ? "bg-red-500/15 text-red-600" : "bg-teal/15 text-teal"
+            }`}
+          >
             {it.stock} u
           </span>
         </div>
@@ -358,9 +384,15 @@ function BillingPreview() {
       <div className="rounded-md bg-gradient-to-br from-sky/10 to-teal/10 border border-sky/20 p-2.5 flex-1">
         <div className="text-[10px] text-text-muted mb-1">Forma de pago</div>
         <div className="flex gap-1.5">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">Efectivo</span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">Tarjeta</span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">Transferencia</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+            Efectivo
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+            Tarjeta
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+            Transferencia
+          </span>
         </div>
       </div>
     </div>

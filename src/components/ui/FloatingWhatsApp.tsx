@@ -40,7 +40,7 @@ export default function FloatingWhatsApp() {
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
-          className="md:hidden fixed bottom-5 right-5 z-50 flex items-center justify-center w-14 h-14 rounded-full text-white shadow-[0_10px_30px_rgba(37,211,102,0.4)]"
+          className="fixed bottom-5 right-5 z-50 flex items-center justify-center w-14 h-14 rounded-full text-white shadow-[0_10px_30px_rgba(37,211,102,0.4)]"
           style={{ background: "#25D366" }}
         >
           <WhatsAppIcon />

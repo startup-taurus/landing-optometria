@@ -88,7 +88,7 @@ export const staggerCards: Variants = {
   },
 };
 
-export const VIEWPORT_DEFAULT = { once: true, margin: "-80px" };
+export const VIEWPORT_DEFAULT = { once: false, margin: "-80px" };
 
 export async function initGSAP() {
   if (typeof window === "undefined") return { gsap: null, ScrollTrigger: null };
