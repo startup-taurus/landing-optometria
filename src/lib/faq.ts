@@ -1,19 +1,15 @@
 export const FAQS = [
   {
     q: "¿Cuánto tarda en estar funcionando en mi clínica?",
-    a: "El alta inicial toma minutos. La configuración guiada (sucursales, doctores, permisos, datos básicos) se completa el mismo día. Si quieres importar tu base de pacientes y catálogo de productos desde Excel, lo hacemos contigo en una sesión de onboarding y queda listo en menos de una semana.",
+    a: "Te acompañamos en una sesión de configuración guiada con nuestro equipo. Creamos contigo tus sucursales, usuarios y roles con sus permisos. La operación arranca el mismo día.",
   },
   {
     q: "¿Mi información clínica está segura?",
-    a: "Sí. Los datos viajan cifrados (HTTPS/TLS), se almacenan en infraestructura con respaldos automáticos diarios y la base de datos es independiente por cliente. Cada usuario tiene un rol con permisos granulares para acceder solo a lo que su función requiera.",
-  },
-  {
-    q: "¿Puedo migrar desde Excel u otro sistema?",
-    a: "Sí. Aceptamos plantillas Excel/CSV con tus pacientes, productos y stock actual. Te entregamos las plantillas, las llenas (o las llenamos contigo) y nosotros hacemos la carga inicial validada antes de salir a producción.",
+    a: "Sí. Los datos viajan cifrados (HTTPS/TLS) y se almacenan en infraestructura con respaldos automáticos diarios. Cada usuario entra con su propio acceso y se le asignan permisos granulares por rol — solo ve lo que su función requiere.",
   },
   {
     q: "¿Funciona si tengo varias sucursales?",
-    a: "Está pensado para multi-sucursal desde el primer día. Cada sucursal tiene su propio inventario, agenda y caja, pero el historial del paciente y los reportes consolidados son únicos. Un paciente puede atenderse en cualquiera de tus sucursales y todos los profesionales ven la misma ficha.",
+    a: "Está pensado para multi-sucursal desde el primer día. Cada sucursal opera con sus propios pacientes, agenda, caja e inventario. Puedes transferir stock entre locales, y el administrador alterna entre sucursales desde un selector en el header — con permisos asignados por rol.",
   },
   {
     q: "¿Necesito instalar algo o comprar servidores?",
@@ -25,7 +21,7 @@ export const FAQS = [
   },
   {
     q: "¿Hay permanencia o contrato anual obligatorio?",
-    a: "No. El servicio es mensual y puedes cancelar cuando lo necesites. Si decides irte, te entregamos tu información completa exportada en formatos estándar (Excel/CSV/PDF).",
+    a: "No. El servicio es mensual y puedes cancelar cuando lo necesites.",
   },
   {
     q: "¿Cuánto cuesta?",

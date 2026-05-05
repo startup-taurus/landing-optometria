@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useRef, type ReactNode, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type ReactNode, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface TiltCardProps {
@@ -13,24 +13,33 @@ interface TiltCardProps {
 export default function TiltCard({
   children,
   className,
-  intensity = 8,
+  intensity = 6,
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1024px)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setEnabled(mq.matches && !reduce);
+    const onChange = () => setEnabled(mq.matches && !reduce);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const springConfig = { stiffness: 180, damping: 18, mass: 0.4 };
+  const springConfig = { stiffness: 160, damping: 16, mass: 0.4 };
   const springX = useSpring(x, springConfig);
   const springY = useSpring(y, springConfig);
 
   const rotateX = useTransform(springY, [-0.5, 0.5], [intensity, -intensity]);
   const rotateY = useTransform(springX, [-0.5, 0.5], [-intensity, intensity]);
 
-  const glowX = useTransform(springX, [-0.5, 0.5], ["20%", "80%"]);
-  const glowY = useTransform(springY, [-0.5, 0.5], ["20%", "80%"]);
-
   function handleMove(e: MouseEvent<HTMLDivElement>) {
-    if (!ref.current) return;
+    if (!enabled || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width - 0.5;
     const py = (e.clientY - rect.top) / rect.height - 0.5;
@@ -39,8 +48,13 @@ export default function TiltCard({
   }
 
   function handleLeave() {
+    if (!enabled) return;
     x.set(0);
     y.set(0);
+  }
+
+  if (!enabled) {
+    return <div className={className}>{children}</div>;
   }
 
   return (
@@ -49,25 +63,11 @@ export default function TiltCard({
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       style={{ rotateX, rotateY, transformPerspective: 800, transformStyle: "preserve-3d" }}
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 220, damping: 22 }}
-      className={cn("relative will-change-transform", className)}
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 200, damping: 22 }}
+      className={cn("relative", className)}
     >
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300"
-        style={{
-          background: useTransform(
-            [glowX, glowY] as any,
-            ([gx, gy]: any) =>
-              `radial-gradient(380px circle at ${gx} ${gy}, rgba(14,165,233,0.18), transparent 60%)`
-          ),
-        }}
-        whileHover={{ opacity: 1 }}
-      />
-      <div style={{ transform: "translateZ(20px)" }} className="relative">
-        {children}
-      </div>
+      {children}
     </motion.div>
   );
 }

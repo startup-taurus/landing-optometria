@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   FlaskConical,
   Boxes,
@@ -10,7 +12,9 @@ import {
   LineChart,
   type LucideIcon,
 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import { fadeInUp, staggerCards, VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface ModuleData {
   icon: LucideIcon;
@@ -25,9 +29,9 @@ const modules: ModuleData[] = [
   {
     icon: CalendarDays,
     tag: "Agenda",
-    title: "Calendario multi-doctor",
+    title: "Agenda por sucursal",
     description:
-      "Vista por día, semana o mes. Estados de cita, recordatorios automáticos y bloqueos por sucursal.",
+      "Vista por día, semana o mes. Estados de cita y recordatorio automático al paciente un día antes.",
     accent: "from-sky/30 to-sky/5",
     preview: () => <AgendaPreview />,
   },
@@ -79,129 +83,150 @@ const modules: ModuleData[] = [
 ];
 
 export default function ModuleShowcase() {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const updateState = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const max = track.scrollWidth - track.clientWidth;
+    const p = max <= 0 ? 0 : track.scrollLeft / max;
+    setProgress(p);
+    setCanPrev(track.scrollLeft > 4);
+    setCanNext(track.scrollLeft < max - 4);
+  }, []);
 
   useEffect(() => {
-    let ctx: any;
-    let cleanup: (() => void) | undefined;
-
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduce) return;
-
-    async function init() {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      ctx = gsap.context(() => {
-        if (!sectionRef.current || !trackRef.current) return;
-
-        const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-        if (!isDesktop) return;
-
-        const track = trackRef.current;
-        const distance = track.scrollWidth - window.innerWidth + 64;
-
-        gsap.to(track, {
-          x: -distance,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: () => `+=${distance + 200}`,
-            pin: true,
-            scrub: 0.6,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        const onResize = () => ScrollTrigger.refresh();
-        window.addEventListener("resize", onResize);
-        cleanup = () => window.removeEventListener("resize", onResize);
-      }, sectionRef);
-    }
-
-    init();
+    const track = trackRef.current;
+    if (!track) return;
+    updateState();
+    const onScroll = () => updateState();
+    track.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateState);
     return () => {
-      cleanup?.();
-      ctx?.revert();
+      track.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateState);
     };
+  }, [updateState]);
+
+  const scrollBy = useCallback((dir: 1 | -1) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = track.querySelector<HTMLElement>("[data-card]");
+    const step = card ? card.offsetWidth + 24 : track.clientWidth * 0.8;
+    track.scrollBy({ left: dir * step, behavior: "smooth" });
   }, []);
 
   return (
-    <section className="relative bg-gradient-to-b from-white via-bg-soft to-white">
-      <div className="max-w-7xl mx-auto px-6 pt-24 pb-12 text-center">
-        <Reveal variant="up">
-          <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-4">
-            Recorre los módulos
-          </span>
-        </Reveal>
-        <Reveal variant="up" delay={0.05}>
-          <h2
-            className="font-jakarta font-bold text-navy mx-auto max-w-3xl"
-            style={{ fontSize: "clamp(30px, 4vw, 48px)" }}
-          >
-            Una plataforma,{" "}
-            <span className="text-aurora">seis ejes operativos</span>
-          </h2>
-        </Reveal>
-        <Reveal variant="up" delay={0.1}>
-          <p className="font-inter text-text-muted text-lg mt-4 max-w-2xl mx-auto">
-            Desliza para ver cómo cada módulo se conecta con el siguiente sin que
-            tengas que cambiar de herramienta.
-          </p>
-        </Reveal>
+    <section className="relative bg-gradient-to-b from-white via-bg-soft to-white py-24 sm:py-28 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 mb-10 sm:mb-14">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+          <div className="max-w-2xl">
+            <Reveal variant="up">
+              <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-3">
+                Recorre los módulos
+              </span>
+            </Reveal>
+            <Reveal variant="up" delay={0.05}>
+              <h2
+                className="font-jakarta font-bold text-navy"
+                style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+              >
+                Una plataforma,{" "}
+                <span className="text-aurora">seis ejes operativos</span>
+              </h2>
+            </Reveal>
+            <Reveal variant="up" delay={0.1}>
+              <p className="font-inter text-text-muted text-lg mt-3">
+                Desliza para ver cómo cada módulo se conecta con el siguiente.
+              </p>
+            </Reveal>
+          </div>
+
+          <Reveal variant="up" delay={0.15}>
+            <div className="hidden sm:flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollBy(-1)}
+                disabled={!canPrev}
+                aria-label="Módulo anterior"
+                className="w-11 h-11 rounded-full border border-border bg-white flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-navy"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollBy(1)}
+                disabled={!canNext}
+                aria-label="Siguiente módulo"
+                className="w-11 h-11 rounded-full border border-border bg-white flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-border disabled:hover:text-navy"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </Reveal>
+        </div>
       </div>
 
-      <div
-        ref={sectionRef}
-        className="relative md:h-screen md:min-h-[640px] md:max-h-[820px] overflow-hidden"
+      <motion.div
+        variants={staggerCards}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VIEWPORT_DEFAULT}
+        ref={trackRef}
+        className="module-track flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pl-6 pr-6 sm:pl-12 sm:pr-12 lg:pl-[max(3rem,calc((100vw-1280px)/2+1.5rem))] pb-4"
+        style={{ scrollPaddingLeft: "1.5rem" }}
       >
-        <div
-          ref={trackRef}
-          className="md:absolute md:inset-y-0 md:left-0 flex flex-col md:flex-row gap-6 md:gap-8 px-6 md:pl-12 md:pr-32 md:items-center will-change-transform pb-16"
-        >
-          {modules.map((m, i) => {
-            const Icon = m.icon;
-            return (
-              <article
-                key={m.title}
-                className="relative shrink-0 md:w-[460px] lg:w-[520px] rounded-card border border-border bg-white shadow-card overflow-hidden"
-              >
-                <div
-                  aria-hidden
-                  className={`absolute -top-20 -right-20 w-72 h-72 rounded-full bg-gradient-to-br ${m.accent} blur-3xl pointer-events-none`}
-                />
-                <div className="relative p-7 sm:p-8 flex flex-col gap-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky/15 to-teal/10 flex items-center justify-center ring-1 ring-sky/15">
-                      <Icon className="w-5 h-5 text-sky" />
-                    </div>
-                    <div>
-                      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-text-muted">
-                        Módulo {String(i + 1).padStart(2, "0")}
-                      </p>
-                      <p className="font-jakarta font-semibold text-navy">{m.tag}</p>
-                    </div>
+        {modules.map((m, i) => {
+          const Icon = m.icon;
+          return (
+            <motion.article
+              key={m.title}
+              data-card
+              variants={fadeInUp}
+              className="snap-start shrink-0 w-[85vw] sm:w-[420px] lg:w-[480px] rounded-card border border-border bg-white shadow-card relative overflow-hidden"
+            >
+              <div
+                aria-hidden
+                className={`absolute -top-20 -right-20 w-60 h-60 rounded-full bg-gradient-to-br ${m.accent} blur-2xl pointer-events-none`}
+              />
+              <div className="relative p-7 flex flex-col gap-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky/15 to-teal/10 flex items-center justify-center ring-1 ring-sky/15">
+                    <Icon className="w-5 h-5 text-sky" />
                   </div>
-                  <h3 className="font-jakarta font-bold text-navy text-2xl leading-tight">
-                    {m.title}
-                  </h3>
-                  <p className="font-inter text-text-muted text-sm leading-relaxed">
-                    {m.description}
-                  </p>
-                  <div className="rounded-xl border border-border bg-bg-soft/80 backdrop-blur p-4 h-56 sm:h-64 overflow-hidden">
-                    {m.preview()}
+                  <div>
+                    <p className="font-inter text-xs font-semibold uppercase tracking-widest text-text-muted">
+                      Módulo {String(i + 1).padStart(2, "0")}
+                    </p>
+                    <p className="font-jakarta font-semibold text-navy">{m.tag}</p>
                   </div>
                 </div>
-              </article>
-            );
-          })}
+                <h3 className="font-jakarta font-bold text-navy text-2xl leading-tight">
+                  {m.title}
+                </h3>
+                <p className="font-inter text-text-muted text-sm leading-relaxed">
+                  {m.description}
+                </p>
+                <div className="rounded-xl border border-border bg-bg-soft/80 p-4 h-56 sm:h-64 overflow-hidden">
+                  {m.preview()}
+                </div>
+              </div>
+            </motion.article>
+          );
+        })}
+        <div aria-hidden className="shrink-0 w-2 sm:w-12" />
+      </motion.div>
+
+      <div className="max-w-7xl mx-auto px-6 mt-8">
+        <div className="h-1 rounded-full bg-bg-slate overflow-hidden max-w-md mx-auto">
+          <motion.div
+            className="h-full bg-gradient-to-r from-sky to-teal"
+            style={{ width: `${Math.max(8, progress * 100)}%` }}
+            transition={{ type: "tween", duration: 0.2 }}
+          />
         </div>
       </div>
     </section>

@@ -19,7 +19,7 @@ const withSystem = [
   "Órdenes a laboratorio con especificaciones precisas y trazabilidad",
   "Inventario en tiempo real, alertas de stock bajo automáticas",
   "WhatsApp Business integrado: confirmaciones y recordatorios automáticos",
-  "Multi-sucursal con datos sincronizados al instante",
+  "Multi-sucursal con stock transferible y vista del admin por sucursal",
   "Dashboard en tiempo real: ventas, citas, diagnósticos frecuentes",
 ];
 

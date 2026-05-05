@@ -82,6 +82,14 @@ p {
     -webkit-backdrop-filter: blur(16px) saturate(160%);
   }
 
+  .module-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .module-track::-webkit-scrollbar {
+    display: none;
+  }
+
   .noise-overlay::after {
     content: "";
     position: absolute;

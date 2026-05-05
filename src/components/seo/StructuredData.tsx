@@ -47,7 +47,7 @@ export default function StructuredData() {
       "Historia clínica oftalmológica digital",
       "Pedidos a laboratorio óptico",
       "Inventario de monturas, lentes y accesorios",
-      "Agenda y citas multi-doctor",
+      "Agenda por sucursal",
       "Notificaciones por WhatsApp",
       "Dashboard de analítica",
       "Multi-sucursal",

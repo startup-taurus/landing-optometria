@@ -47,8 +47,8 @@ const features = [
   },
   {
     icon: Calendar,
-    title: "Agenda y citas",
-    description: "Calendario visual multi-doctor con control de estados de cita y vista por día/semana/mes.",
+    title: "Agenda por sucursal",
+    description: "Calendario por sucursal con estados de cita y vista por día, semana o mes.",
     color: "from-sky/20 to-sky/5",
     iconColor: "text-sky",
   },

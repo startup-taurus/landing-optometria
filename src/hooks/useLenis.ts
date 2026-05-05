@@ -20,8 +20,10 @@ export function useLenis() {
       gsap.registerPlugin(ScrollTrigger);
 
       lenis = new Lenis({
-        duration: 1.05,
+        duration: 0.9,
         easing: (t: number) => 1 - Math.pow(1 - t, 3),
+        wheelMultiplier: 1,
+        touchMultiplier: 1.5,
       });
 
       rafTicker = (time: number) => lenis.raf(time * 1000);
