@@ -96,6 +96,7 @@ export default function Differentiators() {
               <motion.div
                 key={d.title}
                 variants={cardVariants}
+                whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
                 className="group relative rounded-card border border-border bg-white shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden"
               >
                 <div

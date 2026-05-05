@@ -61,6 +61,7 @@ export default function Comparison() {
             initial="hidden"
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
+            whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
             className="relative rounded-card border border-border bg-bg-slate/60 p-7 sm:p-8"
           >
             <div className="flex items-center gap-3 mb-6">
@@ -99,6 +100,7 @@ export default function Comparison() {
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
             transition={{ delay: 0.05 }}
+            whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
             className="relative rounded-card border-aurora bg-white p-7 sm:p-8 shadow-glow-sky"
           >
             <div

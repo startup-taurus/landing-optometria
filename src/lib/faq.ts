@@ -5,7 +5,7 @@ export const FAQS = [
   },
   {
     q: "¿Mi información clínica está segura?",
-    a: "Sí. Los datos viajan cifrados (HTTPS/TLS) y se almacenan en infraestructura con respaldos automáticos diarios. Cada usuario entra con su propio acceso y se le asignan permisos granulares por rol — solo ve lo que su función requiere.",
+    a: "Sí. Los datos viajan cifrados (HTTPS/TLS) y se almacenan en infraestructura con respaldos automáticos diarios. Cada usuario entra con su propio acceso y se le asignan permisos granulares por roles. Solo ve lo que su función requiere.",
   },
   {
     q: "¿Funciona si tengo varias sucursales?",

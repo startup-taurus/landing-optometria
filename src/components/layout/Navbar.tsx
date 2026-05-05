@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { useActiveSection } from "@/hooks/useActiveSection";
 
 const NAV_LINKS = [
   { label: "Características", href: "#caracteristicas" },
@@ -14,10 +15,14 @@ const NAV_LINKS = [
   { label: "Contacto", href: "#contacto" },
 ];
 
+// Stable reference so the hook's effect only runs once
+const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1));
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
+  const activeSection = useActiveSection(SECTION_IDS);
 
   useEffect(() => {
     return scrollY.on("change", (y) => setScrolled(y > 50));
@@ -66,16 +71,33 @@ export default function Navbar() {
           </motion.a>
 
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="relative text-text-muted hover:text-navy font-inter text-sm font-medium transition-colors group"
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-sky to-teal scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
-              </a>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive = activeSection === link.href.slice(1);
+              return (
+                <motion.a
+                  key={link.href}
+                  href={link.href}
+                  initial="idle"
+                  animate={isActive ? "active" : "idle"}
+                  whileHover="hovered"
+                  className={`relative font-inter text-sm font-medium transition-colors ${
+                    isActive ? "text-navy" : "text-text-muted hover:text-navy"
+                  }`}
+                >
+                  {link.label}
+                  <motion.span
+                    aria-hidden
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-sky to-teal origin-left"
+                    variants={{
+                      idle: { scaleX: 0 },
+                      active: { scaleX: 1 },
+                      hovered: { scaleX: 1 },
+                    }}
+                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                </motion.a>
+              );
+            })}
           </nav>
 
           <div className="hidden md:block">
