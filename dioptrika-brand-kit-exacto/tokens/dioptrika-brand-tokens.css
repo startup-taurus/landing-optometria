@@ -1,0 +1,27 @@
+:root {
+  --dioptrika-green-master: #01AF76;
+  --dioptrika-green: #14B875;
+  --dioptrika-green-deep: #087A5A;
+  --dioptrika-petroleum: #123A43;
+  --dioptrika-dark: #071A1F;
+  --dioptrika-dark-surface: #0D252C;
+  --dioptrika-white: #F8FBFA;
+  --dioptrika-graphite-master: #1F2B36;
+  --dioptrika-muted: #6B7280;
+
+  --dioptrika-bg: #F8FBFA;
+  --dioptrika-surface: #FFFFFF;
+  --dioptrika-text: #1F2B36;
+  --dioptrika-text-muted: #6B7280;
+  --dioptrika-primary: #01AF76;
+  --dioptrika-border: #DCEBE7;
+}
+
+[data-theme="dark"] {
+  --dioptrika-bg: #071A1F;
+  --dioptrika-surface: #0D252C;
+  --dioptrika-text: #F8FBFA;
+  --dioptrika-text-muted: #B7D1D2;
+  --dioptrika-primary: #14B875;
+  --dioptrika-border: #1D4650;
+}

@@ -3,12 +3,41 @@
 @tailwind utilities;
 
 :root {
-  --navy: #1E3A5F;
-  --sky: #0EA5E9;
-  --teal: #0D9488;
-  --text: #0F172A;
-  --text-muted: #64748B;
-  --border: #E2E8F0;
+  /* Dioptrika brand tokens */
+  --dioptrika-green-master: #01AF76;
+  --dioptrika-green: #14B875;
+  --dioptrika-green-deep: #087A5A;
+  --dioptrika-petroleum: #123A43;
+  --dioptrika-dark: #071A1F;
+  --dioptrika-dark-surface: #0D252C;
+  --dioptrika-white: #F8FBFA;
+  --dioptrika-graphite: #1F2B36;
+  --dioptrika-muted: #6B7280;
+  --dioptrika-muted-dark: #B7D1D2;
+  --dioptrika-border-light: #DCEBE7;
+  --dioptrika-border-dark: #1D4650;
+
+  /* Semantic aliases (dark mode by default) */
+  --bg: var(--dioptrika-dark);
+  --surface: var(--dioptrika-dark-surface);
+  --text: var(--dioptrika-white);
+  --text-muted: var(--dioptrika-muted-dark);
+  --primary: var(--dioptrika-green);
+  --primary-deep: var(--dioptrika-green-deep);
+  --border: var(--dioptrika-border-dark);
+
+  /* Legacy aliases (kept for backward compatibility with any stragglers) */
+  --navy: var(--dioptrika-petroleum);
+  --sky: var(--dioptrika-green);
+  --teal: var(--dioptrika-green-deep);
+}
+
+[data-theme="light"] {
+  --bg: var(--dioptrika-white);
+  --surface: #FFFFFF;
+  --text: var(--dioptrika-graphite);
+  --text-muted: var(--dioptrika-muted);
+  --border: var(--dioptrika-border-light);
 }
 
 * {
@@ -19,25 +48,28 @@
 
 html {
   scroll-behavior: auto;
+  background: var(--dioptrika-dark);
+  color-scheme: dark;
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  color: #0F172A;
-  background: #ffffff;
+  color: var(--text);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(14, 165, 233, 0.25);
-  color: #0F172A;
+  background: rgba(20, 184, 117, 0.30);
+  color: var(--dioptrika-white);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Sora', 'Manrope', 'Inter', sans-serif;
   text-wrap: balance;
+  letter-spacing: -0.01em;
 }
 
 p {
@@ -46,7 +78,14 @@ p {
 
 @layer utilities {
   .text-aurora {
-    background: linear-gradient(120deg, #0EA5E9 0%, #0D9488 60%, #1E3A5F 100%);
+    background: linear-gradient(120deg, #14B875 0%, #5FD4A0 50%, #01AF76 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-aurora-deep {
+    background: linear-gradient(120deg, #087A5A 0%, #14B875 60%, #01AF76 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -61,7 +100,7 @@ p {
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(140deg, rgba(14,165,233,0.55), rgba(13,148,136,0.45) 50%, rgba(255,255,255,0));
+    background: linear-gradient(140deg, rgba(20,184,117,0.65), rgba(8,122,90,0.45) 50%, rgba(255,255,255,0));
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
@@ -71,15 +110,31 @@ p {
   }
 
   .glass {
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(13, 37, 44, 0.70);
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
   }
 
   .glass-dark {
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(7, 26, 31, 0.65);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  /* Light "respiration islands" — use on sections that opt out of dark theme */
+  .light-island {
+    background: var(--dioptrika-white);
+    color: var(--dioptrika-graphite);
+  }
+  .light-island ::selection {
+    background: rgba(20, 184, 117, 0.25);
+    color: var(--dioptrika-graphite);
   }
 
   .module-track {
@@ -110,10 +165,10 @@ p {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #0D252C;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0EA5E9, #0D9488);
+  background: linear-gradient(180deg, #14B875, #087A5A);
   border-radius: 4px;
 }
 

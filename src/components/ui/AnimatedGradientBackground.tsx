@@ -15,12 +15,11 @@ export default function AnimatedGradientBackground({
   const blobs =
     variant === "soft"
       ? [
-          { color: "#0EA5E9", size: 380, x: "18%", y: "30%", opacity: 0.18 },
-          { color: "#0D9488", size: 340, x: "78%", y: "70%", opacity: 0.16 },
+          { color: "#14B875", size: 360, x: "82%", y: "65%", opacity: 0.10 },
         ]
       : [
-          { color: "#0EA5E9", size: 420, x: "15%", y: "25%", opacity: 0.26 },
-          { color: "#0D9488", size: 380, x: "78%", y: "60%", opacity: 0.22 },
+          { color: "#14B875", size: 460, x: "80%", y: "20%", opacity: 0.18 },
+          { color: "#087A5A", size: 380, x: "12%", y: "78%", opacity: 0.12 },
         ];
 
   return (
@@ -42,7 +41,7 @@ export default function AnimatedGradientBackground({
             top: b.y,
             background: b.color,
             opacity: b.opacity,
-            filter: "blur(70px)",
+            filter: "blur(90px)",
             transform: "translate3d(-50%, -50%, 0)",
             willChange: "transform",
           }}

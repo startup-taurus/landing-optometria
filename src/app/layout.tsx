@@ -20,12 +20,19 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
   applicationName: SITE_NAME,
-  authors: [{ name: SITE_NAME }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
+  authors: [{ name: "LatamSoft" }, { name: SITE_NAME }],
+  creator: "LatamSoft",
+  publisher: "LatamSoft",
   category: "technology",
   alternates: {
     canonical: "/",
+    languages: {
+      "es-LA": "/",
+      "es-EC": "/",
+      "es-MX": "/",
+      "es-CO": "/",
+      "es-PE": "/",
+    },
   },
   openGraph: {
     type: "website",
@@ -34,11 +41,20 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_TITLE_DEFAULT,
     description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — software clínico para ópticas`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE_DEFAULT,
     description: SITE_DESCRIPTION,
+    images: ["/twitter-image"],
   },
   robots: {
     index: true,
@@ -54,27 +70,28 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/isologo.png", type: "image/png" },
     ],
-    apple: "/apple-icon.png",
+    apple: "/brand/isologo.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1E3A5F",
+  themeColor: "#071A1F",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  colorScheme: "light",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" className="dark" data-theme="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>

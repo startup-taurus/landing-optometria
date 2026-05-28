@@ -1,0 +1,36 @@
+{
+  "source_master": "C:\\Users\\riden\\Documents\\Proyectos\\Personales\\PROYECTOS\\LATAMSOFT\\Proyectos\\Optica\\branding\\Propuesta 2\\dioptrika-brand-kit\\assets\\reference\\dioptrika-ai-logo-reference.png",
+  "principle": "No redraw, no reinterpretation. Every logo asset is cropped or background-removed from the exact reference image.",
+  "crops": {
+    "logo-principal-original-con-fondo.png": [
+      187,
+      208,
+      1515,
+      572
+    ],
+    "logo-horizontal-original-con-fondo.png": [
+      187,
+      208,
+      1515,
+      500
+    ],
+    "isologo-original-con-fondo.png": [
+      675,
+      628,
+      971,
+      856
+    ]
+  },
+  "colors": {
+    "green_master_sample": "#01AF76",
+    "green_brand": "#14B875",
+    "green_deep": "#087A5A",
+    "petroleum": "#123A43",
+    "dark_bg": "#071A1F",
+    "dark_surface": "#0D252C",
+    "white_optical": "#F8FBFA",
+    "graphite_sample": "#1F2B36",
+    "muted_dark": "#B7D1D2",
+    "gray": "#6B7280"
+  }
+}

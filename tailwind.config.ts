@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,34 +10,58 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Dioptrika brand tokens (semantic names preserved to minimize churn)
         navy: {
-          DEFAULT: "#1E3A5F",
-          deep: "#152A47",
-          light: "#34557E",
+          DEFAULT: "#123A43", // petroleum
+          deep: "#071A1F",    // dark background
+          light: "#1D4650",   // dark border
         },
         sky: {
-          DEFAULT: "#0EA5E9",
-          soft: "#7DD3FC",
-          deep: "#0284C7",
+          DEFAULT: "#14B875", // dioptrika green
+          soft: "#5FD4A0",
+          deep: "#01AF76",    // green master (logo sample)
         },
         teal: {
-          DEFAULT: "#0D9488",
-          soft: "#5EEAD4",
+          DEFAULT: "#087A5A", // green deep
+          soft: "#7AD9B5",
         },
         text: {
-          DEFAULT: "#0F172A",
-          muted: "#64748B",
+          DEFAULT: "#F8FBFA", // white optical
+          muted: "#B7D1D2",   // muted dark
         },
-        border: "#E2E8F0",
+        border: "#1D4650",
         bg: {
-          DEFAULT: "#FFFFFF",
-          soft: "#F8FAFC",
-          slate: "#F1F5F9",
-          blue: "#EFF6FF",
+          DEFAULT: "#071A1F", // dark
+          soft: "#0D252C",    // dark surface
+          slate: "#0D252C",
+          blue: "#123A43",    // petroleum accent
+        },
+        light: {
+          bg: "#F8FBFA",
+          surface: "#FFFFFF",
+          text: "#1F2B36",
+          muted: "#6B7280",
+          border: "#DCEBE7",
+        },
+        dioptrika: {
+          green: "#14B875",
+          "green-master": "#01AF76",
+          "green-deep": "#087A5A",
+          "green-soft": "#5FD4A0",
+          petroleum: "#123A43",
+          dark: "#071A1F",
+          "dark-surface": "#0D252C",
+          "border-dark": "#1D4650",
+          white: "#F8FBFA",
+          graphite: "#1F2B36",
+          "muted-dark": "#B7D1D2",
+          "border-light": "#DCEBE7",
         },
       },
       fontFamily: {
-        jakarta: ["Plus Jakarta Sans", "sans-serif"],
+        sora: ["Sora", "Manrope", "Inter", "sans-serif"],
+        // backwards-compat alias so existing font-jakarta classes still resolve
+        jakarta: ["Sora", "Manrope", "Inter", "sans-serif"],
         inter: ["Inter", "sans-serif"],
       },
       borderRadius: {
@@ -44,21 +69,21 @@ const config: Config = {
         btn: "10px",
       },
       boxShadow: {
-        card: "0 4px 24px rgba(15,23,42,0.06)",
-        "card-hover": "0 18px 48px rgba(15,23,42,0.14)",
-        "glow-sky": "0 18px 60px -10px rgba(14,165,233,0.45)",
-        "glow-teal": "0 18px 60px -10px rgba(13,148,136,0.4)",
-        "glow-navy": "0 24px 80px -20px rgba(30,58,95,0.55)",
+        card: "0 4px 24px rgba(0,0,0,0.22)",
+        "card-hover": "0 18px 48px rgba(0,0,0,0.35)",
+        "glow-sky": "0 18px 60px -10px rgba(20,184,117,0.45)",
+        "glow-teal": "0 18px 60px -10px rgba(8,122,90,0.45)",
+        "glow-navy": "0 24px 80px -20px rgba(18,58,67,0.65)",
       },
       backgroundImage: {
         "gradient-aurora":
-          "linear-gradient(120deg, #0EA5E9 0%, #38BDF8 35%, #0D9488 75%, #1E3A5F 100%)",
+          "linear-gradient(120deg, #14B875 0%, #5FD4A0 35%, #087A5A 75%, #123A43 100%)",
         "gradient-mesh":
-          "radial-gradient(at 20% 20%, rgba(14,165,233,0.18) 0%, transparent 50%), radial-gradient(at 80% 0%, rgba(13,148,136,0.16) 0%, transparent 50%), radial-gradient(at 50% 100%, rgba(125,211,252,0.18) 0%, transparent 55%)",
+          "radial-gradient(at 20% 20%, rgba(20,184,117,0.16) 0%, transparent 50%), radial-gradient(at 80% 0%, rgba(8,122,90,0.14) 0%, transparent 50%), radial-gradient(at 50% 100%, rgba(1,175,118,0.10) 0%, transparent 55%)",
         "gradient-text-aurora":
-          "linear-gradient(120deg, #0EA5E9 0%, #0D9488 60%, #1E3A5F 100%)",
+          "linear-gradient(120deg, #14B875 0%, #5FD4A0 50%, #01AF76 100%)",
         "gradient-card-border":
-          "linear-gradient(140deg, rgba(14,165,233,0.5), rgba(13,148,136,0.4) 50%, rgba(255,255,255,0))",
+          "linear-gradient(140deg, rgba(20,184,117,0.55), rgba(8,122,90,0.4) 50%, rgba(255,255,255,0))",
         noise:
           "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>\")",
       },

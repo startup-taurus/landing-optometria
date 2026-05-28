@@ -27,7 +27,7 @@ const steps: Step[] = [
   {
     icon: Building2,
     kicker: "Día 1",
-    title: "Configura tu clínica",
+    title: "Configura tu óptica",
     description:
       "Sesión de configuración guiada con nuestro equipo. Creamos juntos tus sucursales, usuarios y roles con permisos a medida — desde quién factura hasta quién accede a la historia clínica.",
     scene: () => <SetupScene />,
@@ -37,7 +37,7 @@ const steps: Step[] = [
     kicker: "Día a día",
     title: "Gestiona tu operación",
     description:
-      "Pacientes, clientes, agenda, refracciones, pedidos a laboratorio e inventario en un solo lugar. Tu equipo trabaja en un único sistema, sin saltar entre Excel, libretas y WhatsApp suelto.",
+      "Pacientes, agenda, refracciones, pedidos a laboratorio e inventario en un solo lugar. Tu equipo trabaja en un único sistema, sin saltar entre Excel, libretas y WhatsApp suelto.",
     scene: () => <OperateScene />,
   },
   {
@@ -71,39 +71,39 @@ function StepButton({
       aria-pressed={isActive}
       className={`group relative flex w-full gap-4 items-start rounded-2xl border text-left transition-all duration-300 px-4 sm:px-5 py-4 sm:py-5 ${
         isActive
-          ? "bg-white border-sky/40 shadow-card-hover"
-          : "bg-white/40 border-border hover:bg-white/70 hover:border-sky/20"
+          ? "bg-[#123A43] border-[#14B875]/45 shadow-[0_0_40px_-15px_rgba(20,184,117,0.45)]"
+          : "bg-white/3 border-[#1D4650] hover:bg-white/6 hover:border-[#14B875]/25"
       }`}
     >
       <div className="relative shrink-0 flex flex-col items-center">
         <div
           className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-300 ${
             isActive
-              ? "bg-gradient-to-br from-sky to-teal ring-2 ring-sky/30"
-              : "bg-white border-2 border-sky/20"
+              ? "bg-gradient-to-br from-[#14B875] to-[#087A5A] ring-2 ring-[#14B875]/35"
+              : "bg-[#0D252C] border-2 border-[#1D4650]"
           }`}
         >
           <Icon
             className={`w-5 h-5 transition-colors duration-300 ${
-              isActive ? "text-white" : "text-navy/70"
+              isActive ? "text-white" : "text-[#B7D1D2]/70"
             }`}
           />
         </div>
         {index < total - 1 && (
-          <div className="w-0.5 h-6 bg-border mt-2" />
+          <div className="w-0.5 h-6 bg-[#1D4650] mt-2" />
         )}
       </div>
       <div className="flex-1 min-w-0 pt-1">
         <p
           className={`font-inter text-xs font-semibold uppercase tracking-widest transition-colors duration-300 ${
-            isActive ? "text-sky" : "text-text-muted"
+            isActive ? "text-[#14B875]" : "text-[#B7D1D2]/70"
           }`}
         >
           {step.kicker}
         </p>
         <h3
-          className={`font-jakarta font-bold mt-1 leading-tight transition-colors duration-300 ${
-            isActive ? "text-navy text-lg sm:text-xl" : "text-navy/80 text-base sm:text-lg"
+          className={`font-sora font-bold mt-1 leading-tight transition-colors duration-300 ${
+            isActive ? "text-white text-lg sm:text-xl" : "text-white/85 text-base sm:text-lg"
           }`}
         >
           {step.title}
@@ -111,8 +111,8 @@ function StepButton({
         <p
           className={`font-inter text-sm leading-relaxed transition-all duration-300 ${
             isActive
-              ? "text-text-muted max-h-40 opacity-100 mt-2"
-              : "text-text-muted/0 max-h-0 opacity-0 overflow-hidden mt-0"
+              ? "text-[#B7D1D2] max-h-40 opacity-100 mt-2"
+              : "text-[#B7D1D2]/0 max-h-0 opacity-0 overflow-hidden mt-0"
           }`}
         >
           {step.description}
@@ -131,22 +131,22 @@ export default function HowItWorks() {
   return (
     <section
       id="como-funciona"
-      className="relative bg-bg-soft overflow-hidden"
+      className="relative bg-[#071A1F] overflow-hidden"
     >
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-mesh opacity-50 pointer-events-none"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/30 to-transparent"
       />
 
       <div className="relative max-w-7xl mx-auto px-6 pt-20 sm:pt-28 pb-10 sm:pb-14 text-center">
         <Reveal variant="up">
-          <span className="inline-block text-sm font-semibold tracking-widest uppercase text-teal mb-4">
+          <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
             Cómo funciona
           </span>
         </Reveal>
         <Reveal variant="up" delay={0.05}>
           <h2
-            className="font-jakarta font-bold text-navy mx-auto max-w-3xl"
+            className="font-sora font-bold text-white mx-auto max-w-3xl"
             style={{ fontSize: "clamp(30px, 4vw, 48px)" }}
           >
             Tres etapas,{" "}
@@ -175,14 +175,14 @@ export default function HowItWorks() {
           </div>
 
           <div className="order-1 md:order-2 md:sticky md:top-28">
-            <div className="relative h-[340px] sm:h-[420px] md:h-[480px] rounded-card border border-border bg-white shadow-card-hover overflow-hidden">
+            <div className="relative h-[340px] sm:h-[420px] md:h-[480px] rounded-card border border-[#1D4650] bg-[#0D252C] shadow-card-hover overflow-hidden">
               <div
                 aria-hidden
-                className="absolute -top-32 -right-32 w-72 h-72 rounded-full bg-sky/15 blur-3xl pointer-events-none"
+                className="absolute -top-32 -right-32 w-72 h-72 rounded-full bg-[#14B875]/10 blur-3xl pointer-events-none"
               />
               <div
                 aria-hidden
-                className="absolute -bottom-32 -left-32 w-72 h-72 rounded-full bg-teal/15 blur-3xl pointer-events-none"
+                className="absolute -bottom-32 -left-32 w-72 h-72 rounded-full bg-[#087A5A]/10 blur-3xl pointer-events-none"
               />
               <div className="relative w-full h-full p-5 sm:p-6">
                 <AnimatePresence mode="wait" initial={false}>
@@ -208,8 +208,8 @@ export default function HowItWorks() {
                   onClick={() => setActive(i)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     active === i
-                      ? "w-8 bg-gradient-to-r from-sky to-teal"
-                      : "w-2 bg-border hover:bg-text-muted/40"
+                      ? "w-8 bg-gradient-to-r from-[#14B875] to-[#087A5A]"
+                      : "w-2 bg-[#1D4650] hover:bg-[#B7D1D2]/40"
                   }`}
                   aria-label={`Ir al paso ${i + 1}`}
                 />
@@ -234,15 +234,15 @@ function SetupScene() {
 
   return (
     <div className="h-full flex flex-col gap-3">
-      <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sky to-teal flex items-center justify-center">
+      <div className="flex items-center gap-2.5 pb-2 border-b border-[#1D4650]">
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center">
           <Building2 className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-widest text-text-muted">Configuración guiada</p>
-          <p className="font-jakarta font-bold text-navy text-sm">Óptica Vista Clara</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#B7D1D2]/70">Configuración guiada</p>
+          <p className="font-sora font-bold text-white text-sm">Óptica Vista Clara</p>
         </div>
-        <div className="text-[10px] font-semibold text-teal bg-teal/10 px-2 py-1 rounded-full">
+        <div className="text-[10px] font-semibold text-[#14B875] bg-[#14B875]/12 px-2 py-1 rounded-full">
           4 / 4
         </div>
       </div>
@@ -256,20 +256,20 @@ function SetupScene() {
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 + i * 0.12, duration: 0.35 }}
-              className="flex items-center gap-3 rounded-lg bg-bg-soft/70 border border-border px-3 py-2.5"
+              className="flex items-center gap-3 rounded-lg bg-[#123A43] border border-[#1D4650] px-3 py-2.5"
             >
-              <div className="shrink-0 w-7 h-7 rounded-md bg-white border border-border flex items-center justify-center">
-                <Icon className="w-3.5 h-3.5 text-sky" />
+              <div className="shrink-0 w-7 h-7 rounded-md bg-[#0D252C] border border-[#1D4650] flex items-center justify-center">
+                <Icon className="w-3.5 h-3.5 text-[#14B875]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-semibold text-navy leading-tight">{item.label}</p>
-                <p className="text-[10px] text-text-muted leading-tight">{item.value}</p>
+                <p className="text-[11px] font-semibold text-white leading-tight">{item.label}</p>
+                <p className="text-[10px] text-[#B7D1D2]/70 leading-tight">{item.value}</p>
               </div>
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.12, duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-                className="shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-sky to-teal flex items-center justify-center"
+                className="shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center"
               >
                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
               </motion.div>
@@ -282,10 +282,10 @@ function SetupScene() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.4 }}
-        className="rounded-lg bg-gradient-to-br from-sky/10 to-teal/5 border border-sky/20 px-3 py-2 flex items-center gap-2"
+        className="rounded-lg bg-gradient-to-br from-[#14B875]/12 to-[#087A5A]/6 border border-[#14B875]/30 px-3 py-2 flex items-center gap-2"
       >
-        <div className="w-1.5 h-1.5 rounded-full bg-teal animate-pulse" />
-        <p className="text-[11px] text-navy font-medium">Sistema listo para operar</p>
+        <div className="w-1.5 h-1.5 rounded-full bg-[#14B875] animate-pulse" />
+        <p className="text-[11px] text-white font-medium">Sistema listo para operar</p>
       </motion.div>
     </div>
   );
@@ -295,15 +295,15 @@ function SetupScene() {
 
 function OperateScene() {
   const stats = [
-    { l: "Pacientes", v: "1.284", c: "from-sky to-sky" },
-    { l: "Citas hoy", v: "38", c: "from-teal to-sky" },
-    { l: "Pedidos", v: "12", c: "from-navy to-teal" },
+    { l: "Pacientes", v: "1.284", c: "from-[#14B875] to-[#5FD4A0]" },
+    { l: "Citas hoy", v: "38", c: "from-[#087A5A] to-[#14B875]" },
+    { l: "Pedidos", v: "12", c: "from-[#123A43] to-[#087A5A]" },
   ];
 
   const agenda = [
-    { time: "08:00", name: "M. Pérez", task: "Refracción", color: "bg-sky" },
-    { time: "09:30", name: "L. Vega", task: "Adaptación LC", color: "bg-teal" },
-    { time: "11:00", name: "J. Ríos", task: "Control anual", color: "bg-navy" },
+    { time: "08:00", name: "M. Pérez", task: "Refracción", color: "bg-[#14B875]" },
+    { time: "09:30", name: "L. Vega", task: "Adaptación LC", color: "bg-[#087A5A]" },
+    { time: "11:00", name: "J. Ríos", task: "Control anual", color: "bg-[#5FD4A0]" },
   ];
 
   return (
@@ -315,11 +315,11 @@ function OperateScene() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 + i * 0.07, duration: 0.35 }}
-            className="rounded-lg bg-white border border-border p-2.5 relative overflow-hidden"
+            className="rounded-lg bg-[#123A43] border border-[#1D4650] p-2.5 relative overflow-hidden"
           >
             <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${m.c}`} />
-            <div className="text-[10px] text-text-muted">{m.l}</div>
-            <div className="text-base font-jakarta font-bold text-navy mt-0.5">{m.v}</div>
+            <div className="text-[10px] text-[#B7D1D2]/70">{m.l}</div>
+            <div className="text-base font-sora font-bold text-white mt-0.5">{m.v}</div>
           </motion.div>
         ))}
       </div>
@@ -328,14 +328,14 @@ function OperateScene() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.35 }}
-        className="rounded-lg bg-white border border-border p-2.5"
+        className="rounded-lg bg-[#123A43] border border-[#1D4650] p-2.5"
       >
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
-            <Eye className="w-3 h-3 text-sky" />
-            <span className="text-[11px] font-semibold text-navy">M. Pérez · Refracción</span>
+            <Eye className="w-3 h-3 text-[#14B875]" />
+            <span className="text-[11px] font-semibold text-white">M. Pérez · Refracción</span>
           </div>
-          <span className="text-[9px] text-text-muted">OD / OI</span>
+          <span className="text-[9px] text-[#B7D1D2]/70">OD / OI</span>
         </div>
         <div className="grid grid-cols-3 gap-1.5">
           {[
@@ -348,22 +348,22 @@ function OperateScene() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.45 + i * 0.06, duration: 0.3 }}
-              className="rounded bg-bg-soft/70 border border-border px-1.5 py-1"
+              className="rounded bg-[#0D252C] border border-[#1D4650] px-1.5 py-1"
             >
-              <div className="text-[8px] uppercase tracking-wider text-text-muted">{rx.label}</div>
+              <div className="text-[8px] uppercase tracking-wider text-[#B7D1D2]/70">{rx.label}</div>
               <div className="flex items-baseline gap-1.5 mt-0.5">
-                <span className="font-mono text-[10px] text-navy font-semibold">{rx.od}</span>
-                <span className="font-mono text-[10px] text-text-muted">{rx.oi}</span>
+                <span className="font-mono text-[10px] text-white font-semibold">{rx.od}</span>
+                <span className="font-mono text-[10px] text-[#B7D1D2]/80">{rx.oi}</span>
               </div>
             </motion.div>
           ))}
         </div>
       </motion.div>
 
-      <div className="rounded-lg bg-white border border-border p-2.5 flex-1 flex flex-col">
+      <div className="rounded-lg bg-[#123A43] border border-[#1D4650] p-2.5 flex-1 flex flex-col">
         <div className="flex items-center gap-1.5 mb-2">
-          <Calendar className="w-3 h-3 text-teal" />
-          <span className="text-[11px] font-semibold text-navy">Agenda · Hoy</span>
+          <Calendar className="w-3 h-3 text-[#5FD4A0]" />
+          <span className="text-[11px] font-semibold text-white">Agenda · Hoy</span>
         </div>
         <div className="flex flex-col gap-1.5 flex-1 justify-around">
           {agenda.map((a, i) => (
@@ -374,11 +374,11 @@ function OperateScene() {
               transition={{ delay: 0.6 + i * 0.08, duration: 0.3 }}
               className="flex items-center gap-2 text-[11px]"
             >
-              <span className="font-mono text-text-muted w-9">{a.time}</span>
+              <span className="font-mono text-[#B7D1D2]/70 w-9">{a.time}</span>
               <span className={`w-1.5 h-1.5 rounded-full ${a.color} shrink-0`} />
-              <span className="font-medium text-navy">{a.name}</span>
-              <span className="text-text-muted">·</span>
-              <span className="text-text-muted truncate">{a.task}</span>
+              <span className="font-medium text-white">{a.name}</span>
+              <span className="text-[#B7D1D2]/60">·</span>
+              <span className="text-[#B7D1D2]/80 truncate">{a.task}</span>
             </motion.div>
           ))}
         </div>
@@ -412,14 +412,14 @@ function GrowScene() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
-          className="rounded-lg bg-gradient-to-br from-navy to-navy/85 p-3 text-white relative overflow-hidden"
+          className="rounded-lg bg-gradient-to-br from-[#087A5A] to-[#123A43] p-3 text-white relative overflow-hidden"
         >
-          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-sky/30 blur-2xl" />
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[#14B875]/40 blur-2xl" />
           <div className="relative">
-            <div className="text-[10px] uppercase tracking-wider text-white/60">Ventas mes</div>
+            <div className="text-[10px] uppercase tracking-wider text-white/65">Ventas mes</div>
             <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-xl font-jakarta font-bold">$84K</span>
-              <span className="text-[10px] font-semibold text-teal-300 flex items-center gap-0.5">
+              <span className="text-xl font-sora font-bold">$84K</span>
+              <span className="text-[10px] font-semibold text-[#5FD4A0] flex items-center gap-0.5">
                 <ArrowUpRight className="w-3 h-3" />
                 18%
               </span>
@@ -430,12 +430,12 @@ function GrowScene() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.07, duration: 0.35 }}
-          className="rounded-lg bg-white border border-border p-3"
+          className="rounded-lg bg-[#123A43] border border-[#1D4650] p-3"
         >
-          <div className="text-[10px] uppercase tracking-wider text-text-muted">Citas atendidas</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#B7D1D2]/70">Citas atendidas</div>
           <div className="flex items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl font-jakarta font-bold text-navy">412</span>
-            <span className="text-[10px] font-semibold text-teal flex items-center gap-0.5">
+            <span className="text-xl font-sora font-bold text-white">412</span>
+            <span className="text-[10px] font-semibold text-[#14B875] flex items-center gap-0.5">
               <ArrowUpRight className="w-3 h-3" />
               9%
             </span>
@@ -447,11 +447,11 @@ function GrowScene() {
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.35 }}
-        className="rounded-lg bg-white border border-border p-3"
+        className="rounded-lg bg-[#123A43] border border-[#1D4650] p-3"
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-semibold text-navy">Tendencia · 6 meses</span>
-          <span className="text-[10px] text-text-muted">en miles</span>
+          <span className="text-[11px] font-semibold text-white">Tendencia · 6 meses</span>
+          <span className="text-[10px] text-[#B7D1D2]/70">en miles</span>
         </div>
         <div className="flex items-end gap-1.5 h-14">
           {sales.map((v, i) => {
@@ -464,11 +464,11 @@ function GrowScene() {
                   transition={{ delay: 0.25 + i * 0.06, duration: 0.5, ease: "easeOut" }}
                   className={`w-full rounded-t ${
                     isLast
-                      ? "bg-gradient-to-t from-sky to-teal"
-                      : "bg-gradient-to-t from-sky/40 to-teal/30"
+                      ? "bg-gradient-to-t from-[#087A5A] to-[#14B875]"
+                      : "bg-gradient-to-t from-[#087A5A]/40 to-[#14B875]/30"
                   }`}
                 />
-                <span className={`text-[9px] ${isLast ? "text-navy font-semibold" : "text-text-muted"}`}>
+                <span className={`text-[9px] ${isLast ? "text-white font-semibold" : "text-[#B7D1D2]/70"}`}>
                   {months[i]}
                 </span>
               </div>
@@ -482,22 +482,22 @@ function GrowScene() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.35 }}
-          className="rounded-lg bg-white border border-border p-2.5"
+          className="rounded-lg bg-[#123A43] border border-[#1D4650] p-2.5"
         >
-          <div className="text-[10px] uppercase tracking-wider text-text-muted mb-1.5">Por sucursal</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#B7D1D2]/70 mb-1.5">Por sucursal</div>
           <div className="flex flex-col gap-1.5">
             {branches.map((b, i) => (
               <div key={b.name}>
                 <div className="flex items-center justify-between text-[10px] mb-0.5">
-                  <span className="text-navy font-medium">{b.name}</span>
-                  <span className="text-text-muted">{b.pct}</span>
+                  <span className="text-white font-medium">{b.name}</span>
+                  <span className="text-[#B7D1D2]/80">{b.pct}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-bg-soft overflow-hidden">
+                <div className="h-1.5 rounded-full bg-[#0D252C] overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${b.value}%` }}
                     transition={{ delay: 0.5 + i * 0.1, duration: 0.5, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-sky to-teal"
+                    className="h-full bg-gradient-to-r from-[#14B875] to-[#087A5A]"
                   />
                 </div>
               </div>
@@ -509,9 +509,9 @@ function GrowScene() {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.35 }}
-          className="rounded-lg bg-white border border-border p-2.5"
+          className="rounded-lg bg-[#123A43] border border-[#1D4650] p-2.5"
         >
-          <div className="text-[10px] uppercase tracking-wider text-text-muted mb-1.5">Top productos</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#B7D1D2]/70 mb-1.5">Top productos</div>
           <div className="flex flex-col gap-1">
             {top.map((p, i) => (
               <motion.div
@@ -521,8 +521,8 @@ function GrowScene() {
                 transition={{ delay: 0.6 + i * 0.07, duration: 0.3 }}
                 className="flex items-center justify-between text-[10px]"
               >
-                <span className="text-navy truncate flex-1 mr-1.5">{p.name}</span>
-                <span className="font-mono text-text-muted shrink-0">{p.units}</span>
+                <span className="text-white truncate flex-1 mr-1.5">{p.name}</span>
+                <span className="font-mono text-[#B7D1D2]/80 shrink-0">{p.units}</span>
               </motion.div>
             ))}
           </div>

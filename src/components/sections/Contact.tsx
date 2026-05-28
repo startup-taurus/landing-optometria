@@ -2,15 +2,15 @@
 
 import { motion } from "framer-motion";
 import { useState, type FormEvent } from "react";
-import { Mail, MapPin, MessageCircle, Send, CheckCircle2 } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
 import Button from "@/components/ui/Button";
-import Reveal from "@/components/ui/Reveal";
 import { fadeInLeft, fadeInRight, VIEWPORT_DEFAULT } from "@/lib/animations";
 import {
   CONTACT_EMAIL,
   CONTACT_EMAIL_HREF,
   WHATSAPP_DISPLAY,
   WHATSAPP_URL,
+  buildLeadMessage,
   whatsappUrl,
 } from "@/lib/contact";
 
@@ -40,14 +40,13 @@ export default function Contact() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const composed = [
-      `Hola, soy ${form.name || "—"} de ${form.clinic || "una clínica/óptica"}.`,
-      form.email && `Email: ${form.email}`,
-      form.phone && `Teléfono: ${form.phone}`,
-      form.message && `\n${form.message}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const composed = buildLeadMessage({
+      name: form.name,
+      clinic: form.clinic || undefined,
+      email: form.email,
+      phone: form.phone || undefined,
+      message: form.message || undefined,
+    });
     if (typeof window !== "undefined") {
       window.open(whatsappUrl(composed), "_blank", "noopener");
     }
@@ -61,16 +60,19 @@ export default function Contact() {
   return (
     <section
       id="contacto"
-      className="relative py-24 sm:py-28 overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 60%, #ECFEFF 100%)" }}
+      className="relative py-24 sm:py-28 overflow-hidden bg-[#0D252C]"
     >
       <div
         aria-hidden
-        className="absolute -top-40 -right-40 w-[480px] h-[480px] rounded-full bg-sky/15 blur-3xl pointer-events-none"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/35 to-transparent"
       />
       <div
         aria-hidden
-        className="absolute -bottom-40 -left-40 w-[420px] h-[420px] rounded-full bg-teal/15 blur-3xl pointer-events-none"
+        className="absolute -top-40 -right-40 w-[480px] h-[480px] rounded-full bg-[#14B875]/8 blur-3xl pointer-events-none"
+      />
+      <div
+        aria-hidden
+        className="absolute -bottom-40 -left-40 w-[420px] h-[420px] rounded-full bg-[#087A5A]/8 blur-3xl pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-6">
@@ -81,64 +83,46 @@ export default function Contact() {
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
           >
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-4">
+            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
               Contacto
             </span>
             <h2
-              className="font-jakarta font-bold text-navy mb-5"
+              className="font-sora font-bold text-white mb-5"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
-              ¿Listo para transformar tu clínica?
+              ¿Listo para gestionar tu óptica con{" "}
+              <span className="text-aurora">claridad</span>?
             </h2>
-            <p className="font-inter text-text-muted text-lg leading-relaxed mb-8">
-              Cuéntanos sobre tu clínica u óptica y te respondemos por WhatsApp con
-              una propuesta a tu medida. Sin compromisos, sin permanencias.
+            <p className="font-inter text-[#B7D1D2] text-lg leading-relaxed mb-8">
+              Cuéntanos sobre tu óptica y te respondemos por WhatsApp con una
+              propuesta a tu medida. Sin compromisos, sin permanencias.
             </p>
 
-            <div className="space-y-4">
-              <a
+            <div className="relative">
+              <ContactRow
+                icon={MessageCircle}
+                channel="WhatsApp"
+                value={WHATSAPP_DISPLAY}
+                supportText="Respuesta en menos de 24 horas"
                 href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-4 rounded-card border border-border bg-white/70 backdrop-blur p-4 transition-all hover:border-[#25D366]/50 hover:shadow-[0_18px_40px_-10px_rgba(37,211,102,0.35)] hover:-translate-y-0.5"
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0" style={{ background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)" }}>
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-inter text-xs uppercase tracking-wider text-text-muted">WhatsApp</p>
-                  <p className="font-jakarta font-semibold text-navy text-base truncate">
-                    {WHATSAPP_DISPLAY}
-                  </p>
-                </div>
-              </a>
-
-              <a
+                accent="#25D366"
+                external
+              />
+              <ContactRow
+                icon={Mail}
+                channel="Email"
+                value={CONTACT_EMAIL}
+                supportText="Te respondemos en 1 día hábil"
                 href={CONTACT_EMAIL_HREF}
-                className="group flex items-center gap-4 rounded-card border border-border bg-white/70 backdrop-blur p-4 transition-all hover:border-sky/50 hover:shadow-glow-sky/40 hover:-translate-y-0.5"
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky to-sky-deep flex items-center justify-center text-white shrink-0">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-inter text-xs uppercase tracking-wider text-text-muted">Email</p>
-                  <p className="font-jakarta font-semibold text-navy text-base truncate">
-                    {CONTACT_EMAIL}
-                  </p>
-                </div>
-              </a>
-
-              <div className="flex items-center gap-4 rounded-card border border-border bg-white/70 backdrop-blur p-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal to-navy flex items-center justify-center text-white shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-inter text-xs uppercase tracking-wider text-text-muted">Ubicación</p>
-                  <p className="font-jakarta font-semibold text-navy text-base">
-                    Atendemos en toda Latinoamérica
-                  </p>
-                </div>
-              </div>
+                accent="#14B875"
+              />
+              <ContactRow
+                icon={MapPin}
+                channel="Ubicación"
+                value="Atendemos en toda Latinoamérica"
+                supportText="Cobertura remota desde Ecuador"
+                accent="#5FD4A0"
+              />
             </div>
           </motion.div>
 
@@ -151,12 +135,18 @@ export default function Contact() {
           >
             <form
               onSubmit={handleSubmit}
-              className="relative rounded-card border border-border bg-white shadow-card p-7 sm:p-8 border-aurora"
+              className="relative rounded-card p-7 sm:p-8 border-aurora"
+              style={{
+                background: "rgba(7, 26, 31, 0.7)",
+                backdropFilter: "blur(24px) saturate(160%)",
+                WebkitBackdropFilter: "blur(24px) saturate(160%)",
+                boxShadow: "0 24px 80px -16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
             >
-              <h3 className="font-jakarta font-semibold text-navy text-xl mb-1">
+              <h3 className="font-sora font-semibold text-white text-xl mb-1">
                 Solicitar información
               </h3>
-              <p className="font-inter text-text-muted text-sm mb-6">
+              <p className="font-inter text-[#B7D1D2]/70 text-sm mb-6">
                 Te respondemos por WhatsApp en menos de 24h
               </p>
 
@@ -171,7 +161,7 @@ export default function Contact() {
                     required
                   />
                   <Field
-                    label="Clínica u óptica"
+                    label="Óptica"
                     type="text"
                     placeholder="Nombre del negocio"
                     value={form.clinic}
@@ -195,7 +185,7 @@ export default function Contact() {
                 />
                 <FieldArea
                   label="Mensaje"
-                  placeholder="Cuéntanos sobre tu clínica..."
+                  placeholder="Cuéntanos sobre tu óptica..."
                   value={form.message}
                   onChange={(v) => update("message", v)}
                 />
@@ -239,8 +229,8 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block font-inter text-sm font-medium text-text mb-1.5">
-        {label}{required && <span className="text-sky"> *</span>}
+      <span className="block font-inter text-sm font-medium text-[#B7D1D2] mb-1.5">
+        {label}{required && <span className="text-[#14B875]"> *</span>}
       </span>
       <input
         type={type}
@@ -248,9 +238,86 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-4 py-3 rounded-btn border border-border bg-white font-inter text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-2 focus:ring-sky/30 focus:border-sky transition-all"
+        className="w-full px-4 py-3 rounded-btn border border-[#1D4650] bg-[#0D252C]/80 font-inter text-sm text-[#F8FBFA] placeholder:text-[#B7D1D2]/35 focus:outline-none focus:ring-2 focus:ring-[#14B875]/35 focus:border-[#14B875] transition-all"
       />
     </label>
+  );
+}
+
+function ContactRow({
+  icon: Icon,
+  channel,
+  value,
+  supportText,
+  href,
+  accent,
+  external,
+}: {
+  icon: typeof MessageCircle;
+  channel: string;
+  value: string;
+  supportText: string;
+  href?: string;
+  accent: string;
+  external?: boolean;
+}) {
+  const inner = (
+    <>
+      <Icon
+        className="w-4 h-4 shrink-0 text-[#B7D1D2]/55 transition-colors duration-300 group-hover:[color:var(--accent)]"
+        strokeWidth={1.5}
+      />
+      <div className="flex-1 min-w-0 flex items-baseline gap-3">
+        <span className="font-inter text-[11px] uppercase tracking-[0.18em] text-[#B7D1D2]/50 shrink-0">
+          {channel}
+        </span>
+        <span
+          aria-hidden
+          className="hidden sm:block flex-1 h-px self-center bg-[length:6px_1px] bg-repeat-x bg-[linear-gradient(to_right,#1D4650_50%,transparent_50%)] transition-all duration-300 group-hover:bg-[linear-gradient(to_right,var(--accent),var(--accent))]"
+        />
+        <span className="font-sora font-semibold text-white text-[15px] sm:text-base truncate">
+          {value}
+        </span>
+      </div>
+      {href && (
+        <ArrowUpRight
+          className="w-4 h-4 shrink-0 text-[#B7D1D2]/40 transition-all duration-300 group-hover:[color:var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          strokeWidth={1.5}
+        />
+      )}
+    </>
+  );
+
+  const rowClasses =
+    "group relative flex items-center gap-4 py-4 border-b border-[#1D4650] last:border-b-0 transition-colors";
+  const styleVar = { ["--accent" as string]: accent } as React.CSSProperties;
+
+  const supportNode = (
+    <p className="font-inter text-xs text-[#B7D1D2]/45 mt-1 ml-7">
+      {supportText}
+    </p>
+  );
+
+  if (href) {
+    return (
+      <div style={styleVar}>
+        <a
+          href={href}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          className={rowClasses}
+        >
+          {inner}
+        </a>
+        {supportNode}
+      </div>
+    );
+  }
+
+  return (
+    <div style={styleVar}>
+      <div className={rowClasses}>{inner}</div>
+      {supportNode}
+    </div>
   );
 }
 
@@ -267,7 +334,7 @@ function FieldArea({
 }) {
   return (
     <label className="block">
-      <span className="block font-inter text-sm font-medium text-text mb-1.5">
+      <span className="block font-inter text-sm font-medium text-[#B7D1D2] mb-1.5">
         {label}
       </span>
       <textarea
@@ -275,7 +342,7 @@ function FieldArea({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-btn border border-border bg-white font-inter text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-2 focus:ring-sky/30 focus:border-sky transition-all resize-none"
+        className="w-full px-4 py-3 rounded-btn border border-[#1D4650] bg-[#0D252C]/80 font-inter text-sm text-[#F8FBFA] placeholder:text-[#B7D1D2]/35 focus:outline-none focus:ring-2 focus:ring-[#14B875]/35 focus:border-[#14B875] transition-all resize-none"
       />
     </label>
   );

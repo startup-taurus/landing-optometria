@@ -31,7 +31,7 @@ const modules: ModuleData[] = [
     title: "Agenda por sucursal",
     description:
       "Vista por día, semana o mes. Estados de cita y recordatorio automático al paciente un día antes.",
-    accent: "from-sky/30 to-sky/5",
+    accent: "from-[#14B875]/35 to-[#14B875]/5",
     preview: () => <AgendaPreview />,
   },
   {
@@ -39,8 +39,8 @@ const modules: ModuleData[] = [
     tag: "Historia clínica",
     title: "Refracción y diagnóstico",
     description:
-      "Agudeza visual, refracción, diagnóstico clínico y mucho mas en un único formulario digital.",
-    accent: "from-teal/30 to-teal/5",
+      "Agudeza visual, refracción, diagnóstico clínico y mucho más en un único formulario digital.",
+    accent: "from-[#087A5A]/40 to-[#087A5A]/5",
     preview: () => <ClinicalPreview />,
   },
   {
@@ -49,7 +49,7 @@ const modules: ModuleData[] = [
     title: "Pedidos con trazabilidad",
     description:
       "Especificaciones ópticas precisas, seguimiento de estados y notificación automática al paciente.",
-    accent: "from-sky/30 to-teal/10",
+    accent: "from-[#14B875]/35 to-[#087A5A]/10",
     preview: () => <LabPreview />,
   },
   {
@@ -58,7 +58,7 @@ const modules: ModuleData[] = [
     title: "Stock en tiempo real",
     description:
       "Monturas, lentes y accesorios con alertas automáticas, control de movimientos y stock por sucursal.",
-    accent: "from-navy/20 to-sky/10",
+    accent: "from-[#123A43]/40 to-[#14B875]/10",
     preview: () => <InventoryPreview />,
   },
   {
@@ -67,7 +67,7 @@ const modules: ModuleData[] = [
     title: "Facturación electrónica",
     description:
       "Cotizaciones, ventas y notas de crédito con facturación electrónica al SRI desde el mismo flujo.",
-    accent: "from-teal/30 to-navy/10",
+    accent: "from-[#087A5A]/35 to-[#123A43]/10",
     preview: () => <BillingPreview />,
   },
   {
@@ -75,8 +75,8 @@ const modules: ModuleData[] = [
     tag: "Analytics",
     title: "Dashboard ejecutivo",
     description:
-      "Métricas clave de tu clínica: ventas, tendencias, top productos y diagnósticos frecuentes.",
-    accent: "from-sky/30 to-navy/10",
+      "Métricas clave de tu óptica: ventas, tendencias, top productos y diagnósticos frecuentes.",
+    accent: "from-[#14B875]/30 to-[#123A43]/10",
     preview: () => <AnalyticsPreview />,
   },
 ];
@@ -99,17 +99,17 @@ export default function ModuleShowcase() {
   const go = (i: number) => setActive(Math.max(0, Math.min(total - 1, i)));
 
   return (
-    <section className="relative bg-gradient-to-b from-white via-bg-soft to-white py-24 sm:py-28 overflow-hidden">
+    <section className="relative bg-[#0D252C] py-24 sm:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-10 sm:mb-14">
         <div className="max-w-2xl">
           <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-sky mb-3">
+            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-3">
               Recorre los módulos
             </span>
           </Reveal>
           <Reveal variant="up" delay={0.05}>
             <h2
-              className="font-jakarta font-bold text-navy"
+              className="font-sora font-bold text-white"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
               Una plataforma,{" "}
@@ -117,7 +117,7 @@ export default function ModuleShowcase() {
             </h2>
           </Reveal>
           <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-text-muted text-lg mt-3">
+            <p className="font-inter text-[#B7D1D2] text-lg mt-3">
               Explora cómo cada módulo se conecta con el siguiente.
             </p>
           </Reveal>
@@ -132,7 +132,7 @@ export default function ModuleShowcase() {
           onClick={() => go(active - 1)}
           disabled={active === 0}
           aria-label="Módulo anterior"
-          className="absolute left-2 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute left-2 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-[#123A43]/90 backdrop-blur-sm border border-[#1D4650] shadow-lg flex items-center justify-center text-white transition-all hover:border-[#14B875]/60 hover:text-[#14B875] hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -151,7 +151,7 @@ export default function ModuleShowcase() {
             const isCenter = offset === 0;
             const scale = 1 - absOffset * 0.13;
             const opacity = 1 - absOffset * 0.22;
-            const brightness = isCenter ? 1 : 1 - absOffset * 0.13;
+            const brightness = isCenter ? 1 : 1 - absOffset * 0.18;
 
             return (
               <motion.article
@@ -173,13 +173,13 @@ export default function ModuleShowcase() {
                   else if (drag.x > 60 || velocity.x > 400) go(active - 1);
                 }}
                 onClick={() => !isCenter && go(i)}
-                className="absolute w-[82vw] sm:w-[400px] lg:w-[460px] rounded-card border border-border bg-white overflow-hidden select-none"
+                className="absolute w-[82vw] sm:w-[400px] lg:w-[460px] rounded-card border border-[#1D4650] bg-[#123A43] overflow-hidden select-none"
                 style={{
                   transformStyle: "preserve-3d",
                   cursor: isCenter ? "grab" : "pointer",
                   boxShadow: isCenter
-                    ? "0 24px 64px rgba(0,0,0,0.13), 0 8px 24px rgba(0,0,0,0.08)"
-                    : "0 8px 24px rgba(0,0,0,0.06)",
+                    ? "0 28px 70px rgba(0,0,0,0.45), 0 10px 28px rgba(0,0,0,0.3)"
+                    : "0 10px 28px rgba(0,0,0,0.25)",
                   filter: `brightness(${brightness})`,
                 }}
               >
@@ -189,23 +189,23 @@ export default function ModuleShowcase() {
                 />
                 <div className="relative p-7 flex flex-col gap-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky/15 to-teal/10 flex items-center justify-center ring-1 ring-sky/15">
-                      <Icon className="w-5 h-5 text-sky" />
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#14B875]/20 to-[#087A5A]/10 flex items-center justify-center ring-1 ring-[#14B875]/25">
+                      <Icon className="w-5 h-5 text-[#14B875]" />
                     </div>
                     <div>
-                      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-text-muted">
+                      <p className="font-inter text-xs font-semibold uppercase tracking-widest text-[#B7D1D2]/70">
                         Módulo {String(i + 1).padStart(2, "0")}
                       </p>
-                      <p className="font-jakarta font-semibold text-navy">{m.tag}</p>
+                      <p className="font-sora font-semibold text-white">{m.tag}</p>
                     </div>
                   </div>
-                  <h3 className="font-jakarta font-bold text-navy text-2xl leading-tight">
+                  <h3 className="font-sora font-bold text-white text-2xl leading-tight">
                     {m.title}
                   </h3>
-                  <p className="font-inter text-text-muted text-sm leading-relaxed">
+                  <p className="font-inter text-[#B7D1D2] text-sm leading-relaxed">
                     {m.description}
                   </p>
-                  <div className="rounded-xl border border-border bg-bg-soft/80 p-4 h-52 sm:h-60 overflow-hidden">
+                  <div className="rounded-xl border border-[#1D4650] bg-[#071A1F]/70 p-4 h-52 sm:h-60 overflow-hidden">
                     {m.preview()}
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export default function ModuleShowcase() {
           onClick={() => go(active + 1)}
           disabled={active === total - 1}
           aria-label="Siguiente módulo"
-          className="absolute right-2 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center text-navy transition-all hover:border-sky/60 hover:text-sky hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
+          className="absolute right-2 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-[#123A43]/90 backdrop-blur-sm border border-[#1D4650] shadow-lg flex items-center justify-center text-white transition-all hover:border-[#14B875]/60 hover:text-[#14B875] hover:shadow-xl disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -235,7 +235,7 @@ export default function ModuleShowcase() {
             onClick={() => go(i)}
             aria-label={`Ir al módulo ${i + 1}`}
             className={`h-2 rounded-full transition-all duration-300 ${
-              i === active ? "w-6 bg-sky" : "w-2 bg-black/15"
+              i === active ? "w-6 bg-[#14B875]" : "w-2 bg-white/15 hover:bg-white/25"
             }`}
           />
         ))}
@@ -247,9 +247,9 @@ export default function ModuleShowcase() {
 function AgendaPreview() {
   const hours = ["08:00", "09:00", "10:00", "11:00", "12:00"];
   const events = [
-    { row: 0, color: "bg-sky", label: "M. Pérez · Refracción" },
-    { row: 1, color: "bg-teal", label: "L. Vega · Control" },
-    { row: 3, color: "bg-navy", label: "J. Ríos · Adaptación LC" },
+    { row: 0, color: "bg-[#14B875]", label: "M. Pérez · Refracción" },
+    { row: 1, color: "bg-[#087A5A]", label: "L. Vega · Control" },
+    { row: 3, color: "bg-[#5FD4A0]", label: "J. Ríos · Adaptación LC" },
   ];
   return (
     <div className="h-full flex flex-col gap-1.5">
@@ -257,8 +257,8 @@ function AgendaPreview() {
         const ev = events.find((e) => e.row === i);
         return (
           <div key={h} className="flex items-center gap-2">
-            <span className="w-10 text-[10px] font-mono text-text-muted">{h}</span>
-            <div className="flex-1 h-7 rounded-md bg-white border border-border relative overflow-hidden">
+            <span className="w-10 text-[10px] font-mono text-[#B7D1D2]/70">{h}</span>
+            <div className="flex-1 h-7 rounded-md bg-[#123A43] border border-[#1D4650] relative overflow-hidden">
               {ev && (
                 <div
                   className={`absolute inset-y-0 left-0 w-3/4 ${ev.color} text-white text-[10px] flex items-center px-2 rounded-md`}
@@ -278,26 +278,26 @@ function ClinicalPreview() {
   return (
     <div className="h-full flex flex-col gap-2.5">
       <div className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky to-teal" />
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#14B875] to-[#087A5A]" />
         <div className="flex-1">
-          <div className="h-2.5 w-28 bg-navy/80 rounded-full mb-1" />
-          <div className="h-2 w-20 bg-text-muted/40 rounded-full" />
+          <div className="h-2.5 w-28 bg-white/80 rounded-full mb-1" />
+          <div className="h-2 w-20 bg-[#B7D1D2]/40 rounded-full" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {["OD esf -1.25", "OI esf -1.50", "OD cil -0.50", "OI cil -0.75"].map((t) => (
           <div
             key={t}
-            className="rounded-md bg-white border border-border px-2 py-1.5 text-[10px] font-mono text-navy"
+            className="rounded-md bg-[#123A43] border border-[#1D4650] px-2 py-1.5 text-[10px] font-mono text-white"
           >
             {t}
           </div>
         ))}
       </div>
-      <div className="rounded-md border border-border bg-white p-2 flex-1">
-        <div className="h-2 w-3/4 bg-navy/30 rounded-full mb-1.5" />
-        <div className="h-2 w-2/3 bg-navy/20 rounded-full mb-1.5" />
-        <div className="h-2 w-1/2 bg-navy/15 rounded-full" />
+      <div className="rounded-md border border-[#1D4650] bg-[#123A43] p-2 flex-1">
+        <div className="h-2 w-3/4 bg-white/30 rounded-full mb-1.5" />
+        <div className="h-2 w-2/3 bg-white/20 rounded-full mb-1.5" />
+        <div className="h-2 w-1/2 bg-white/15 rounded-full" />
       </div>
     </div>
   );
@@ -305,21 +305,21 @@ function ClinicalPreview() {
 
 function LabPreview() {
   const orders = [
-    { id: "LB-1042", state: "Enviado", color: "bg-sky text-white" },
-    { id: "LB-1041", state: "En proceso", color: "bg-yellow-400/90 text-yellow-900" },
-    { id: "LB-1040", state: "Listo", color: "bg-teal text-white" },
-    { id: "LB-1039", state: "Entregado", color: "bg-navy text-white" },
+    { id: "LB-1042", state: "Enviado", color: "bg-[#14B875] text-white" },
+    { id: "LB-1041", state: "En proceso", color: "bg-amber-400/90 text-amber-950" },
+    { id: "LB-1040", state: "Listo", color: "bg-[#087A5A] text-white" },
+    { id: "LB-1039", state: "Entregado", color: "bg-[#5FD4A0] text-[#0D252C]" },
   ];
   return (
     <div className="h-full flex flex-col gap-2">
       {orders.map((o) => (
         <div
           key={o.id}
-          className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-2"
+          className="flex items-center gap-2 rounded-md bg-[#123A43] border border-[#1D4650] px-2.5 py-2"
         >
-          <span className="font-mono text-[10px] text-text-muted">{o.id}</span>
-          <div className="flex-1 h-1.5 bg-bg-slate rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-sky to-teal w-3/4" />
+          <span className="font-mono text-[10px] text-[#B7D1D2]/70">{o.id}</span>
+          <div className="flex-1 h-1.5 bg-[#0D252C] rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#14B875] to-[#087A5A] w-3/4" />
           </div>
           <span className={`text-[9px] px-1.5 py-0.5 rounded ${o.color}`}>{o.state}</span>
         </div>
@@ -340,15 +340,15 @@ function InventoryPreview() {
       {items.map((it) => (
         <div
           key={it.name}
-          className="flex items-center gap-2 rounded-md bg-white border border-border px-2.5 py-1.5"
+          className="flex items-center gap-2 rounded-md bg-[#123A43] border border-[#1D4650] px-2.5 py-1.5"
         >
           <div className="flex-1">
-            <div className="h-2 w-3/4 bg-navy/70 rounded-full mb-1" />
-            <div className="h-1.5 w-1/2 bg-text-muted/30 rounded-full" />
+            <div className="h-2 w-3/4 bg-white/70 rounded-full mb-1" />
+            <div className="h-1.5 w-1/2 bg-[#B7D1D2]/30 rounded-full" />
           </div>
           <span
             className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-              it.low ? "bg-red-500/15 text-red-600" : "bg-teal/15 text-teal"
+              it.low ? "bg-rose-500/20 text-rose-300" : "bg-[#14B875]/20 text-[#14B875]"
             }`}
           >
             {it.stock} u
@@ -362,12 +362,12 @@ function InventoryPreview() {
 function BillingPreview() {
   return (
     <div className="h-full flex flex-col gap-2">
-      <div className="rounded-md bg-white border border-border p-2.5">
+      <div className="rounded-md bg-[#123A43] border border-[#1D4650] p-2.5">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="font-mono text-[10px] text-text-muted">Factura 001-002-1284</span>
-          <span className="text-[10px] font-semibold text-teal">Pagada</span>
+          <span className="font-mono text-[10px] text-[#B7D1D2]/70">Factura 001-002-1284</span>
+          <span className="text-[10px] font-semibold text-[#14B875]">Pagada</span>
         </div>
-        <div className="h-2 w-1/2 bg-navy/40 rounded-full" />
+        <div className="h-2 w-1/2 bg-white/40 rounded-full" />
       </div>
       <div className="grid grid-cols-3 gap-1.5 text-center">
         {[
@@ -375,22 +375,22 @@ function BillingPreview() {
           { l: "IVA 12%", v: "$25.20" },
           { l: "Total", v: "$235.20" },
         ].map((c) => (
-          <div key={c.l} className="rounded-md bg-white border border-border py-1.5">
-            <div className="text-[9px] text-text-muted">{c.l}</div>
-            <div className="text-[11px] font-mono font-semibold text-navy">{c.v}</div>
+          <div key={c.l} className="rounded-md bg-[#123A43] border border-[#1D4650] py-1.5">
+            <div className="text-[9px] text-[#B7D1D2]/70">{c.l}</div>
+            <div className="text-[11px] font-mono font-semibold text-white">{c.v}</div>
           </div>
         ))}
       </div>
-      <div className="rounded-md bg-gradient-to-br from-sky/10 to-teal/10 border border-sky/20 p-2.5 flex-1">
-        <div className="text-[10px] text-text-muted mb-1">Forma de pago</div>
+      <div className="rounded-md bg-gradient-to-br from-[#14B875]/15 to-[#087A5A]/10 border border-[#14B875]/30 p-2.5 flex-1">
+        <div className="text-[10px] text-[#B7D1D2]/80 mb-1">Forma de pago</div>
         <div className="flex gap-1.5">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#123A43] border border-[#1D4650] text-white">
             Efectivo
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#123A43] border border-[#1D4650] text-white">
             Tarjeta
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-border">
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#123A43] border border-[#1D4650] text-white">
             Transferencia
           </span>
         </div>
@@ -405,22 +405,22 @@ function AnalyticsPreview() {
     <div className="h-full flex flex-col gap-2">
       <div className="grid grid-cols-3 gap-1.5">
         {[
-          { l: "Ventas mes", v: "$28.4K", c: "text-sky" },
-          { l: "Citas", v: "412", c: "text-teal" },
-          { l: "Conversión", v: "62%", c: "text-navy" },
+          { l: "Ventas mes", v: "$28.4K", c: "text-[#14B875]" },
+          { l: "Citas", v: "412", c: "text-[#5FD4A0]" },
+          { l: "Conversión", v: "62%", c: "text-white" },
         ].map((m) => (
-          <div key={m.l} className="rounded-md bg-white border border-border px-2 py-1.5">
-            <div className="text-[9px] text-text-muted">{m.l}</div>
-            <div className={`text-sm font-jakarta font-bold ${m.c}`}>{m.v}</div>
+          <div key={m.l} className="rounded-md bg-[#123A43] border border-[#1D4650] px-2 py-1.5">
+            <div className="text-[9px] text-[#B7D1D2]/70">{m.l}</div>
+            <div className={`text-sm font-sora font-bold ${m.c}`}>{m.v}</div>
           </div>
         ))}
       </div>
-      <div className="rounded-md bg-white border border-border p-2.5 flex items-end gap-1 flex-1">
+      <div className="rounded-md bg-[#123A43] border border-[#1D4650] p-2.5 flex items-end gap-1 flex-1">
         {bars.map((h, i) => (
           <div
             key={i}
-            className="flex-1 rounded-t-sm bg-gradient-to-t from-sky to-teal"
-            style={{ height: `${h}%`, opacity: 0.5 + i * 0.05 }}
+            className="flex-1 rounded-t-sm bg-gradient-to-t from-[#087A5A] to-[#14B875]"
+            style={{ height: `${h}%`, opacity: 0.55 + i * 0.045 }}
           />
         ))}
       </div>

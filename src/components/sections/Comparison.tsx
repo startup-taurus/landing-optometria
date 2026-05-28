@@ -25,52 +25,67 @@ const withSystem = [
 
 export default function Comparison() {
   return (
-    <section className="relative py-24 sm:py-28 overflow-hidden bg-white">
+    <section className="relative py-24 sm:py-28 overflow-hidden bg-[#071A1F]">
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky/40 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/40 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/30 to-transparent"
+      />
+      <div
+        aria-hidden
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-[#14B875]/5 blur-3xl pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
           <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-teal mb-4">
+            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
               El antes y el después
             </span>
           </Reveal>
           <Reveal variant="up" delay={0.05}>
             <h2
-              className="font-jakarta font-bold text-navy mb-5"
+              className="font-sora font-bold text-white mb-5"
               style={{ fontSize: "clamp(30px, 4vw, 48px)" }}
             >
               De Excel y papel{" "}
-              <span className="text-aurora">a una clínica que funciona sola</span>
+              <span className="text-aurora">a una óptica que funciona sola</span>
             </h2>
           </Reveal>
           <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-text-muted text-lg">
+            <p className="font-inter text-[#B7D1D2] text-lg">
               Si todavía gestionas tu óptica con planillas, libretas y herramientas
-              genéricas que no entienden de refracciones, esto es lo que cambia.
+              genéricas que no entienden de refracciones, esto es lo que cambia con
+              Dioptrika.
             </p>
           </Reveal>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+          {/* Without card */}
           <motion.div
             variants={fadeInLeft}
             initial="hidden"
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
             whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
-            className="relative rounded-card border border-border bg-bg-slate/60 p-7 sm:p-8"
+            className="relative rounded-card border border-[#1D4650] p-7 sm:p-8"
+            style={{
+              background: "rgba(7, 26, 31, 0.75)",
+              backdropFilter: "blur(20px) saturate(140%)",
+              WebkitBackdropFilter: "blur(20px) saturate(140%)",
+            }}
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <X className="w-5 h-5 text-red-500" strokeWidth={2.5} />
+              <div className="w-10 h-10 rounded-xl bg-red-500/12 border border-red-500/20 flex items-center justify-center">
+                <X className="w-5 h-5 text-red-400" strokeWidth={2.5} />
               </div>
               <div>
-                <p className="font-inter text-xs uppercase tracking-widest text-text-muted">Sin sistema especializado</p>
-                <h3 className="font-jakarta font-bold text-navy text-lg">Excel, papel o herramientas genéricas</h3>
+                <p className="font-inter text-xs uppercase tracking-widest text-[#B7D1D2]/55">Sin sistema especializado</p>
+                <h3 className="font-sora font-bold text-white text-lg">Excel, papel o herramientas genéricas</h3>
               </div>
             </div>
             <ul className="space-y-3.5">
@@ -83,10 +98,10 @@ export default function Comparison() {
                   transition={{ delay: 0.1 + i * 0.06 }}
                   className="flex items-start gap-3"
                 >
-                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-red-500/15 items-center justify-center">
-                    <X className="w-2.5 h-2.5 text-red-500" strokeWidth={3} />
+                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-red-500/15 border border-red-500/20 items-center justify-center">
+                    <X className="w-2.5 h-2.5 text-red-400" strokeWidth={3} />
                   </span>
-                  <span className="font-inter text-text-muted text-sm leading-relaxed">
+                  <span className="font-inter text-[#B7D1D2]/75 text-sm leading-relaxed">
                     {item}
                   </span>
                 </motion.li>
@@ -94,6 +109,7 @@ export default function Comparison() {
             </ul>
           </motion.div>
 
+          {/* With Dioptrika card */}
           <motion.div
             variants={fadeInRight}
             initial="hidden"
@@ -101,19 +117,26 @@ export default function Comparison() {
             viewport={VIEWPORT_DEFAULT}
             transition={{ delay: 0.05 }}
             whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
-            className="relative rounded-card border-aurora bg-white p-7 sm:p-8 shadow-glow-sky"
+            className="relative rounded-card p-7 sm:p-8"
+            style={{
+              background: "rgba(18, 58, 67, 0.65)",
+              backdropFilter: "blur(24px) saturate(160%)",
+              WebkitBackdropFilter: "blur(24px) saturate(160%)",
+              border: "1px solid rgba(20, 184, 117, 0.28)",
+              boxShadow: "0 24px 80px -12px rgba(20,184,117,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}
           >
             <div
               aria-hidden
-              className="absolute -top-20 -right-20 w-56 h-56 rounded-full bg-sky/15 blur-3xl pointer-events-none"
+              className="absolute -top-20 -right-20 w-56 h-56 rounded-full bg-[#14B875]/10 blur-3xl pointer-events-none"
             />
             <div className="relative flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky to-teal flex items-center justify-center shadow-glow-sky">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(20,184,117,0.6)]">
                 <Check className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
               <div>
-                <p className="font-inter text-xs uppercase tracking-widest text-sky">Con LatamSoft</p>
-                <h3 className="font-jakarta font-bold text-navy text-lg">Plataforma especializada</h3>
+                <p className="font-inter text-xs uppercase tracking-widest text-[#14B875]">Con Dioptrika</p>
+                <h3 className="font-sora font-bold text-white text-lg">Plataforma especializada</h3>
               </div>
             </div>
             <ul className="relative space-y-3.5">
@@ -126,10 +149,10 @@ export default function Comparison() {
                   transition={{ delay: 0.1 + i * 0.06 }}
                   className="flex items-start gap-3"
                 >
-                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-gradient-to-br from-sky to-teal items-center justify-center">
+                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-gradient-to-br from-[#14B875] to-[#087A5A] items-center justify-center">
                     <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                   </span>
-                  <span className="font-inter text-text text-sm leading-relaxed">
+                  <span className="font-inter text-[#F8FBFA] text-sm leading-relaxed">
                     {item}
                   </span>
                 </motion.li>
