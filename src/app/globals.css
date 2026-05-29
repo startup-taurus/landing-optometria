@@ -182,3 +182,528 @@ p {
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================
+   Payphone Cajita — overrides visuales (tema Dioptrika oscuro)
+   Mapeado a las clases REALES del bundle v1.1:
+   - .payment-box                 contenedor principal
+   - .ppb-form-control            inputs
+   - .ppb-input-group             input + icono
+   - .ppb-input-group-text        icono adyacente
+   - .ppb-label                   labels
+   - .ppb-btn.ppb-btn-pay         botón principal Pagar
+   - .btn-card                    selector método tarjeta
+   - .ppb-text-danger             errores
+   - .ppb-hr / .ppb-dashed        separadores
+   - .country-selector            selector cédula
+   ============================================================ */
+#pp-button {
+  --dpk-green: #14B875;
+  --dpk-green-deep: #087A5A;
+  --dpk-green-soft: rgba(20, 184, 117, 0.12);
+  --dpk-green-ring: rgba(20, 184, 117, 0.18);
+  --dpk-dark: #071A1F;
+  --dpk-surface: #0B1D22;
+  --dpk-surface-2: #0D252C;
+  --dpk-border: #1D4650;
+  --dpk-border-soft: rgba(29, 70, 80, 0.5);
+  --dpk-text: #F8FBFA;
+  --dpk-muted: #B7D1D2;
+  --dpk-muted-soft: rgba(183, 209, 210, 0.55);
+
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--dpk-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#pp-button .payment-box {
+  background: transparent !important;
+  color: var(--dpk-text) !important;
+  padding: 0 !important;
+}
+
+#pp-button *,
+#pp-button *::before,
+#pp-button *::after {
+  box-sizing: border-box;
+}
+
+/* Reset de elementos sueltos */
+#pp-button .ppb-content,
+#pp-button .ppb-content-otp,
+#pp-button .ppb-body,
+#pp-button .content-payment-box {
+  background: transparent !important;
+  color: var(--dpk-text) !important;
+}
+
+/* ---------- Selector de método de pago (los 2 botones grandes) ---------- */
+#pp-button .ppb-row {
+  margin-left: -6px !important;
+  margin-right: -6px !important;
+}
+
+#pp-button .ppb-row > [class*="ppb-col"] {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+#pp-button .btn-card,
+#pp-button .select-btn,
+#pp-button .payment-box > .ppb-row:first-of-type .ppb-col-6 > div,
+#pp-button .payment-box > .ppb-row:first-of-type .ppb-col-6 > button {
+  background: var(--dpk-surface) !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 12px !important;
+  padding: 14px 12px !important;
+  color: var(--dpk-muted) !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-height: 56px !important;
+  box-shadow: none !important;
+}
+
+#pp-button .btn-card:hover,
+#pp-button .select-btn:hover {
+  border-color: var(--dpk-green) !important;
+  background: var(--dpk-green-soft) !important;
+  transform: translateY(-1px) !important;
+}
+
+#pp-button .btn-card.selected,
+#pp-button .select-btn.selected,
+#pp-button .btn-card.active,
+#pp-button .selected {
+  background: var(--dpk-green-soft) !important;
+  border-color: var(--dpk-green) !important;
+  color: var(--dpk-text) !important;
+  box-shadow: 0 0 0 1px var(--dpk-green) inset !important;
+}
+
+/* ---------- Inputs ---------- */
+#pp-button .ppb-form-control,
+#pp-button input.ppb-form-control,
+#pp-button input[type="text"],
+#pp-button input[type="tel"],
+#pp-button input[type="email"],
+#pp-button input[type="number"],
+#pp-button input[type="password"],
+#pp-button select {
+  background: var(--dpk-dark) !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 10px !important;
+  color: var(--dpk-text) !important;
+  font-family: inherit !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 12px 14px !important;
+  height: auto !important;
+  width: 100% !important;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+#pp-button input::placeholder,
+#pp-button .ppb-form-control::placeholder {
+  color: rgba(183, 209, 210, 0.32) !important;
+  font-weight: 400 !important;
+}
+
+#pp-button .ppb-form-control:focus,
+#pp-button input:focus,
+#pp-button select:focus {
+  outline: none !important;
+  border-color: var(--dpk-green) !important;
+  background: var(--dpk-dark) !important;
+  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+}
+
+#pp-button input:-webkit-autofill,
+#pp-button input:-webkit-autofill:hover,
+#pp-button input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--dpk-text) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--dpk-dark) inset !important;
+  caret-color: var(--dpk-text) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ---------- Input group (input + icono) ---------- */
+#pp-button .ppb-input-group {
+  display: flex !important;
+  align-items: stretch !important;
+  position: relative !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 10px !important;
+  background: var(--dpk-dark) !important;
+  overflow: hidden !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+#pp-button .ppb-input-group:focus-within {
+  border-color: var(--dpk-green) !important;
+  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+}
+
+#pp-button .ppb-input-group .ppb-input-group-text {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 12px !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--dpk-muted) !important;
+  min-width: 40px !important;
+}
+
+#pp-button .ppb-input-group .ppb-input-group-text svg,
+#pp-button .ppb-input-group .ppb-input-group-text img {
+  width: 18px !important;
+  height: 18px !important;
+  opacity: 0.65;
+  fill: var(--dpk-muted) !important;
+}
+
+#pp-button .ppb-input-group .ppb-form-control,
+#pp-button .ppb-input-group input {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  flex: 1 1 auto !important;
+}
+
+#pp-button .ppb-input-group .ppb-form-control:focus,
+#pp-button .ppb-input-group input:focus {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Marca de tarjeta dentro del input (VISA/MC/...) */
+#pp-button .ppb-input-group .ppb-img,
+#pp-button .ppb-input-group img {
+  max-height: 24px !important;
+  width: auto !important;
+  margin: 0 10px !important;
+}
+
+/* ---------- Labels ---------- */
+#pp-button .ppb-label,
+#pp-button label {
+  color: var(--dpk-muted) !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+
+#pp-button .ppb-text-uppercase {
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* ---------- Botón Pagar ---------- */
+#pp-button .ppb-btn,
+#pp-button button.ppb-btn,
+#pp-button .ppb-btn-pay,
+#pp-button .ppb-btn-continue {
+  background: linear-gradient(135deg, var(--dpk-green) 0%, var(--dpk-green-deep) 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  padding: 14px 22px !important;
+  width: 100% !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 18px 40px -14px rgba(20, 184, 117, 0.55) !important;
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s !important;
+  min-height: 52px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+#pp-button .ppb-btn:hover,
+#pp-button .ppb-btn-pay:hover,
+#pp-button .ppb-btn-continue:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 24px 60px -12px rgba(20, 184, 117, 0.7) !important;
+  filter: brightness(1.04);
+}
+
+#pp-button .ppb-btn:active {
+  transform: translateY(0) scale(0.99) !important;
+}
+
+#pp-button .ppb-btn:disabled,
+#pp-button .ppb-btn[disabled] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  filter: grayscale(0.4);
+}
+
+/* Botón secundario "Cerrar" */
+#pp-button .ppb-btn-close.ppb-button {
+  background: transparent !important;
+  border: 1px solid var(--dpk-border) !important;
+  color: var(--dpk-muted) !important;
+  box-shadow: none !important;
+}
+#pp-button .ppb-btn-close.ppb-button:hover {
+  border-color: var(--dpk-green) !important;
+  color: var(--dpk-text) !important;
+}
+
+/* Pequeños botones de control (cambiar tarjeta, etc.) */
+#pp-button .ppb-div-btn-control {
+  background: transparent !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 10px !important;
+  padding: 10px !important;
+  cursor: pointer !important;
+  transition: border-color 0.2s, background 0.2s !important;
+}
+#pp-button .ppb-div-btn-control:hover {
+  border-color: var(--dpk-green) !important;
+  background: var(--dpk-green-soft) !important;
+}
+
+/* ---------- Mensajes (errores y descriptivos) ---------- */
+#pp-button .ppb-text-danger,
+#pp-button .ppb-p.ppb-text-danger,
+#pp-button .ppb-error-message,
+#pp-button .ppb-error-message-content,
+#pp-button .ppb-error-message-description {
+  color: #fca5a5 !important;
+  font-size: 13px !important;
+  font-family: inherit !important;
+  margin-top: 4px !important;
+}
+
+#pp-button .message,
+#pp-button .message-button,
+#pp-button .message-paypment-cash,
+#pp-button .message-paypment-box,
+#pp-button .ppb-p,
+#pp-button .ppb-disclaimer-split,
+#pp-button .info-open-app {
+  color: var(--dpk-muted) !important;
+  font-family: inherit !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+#pp-button .ppb-p.ppb-text-center,
+#pp-button .ppb-text-center {
+  text-align: center !important;
+}
+
+/* ---------- Separadores y tipografía ---------- */
+#pp-button .ppb-hr,
+#pp-button hr {
+  border: none !important;
+  border-top: 1px solid var(--dpk-border) !important;
+  opacity: 0.55;
+  margin: 14px 0 !important;
+}
+#pp-button .ppb-hr.ppb-dashed {
+  border-top-style: dashed !important;
+  opacity: 0.4;
+}
+
+#pp-button h1, #pp-button h2, #pp-button h3, #pp-button h4, #pp-button h5,
+#pp-button .ppb-h2, #pp-button .ppb-h4, #pp-button .ppb-h5 {
+  color: var(--dpk-text) !important;
+  font-family: "Sora", "Inter", sans-serif !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  margin: 0 0 8px !important;
+}
+
+#pp-button .ppb-h4 {
+  font-size: 18px !important;
+}
+
+#pp-button .ppb-h2 {
+  font-size: 22px !important;
+}
+
+#pp-button .ppb-fw-bold { font-weight: 700 !important; }
+#pp-button .ppb-text-white { color: var(--dpk-text) !important; }
+#pp-button .ppb-text-amount,
+#pp-button .ppb-text-amount-h4,
+#pp-button .ppb-text-total {
+  color: var(--dpk-text) !important;
+  font-family: "Sora", "Inter", sans-serif !important;
+}
+
+#pp-button .total-paypment-code {
+  background: var(--dpk-surface) !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+}
+
+/* ---------- Spinner ---------- */
+#pp-button .ppb-spinner-grow,
+#pp-button .ppb-loading,
+#pp-button .ppb-loading-prepare {
+  color: var(--dpk-green) !important;
+}
+
+#pp-button .ppb-spinner-grow {
+  background-color: var(--dpk-green) !important;
+}
+
+/* ---------- Imágenes/logos ---------- */
+#pp-button .ppb-img,
+#pp-button .ppb-img-fluid {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+#pp-button .ppb-footer-image-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--dpk-border-soft) !important;
+  opacity: 0.8;
+}
+
+#pp-button .ppb-footer-image {
+  max-height: 22px !important;
+  width: auto !important;
+  filter: brightness(1.1) contrast(0.95);
+}
+
+#pp-button .ppb-customer-profile {
+  border-radius: 50% !important;
+  border: 2px solid var(--dpk-green) !important;
+  padding: 2px !important;
+}
+
+/* ---------- Country selector (input de cédula con bandera) ---------- */
+#pp-button .country-selector {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  background: var(--dpk-surface-2) !important;
+  border-right: 1px solid var(--dpk-border) !important;
+  cursor: pointer !important;
+}
+
+#pp-button .selected-flag {
+  width: 22px !important;
+  height: 16px !important;
+  border-radius: 2px !important;
+  overflow: hidden !important;
+}
+
+#pp-button .selected-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+  font-size: 13px !important;
+  color: var(--dpk-muted) !important;
+}
+
+#pp-button .country-arrow {
+  color: var(--dpk-muted) !important;
+  font-size: 10px !important;
+}
+
+#pp-button .country-list {
+  background: var(--dpk-surface-2) !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 10px !important;
+  max-height: 240px !important;
+  overflow-y: auto !important;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6) !important;
+  z-index: 50 !important;
+}
+
+#pp-button .country {
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  color: var(--dpk-text) !important;
+}
+#pp-button .country:hover {
+  background: var(--dpk-green-soft) !important;
+}
+
+#pp-button .country-name {
+  color: var(--dpk-text) !important;
+  font-weight: 500 !important;
+}
+#pp-button .country-code {
+  color: var(--dpk-muted) !important;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+}
+
+/* ---------- OTP ---------- */
+#pp-button .ppb-otp-container {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  margin: 16px 0 !important;
+}
+
+#pp-button .ppb-otp-input,
+#pp-button .ppb-otp-input.ppb-input {
+  width: 48px !important;
+  height: 56px !important;
+  text-align: center !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  background: var(--dpk-dark) !important;
+  border: 1px solid var(--dpk-border) !important;
+  border-radius: 10px !important;
+  color: var(--dpk-text) !important;
+  font-family: "Sora", "Inter", sans-serif !important;
+}
+#pp-button .ppb-otp-input:focus {
+  border-color: var(--dpk-green) !important;
+  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+  outline: none !important;
+}
+
+/* ---------- Espaciado utilitario (asegura ritmo) ---------- */
+#pp-button .ppb-mb-2 { margin-bottom: 10px !important; }
+#pp-button .ppb-mb-3 { margin-bottom: 14px !important; }
+#pp-button .ppb-mb-4 { margin-bottom: 18px !important; }
+#pp-button .ppb-mt-2 { margin-top: 10px !important; }
+#pp-button .ppb-mt-3 { margin-top: 14px !important; }
+#pp-button .ppb-mt-4 { margin-top: 18px !important; }
+#pp-button .ppb-m-3 { margin: 14px !important; }
+#pp-button .ppb-p-2 { padding: 10px !important; }
+#pp-button .ppb-me-1 { margin-right: 4px !important; }
+#pp-button .ppb-me-2 { margin-right: 8px !important; }
+#pp-button .ppb-ps-5 { padding-left: 20px !important; }
+#pp-button .ppb-pe-5 { padding-right: 20px !important; }
+
+#pp-button .ppb-d-flex { display: flex !important; }
+#pp-button .ppb-justify-content-center { justify-content: center !important; }
+#pp-button .ppb-justify-content-end { justify-content: flex-end !important; }
+#pp-button .ppb-align-items-center { align-items: center !important; }
+

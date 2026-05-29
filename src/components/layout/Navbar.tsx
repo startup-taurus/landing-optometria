@@ -12,6 +12,7 @@ import { useActiveSection } from "@/hooks/useActiveSection";
 const NAV_LINKS = [
   { label: "Características", href: "#caracteristicas" },
   { label: "Cómo funciona", href: "#como-funciona" },
+  { label: "Planes", href: "#planes" },
   { label: "FAQ", href: "#faq" },
   { label: "Contacto", href: "#contacto" },
 ];

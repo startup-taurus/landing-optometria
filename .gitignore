@@ -15,3 +15,10 @@ yarn-error.log*
 
 # OS files
 .DS_Store
+
+# Local env
+.env.local
+.env*.local
+
+# Local data (transacciones Payphone)
+data/

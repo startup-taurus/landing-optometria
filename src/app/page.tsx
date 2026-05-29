@@ -10,6 +10,7 @@ import Comparison from "@/components/sections/Comparison";
 import Features from "@/components/sections/Features";
 import ModuleShowcase from "@/components/sections/ModuleShowcase";
 import HowItWorks from "@/components/sections/HowItWorks";
+import Pricing from "@/components/sections/Pricing";
 import FAQ from "@/components/sections/FAQ";
 import Contact from "@/components/sections/Contact";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
@@ -32,6 +33,7 @@ export default function Home() {
         <Features />
         <ModuleShowcase />
         <HowItWorks />
+        <Pricing />
         <FAQ />
         <Contact />
       </main>
