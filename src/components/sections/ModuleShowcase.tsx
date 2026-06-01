@@ -372,8 +372,8 @@ function BillingPreview() {
       <div className="grid grid-cols-3 gap-1.5 text-center">
         {[
           { l: "Subtotal", v: "$210" },
-          { l: "IVA 12%", v: "$25.20" },
-          { l: "Total", v: "$235.20" },
+          { l: "IVA 15%", v: "$31.50" },
+          { l: "Total", v: "$241.50" },
         ].map((c) => (
           <div key={c.l} className="rounded-md bg-[#123A43] border border-[#1D4650] py-1.5">
             <div className="text-[9px] text-[#B7D1D2]/70">{c.l}</div>

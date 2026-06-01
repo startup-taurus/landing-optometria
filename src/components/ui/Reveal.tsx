@@ -7,11 +7,12 @@ import {
   fadeInLeft,
   fadeInRight,
   fadeInUp,
+  irisIn,
   scaleIn,
   VIEWPORT_DEFAULT,
 } from "@/lib/animations";
 
-type RevealVariant = "up" | "left" | "right" | "scale" | "blur";
+type RevealVariant = "up" | "left" | "right" | "scale" | "blur" | "iris";
 
 const variantMap: Record<RevealVariant, Variants> = {
   up: fadeInUp,
@@ -19,6 +20,7 @@ const variantMap: Record<RevealVariant, Variants> = {
   right: fadeInRight,
   scale: scaleIn,
   blur: blurIn,
+  iris: irisIn,
 };
 
 interface RevealProps {

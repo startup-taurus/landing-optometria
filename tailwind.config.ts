@@ -59,10 +59,16 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sora: ["Sora", "Manrope", "Inter", "sans-serif"],
-        // backwards-compat alias so existing font-jakarta classes still resolve
-        jakarta: ["Sora", "Manrope", "Inter", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
+        // Tipografía de marca self-hosted (Fontshare). Las CSS vars las define
+        // next/font/local en layout.tsx. Se conservan los nombres de clase
+        // (font-sora / font-inter / font-jakarta) para no tocar cada componente:
+        //   display (titulares) -> Clash Display
+        //   body (cuerpo/UI)    -> Satoshi
+        display: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
+        body: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
+        sora: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
+        jakarta: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
+        inter: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
         card: "20px",

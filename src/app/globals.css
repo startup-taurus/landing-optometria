@@ -53,7 +53,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body), 'Inter', system-ui, sans-serif;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
@@ -67,9 +67,9 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Sora', 'Manrope', 'Inter', sans-serif;
+  font-family: var(--font-display), 'Sora', 'Manrope', sans-serif;
   text-wrap: balance;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 p {
@@ -89,6 +89,24 @@ p {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Aberración cromática sutil (franja de lente) para titulares destacados */
+  .text-chromatic {
+    text-shadow:
+      -0.7px 0 0 rgba(255, 40, 110, 0.20),
+      0.7px 0 0 rgba(40, 200, 255, 0.20);
+  }
+
+  /* Giro lento para la retícula óptica decorativa */
+  .reticle-spin {
+    transform-origin: 50% 50%;
+    animation: dpk-reticle-spin 60s linear infinite;
+  }
+  @keyframes dpk-reticle-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .border-aurora {
@@ -125,6 +143,67 @@ p {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  /* ----- Liquid glass (refracción real) -----
+     Base = glass sólido y legible (funciona en todos los navegadores).
+     ::before = capa de refracción con el filtro SVG (mejora progresiva,
+     principalmente Chromium). El texto del contenido queda intacto: solo se
+     ondula lo que se ve A TRAVÉS del vidrio. */
+  .glass-liquid {
+    position: relative;
+    isolation: isolate;
+    background: rgba(13, 37, 44, 0.78);
+    backdrop-filter: blur(16px) saturate(165%);
+    -webkit-backdrop-filter: blur(16px) saturate(165%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+      0 18px 48px -20px rgba(0, 0, 0, 0.55);
+  }
+  /* Brillo especular sutil (acabado "vidrio") — barato, sin filtros SVG */
+  .glass-liquid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(255, 255, 255, 0) 38%
+    );
+  }
+
+  /* Sin soporte de backdrop-filter -> fondo sólido legible */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-liquid {
+      background: rgba(13, 37, 44, 0.92);
+    }
+  }
+
+  /* Destello (sheen) que barre la superficie al pasar el cursor */
+  .card-sheen {
+    overflow: hidden;
+  }
+  .card-sheen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.16) 48%,
+      transparent 66%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.7s ease;
+  }
+  .card-sheen:hover::before {
+    transform: translateX(130%);
   }
 
   /* Light "respiration islands" — use on sections that opt out of dark theme */

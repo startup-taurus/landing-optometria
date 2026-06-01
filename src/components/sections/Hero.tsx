@@ -1,44 +1,57 @@
 'use client';
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Eye, ArrowRight, ChevronDown, Sparkles, TrendingUp } from "lucide-react";
-import { useRef, type ReactNode } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  useReducedMotion,
+} from "framer-motion";
+import { Eye, TrendingUp } from "lucide-react";
+import { useRef, type ReactNode, type MouseEvent } from "react";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 import AnimatedGradientBackground from "@/components/ui/AnimatedGradientBackground";
-import MagneticButton from "@/components/ui/MagneticButton";
+import Reticle from "@/components/ui/Reticle";
 import { fadeInUp, staggerHero, fadeInMockup } from "@/lib/animations";
-import { WHATSAPP_URL } from "@/lib/contact";
 
 function FloatingCard({
   children,
   className,
   delay,
   from,
+  depth = 0,
 }: {
   children: ReactNode;
   className: string;
   delay: number;
   from: { x?: number; y?: number };
+  depth?: number;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: from.x ?? 0, y: from.y ?? 12 }}
-      animate={{ opacity: 1, x: 0, y: 0 }}
+      initial={{ opacity: 0, x: from.x ?? 0, y: from.y ?? 12, z: depth }}
+      animate={{ opacity: 1, x: 0, y: 0, z: depth }}
+      whileHover={{
+        z: depth + 40,
+        scale: 1.05,
+        transition: { type: "spring", stiffness: 300, damping: 20 },
+      }}
       transition={{ delay, duration: 0.75, type: "spring", stiffness: 90, damping: 18 }}
+      style={{ transformStyle: "preserve-3d" }}
       className={`absolute z-20 hidden xl:block ${className}`}
     >
-      <div className="bg-[#0D252C]/96 backdrop-blur-md border border-[#1D4650] rounded-2xl px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.55)]">
+      <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">
         {children}
       </div>
     </motion.div>
   );
 }
 
-function BrowserMockup() {
+function FloatingStats() {
   return (
-    <div className="relative w-full max-w-xl mx-auto">
-      <FloatingCard className="-left-6 top-8" delay={1.3} from={{ x: -28 }}>
+    <>
+      <FloatingCard className="-left-6 top-8" delay={0.5} from={{ x: -28 }} depth={55}>
         <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
           Pacientes activos
         </p>
@@ -49,7 +62,7 @@ function BrowserMockup() {
         </div>
       </FloatingCard>
 
-      <FloatingCard className="-right-6 bottom-14" delay={1.6} from={{ x: 28 }}>
+      <FloatingCard className="-right-6 bottom-14" delay={0.7} from={{ x: 28 }} depth={80}>
         <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
           Citas confirmadas
         </p>
@@ -59,7 +72,13 @@ function BrowserMockup() {
           <span className="text-xs font-inter text-[#B7D1D2]/80">hoy en agenda</span>
         </div>
       </FloatingCard>
+    </>
+  );
+}
 
+function BrowserMockup() {
+  return (
+    <div className="relative w-full max-w-xl mx-auto">
       <div className="relative rounded-2xl border border-[#1D4650]/80 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.75),0_0_0_1px_rgba(20,184,117,0.06)] overflow-hidden bg-[#071A1F]">
         <div className="bg-[#0D252C] border-b border-[#1D4650] px-4 py-2.5 flex items-center gap-3">
           <div className="flex gap-1.5 shrink-0">
@@ -143,6 +162,56 @@ function BrowserMockup() {
   );
 }
 
+// Escenario 3D del hero: el mockup y las tarjetas siguen al cursor (tilt + parallax).
+// Desactiva el efecto si el usuario prefiere menos movimiento.
+function HeroVisual() {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 140, damping: 18, mass: 0.5 });
+  const sy = useSpring(my, { stiffness: 140, damping: 18, mass: 0.5 });
+  const rotateX = useTransform(sy, [-0.5, 0.5], [10, -10]);
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-14, 14]);
+
+  function handleMove(e: MouseEvent<HTMLDivElement>) {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  }
+  function handleLeave() {
+    mx.set(0);
+    my.set(0);
+  }
+
+  if (reduce) {
+    return (
+      <div className="relative mx-auto w-full max-w-xl">
+        <BrowserMockup />
+        <FloatingStats />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className="mx-auto w-full max-w-xl [perspective:1100px]"
+    >
+      <motion.div
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="relative will-change-transform"
+      >
+        <BrowserMockup />
+        <FloatingStats />
+      </motion.div>
+    </div>
+  );
+}
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -150,7 +219,6 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
   const mockupY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const mockupRotate = useTransform(scrollYProgress, [0, 1], [0, -3]);
   const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, 0.4]);
 
   return (
@@ -159,6 +227,8 @@ export default function Hero() {
       className="relative min-h-screen flex items-center pt-20 lg:pt-16 overflow-hidden bg-[#071A1F]"
     >
       <AnimatedGradientBackground variant="hero" />
+
+      <Reticle className="pointer-events-none absolute -left-44 top-1/2 -translate-y-1/2 hidden lg:block h-[560px] w-[560px] text-[#14B875]/[0.06]" />
 
       <motion.div
         style={{ opacity: heroFade }}
@@ -171,10 +241,7 @@ export default function Hero() {
           className="flex flex-col gap-6"
         >
           <motion.div variants={fadeInUp}>
-            <Badge>
-              <Sparkles className="w-3.5 h-3.5" />
-              Software clínico especializado para ópticas
-            </Badge>
+            <Badge>Software clínico especializado para ópticas</Badge>
           </motion.div>
 
           <motion.h1
@@ -182,8 +249,8 @@ export default function Hero() {
             className="font-sora font-extrabold text-white leading-[1.05] tracking-tight"
             style={{ fontSize: "clamp(38px, 5.6vw, 68px)" }}
           >
-            <span className="text-aurora">Precisión clínica</span> para gestionar
-            ópticas con claridad.
+            <span className="text-aurora text-chromatic">Precisión clínica</span> para
+            gestionar ópticas con claridad.
           </motion.h1>
 
           <motion.p
@@ -194,19 +261,6 @@ export default function Hero() {
             facturación en un sistema especializado para ópticas. Multi-sucursal y
             pensado para la realidad de Latinoamérica.
           </motion.p>
-
-          <motion.div variants={fadeInUp} className="flex flex-wrap gap-3 pt-2">
-            <MagneticButton href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-              <Button size="lg">
-                Solicitar demo <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </MagneticButton>
-            <a href="#caracteristicas">
-              <Button variant="outline" size="lg">
-                Conocer el sistema <ChevronDown className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
-              </Button>
-            </a>
-          </motion.div>
 
           <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-4">
             {["Implementación guiada", "Soporte en español", "Sin contratos"].map((item) => (
@@ -222,10 +276,10 @@ export default function Hero() {
           variants={fadeInMockup}
           initial="hidden"
           animate="visible"
-          style={{ y: mockupY, rotate: mockupRotate }}
+          style={{ y: mockupY }}
           className="will-change-transform"
         >
-          <BrowserMockup />
+          <HeroVisual />
         </motion.div>
       </motion.div>
     </section>

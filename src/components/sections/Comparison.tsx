@@ -117,11 +117,8 @@ export default function Comparison() {
             viewport={VIEWPORT_DEFAULT}
             transition={{ delay: 0.05 }}
             whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
-            className="relative rounded-card p-7 sm:p-8"
+            className="glass-liquid relative rounded-card p-7 sm:p-8"
             style={{
-              background: "rgba(18, 58, 67, 0.65)",
-              backdropFilter: "blur(24px) saturate(160%)",
-              WebkitBackdropFilter: "blur(24px) saturate(160%)",
               border: "1px solid rgba(20, 184, 117, 0.28)",
               boxShadow: "0 24px 80px -12px rgba(20,184,117,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
             }}

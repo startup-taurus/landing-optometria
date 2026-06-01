@@ -19,7 +19,7 @@ export default function MiniBarChart({ className }: { className?: string }) {
       ref={ref}
       className={className}
       viewBox={`0 0 ${totalWidth} ${height}`}
-      preserveAspectRatio="xMidYEnd meet"
+      preserveAspectRatio="xMidYMax meet"
       role="img"
       aria-label="Tendencia de ventas semanal"
     >

@@ -57,6 +57,18 @@ export const scaleIn: Variants = {
   },
 };
 
+// "Iris": entra como una lente enfocando (escala + desenfoque -> nítido).
+// Motivo óptico de Dioptrika.
+export const irisIn: Variants = {
+  hidden: { opacity: 0, scale: 0.9, filter: "blur(14px)" },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.85, ease: easeOut },
+  },
+};
+
 export const popIn: Variants = {
   hidden: { opacity: 0, scale: 0.7, y: 10 },
   visible: {

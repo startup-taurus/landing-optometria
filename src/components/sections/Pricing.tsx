@@ -361,7 +361,7 @@ function FormStage({
         <Field
           label="Nombre completo"
           type="text"
-          placeholder="Juan Pérez"
+          placeholder="Jordan Moran"
           value={form.name}
           onChange={(v) => update("name", v)}
           required
@@ -518,7 +518,7 @@ function PhoneField({
   }
 
   const hint = (() => {
-    if (!value) return "Ingresa tu celular (10 dígitos, ej. 0962766008)";
+    if (!value) return "Ingresa tu celular (10 dígitos, ej. 0994312472)";
     const digits = value.replace(/\D/g, "");
     let local = digits;
     if (local.startsWith("593")) local = local.slice(3);
@@ -545,7 +545,7 @@ function PhoneField({
         <input
           type="tel"
           inputMode="numeric"
-          placeholder="962766008"
+          placeholder="0994312472"
           value={value}
           onChange={(e) => handleChange(e.target.value)}
           required

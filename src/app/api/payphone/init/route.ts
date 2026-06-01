@@ -5,6 +5,7 @@ import {
   type LeadInput,
 } from "@/lib/payphone";
 import { saveTransaction } from "@/lib/transactions";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,14 @@ function isEmail(s: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const limit = rateLimit(`init:${clientIp(req)}`, { capacity: 5, refillPerSec: 0.2 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera un momento e intenta de nuevo." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+    );
+  }
+
   let body: Partial<LeadInput>;
   try {
     body = (await req.json()) as Partial<LeadInput>;
@@ -34,7 +43,7 @@ export async function POST(req: Request) {
   }
   if (!phone) {
     return NextResponse.json(
-      { error: "Teléfono inválido. Usa un celular ecuatoriano (ej. 0962766008)." },
+      { error: "Teléfono inválido. Usa un celular ecuatoriano (ej. 0994312472)." },
       { status: 400 }
     );
   }

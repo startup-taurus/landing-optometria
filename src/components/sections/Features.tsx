@@ -148,8 +148,12 @@ function CardShell({
 }) {
   return (
     <div
-      className={`group relative rounded-card border border-[#1D4650] bg-[#123A43] shadow-card transition-all duration-300 hover:border-[#14B875]/45 hover:shadow-card-hover overflow-hidden before:absolute before:top-0 before:left-0 before:h-px before:w-0 before:bg-gradient-to-r before:from-transparent before:via-[#14B875] before:to-transparent before:transition-[width] before:duration-700 hover:before:w-full ${className || ""}`}
+      className={`group relative rounded-card border border-[#1D4650] bg-[#123A43] shadow-card transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-[#14B875]/45 hover:shadow-card-hover overflow-hidden before:absolute before:top-0 before:left-0 before:h-px before:w-0 before:bg-gradient-to-r before:from-transparent before:via-[#14B875] before:to-transparent before:transition-[width] before:duration-700 hover:before:w-full ${className || ""}`}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] -translate-x-full rounded-[inherit] bg-[linear-gradient(115deg,transparent_30%,rgba(255,255,255,0.10)_48%,transparent_66%)] transition-transform duration-700 ease-out group-hover:translate-x-full"
+      />
       {children}
     </div>
   );

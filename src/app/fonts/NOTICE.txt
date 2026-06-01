@@ -1,0 +1,18 @@
+Fuentes de marca (self-hosted)
+==============================
+
+Familias:
+- Clash Display  (Indian Type Foundry, vía Fontshare)  -> titulares / display
+- Satoshi        (Indian Type Foundry, vía Fontshare)  -> cuerpo / interfaz
+
+Origen de los archivos .woff2:
+  https://www.fontshare.com  (CDN: https://cdn.fontshare.com)
+
+Licencia:
+  Fontshare / ITF Free Font License — gratuita para uso personal y comercial,
+  incluida la incrustación y el self-hosting en sitios web.
+  Texto vigente: https://www.fontshare.com/licenses/itf-ffl
+
+Nota: si en algún momento se exige máxima certeza legal, conservar/commitear el
+texto exacto de la licencia descargado desde el enlace anterior junto a estos
+archivos.

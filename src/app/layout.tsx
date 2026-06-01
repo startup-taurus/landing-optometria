@@ -1,5 +1,34 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import StructuredData from "@/components/seo/StructuredData";
+
+// Tipografía de marca, self-hosted (Fontshare). Sin requests a Google Fonts.
+// Clash Display = titulares/display; Satoshi = cuerpo/interfaz.
+// Se exponen como CSS vars y Tailwind las mapea (ver tailwind.config.ts).
+const clashDisplay = localFont({
+  src: [
+    { path: "./fonts/ClashDisplay-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ClashDisplay-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/ClashDisplay-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/ClashDisplay-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-display",
+  display: "swap",
+  preload: true,
+  fallback: ["Sora", "system-ui", "sans-serif"],
+});
+
+const satoshi = localFont({
+  src: [
+    { path: "./fonts/Satoshi-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Satoshi-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/Satoshi-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-body",
+  display: "swap",
+  preload: true,
+  fallback: ["Inter", "system-ui", "sans-serif"],
+});
 import {
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
@@ -86,15 +115,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className="dark" data-theme="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="es"
+      className={`dark ${clashDisplay.variable} ${satoshi.variable}`}
+      data-theme="dark"
+    >
       <body>
         <StructuredData />
         {children}
