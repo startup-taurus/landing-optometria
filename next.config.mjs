@@ -12,7 +12,7 @@
 // Tras probar un pago COMPLETO en modo Prueba y confirmar 0 violaciones en la
 // consola, cambiar CSP_REPORT_ONLY a `false` para hacerla efectiva (enforcing).
 // ============================================================================
-const CSP_REPORT_ONLY = true;
+const CSP_REPORT_ONLY = false;
 
 const contentSecurityPolicy = [
   "default-src 'self'",

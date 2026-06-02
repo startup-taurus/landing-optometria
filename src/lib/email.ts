@@ -1,7 +1,7 @@
 import type { StoredTransaction } from "./payphone";
 
 interface SendArgs {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
 }
@@ -106,8 +106,12 @@ export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> 
 }
 
 export async function sendInternalNotification(tx: StoredTransaction): Promise<void> {
-  const to = process.env.NOTIFY_EMAIL;
-  if (!to) {
+  // NOTIFY_EMAIL admite varios correos separados por coma (ej: "a@x.com,b@y.com").
+  const recipients = (process.env.NOTIFY_EMAIL || "")
+    .split(/[,;\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (recipients.length === 0) {
     console.log("[email] NOTIFY_EMAIL vacío, no se envía aviso interno");
     return;
   }
@@ -125,7 +129,7 @@ export async function sendInternalNotification(tx: StoredTransaction): Promise<v
     </table>
   `;
   await sendViaResend({
-    to,
+    to: recipients,
     subject: `Nueva venta Dioptrika $30 — ${tx.lead.name}`,
     html: shell("Nueva venta confirmada", body),
   });

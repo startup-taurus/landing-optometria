@@ -16,11 +16,14 @@ yarn-error.log*
 # OS files
 .DS_Store
 
-# Local env — los secretos NUNCA se suben a git (usar .env.example como plantilla)
+# Local env — los secretos NUNCA se suben a git
 .env
 .env.local
 .env*.local
-!.env.example
 
 # Local data (transacciones Payphone)
 data/
+
+# Ayudante de desarrollo solo para Windows (no aplica en el servidor Linux)
+reset-dev.ps1
+server-run.log

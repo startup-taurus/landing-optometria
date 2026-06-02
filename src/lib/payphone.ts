@@ -1,6 +1,13 @@
 import crypto from "crypto";
+import https from "https";
 
-export const PAYPHONE_API_BASE = "https://api.payphonetodoesposible.com";
+// IMPORTANTE: la API de la Cajita (incluida la Confirmación server-to-server)
+// vive en el host `pay.`, NO en `api.`. El host `api.payphonetodoesposible.com`
+// está detrás de un Azure Application Gateway que responde 403 (cuerpo vacío) a
+// TODO request (verificado empíricamente: raíz, cualquier path, con/sin token).
+// Usar `pay.` (mismo host del script de la Cajita) → devuelve 200 con el JSON real.
+// Si vuelve a fallar con 502/403, verificar que este host siga siendo el correcto.
+export const PAYPHONE_API_BASE = "https://pay.payphonetodoesposible.com";
 export const PAYPHONE_CONFIRM_URL = `${PAYPHONE_API_BASE}/api/button/V2/Confirm`;
 
 // Reglas de Payphone (centavos USD):
@@ -114,28 +121,56 @@ export async function confirmTransactionWithPayphone(input: {
   const token = process.env.PAYPHONE_TOKEN;
   if (!token) throw new Error("PAYPHONE_TOKEN no configurado en el servidor");
 
-  const res = await fetch(PAYPHONE_CONFIRM_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      id: input.id,
-      clientTxId: input.clientTransactionId,
-    }),
-    cache: "no-store",
+  const payload = JSON.stringify({
+    id: input.id,
+    clientTxId: input.clientTransactionId,
   });
+  const url = new URL(PAYPHONE_CONFIRM_URL);
+
+  // IMPORTANTE: usamos el módulo `https` nativo, NO `fetch`. El servidor de
+  // Payphone (ASP.NET/IIS legacy) responde 500 ("Runtime Error") ante los
+  // requests del cliente `fetch` de Node (undici), pero acepta sin problema los
+  // del módulo `https` (igual que .NET/PowerShell). Verificado empíricamente:
+  // mismo host/headers/body → fetch=500, https=200. No cambiar a fetch.
+  const { status, body } = await new Promise<{ status: number; body: string }>(
+    (resolve, reject) => {
+      const req = https.request(
+        {
+          hostname: url.hostname,
+          path: url.pathname,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(payload),
+            Accept: "application/json",
+            "User-Agent": "Dioptrika/1.0",
+          },
+          timeout: 20000,
+        },
+        (res) => {
+          let data = "";
+          res.setEncoding("utf8");
+          res.on("data", (chunk) => (data += chunk));
+          res.on("end", () => resolve({ status: res.statusCode ?? 0, body: data }));
+        }
+      );
+      req.on("error", reject);
+      req.on("timeout", () => req.destroy(new Error("Timeout confirmando con Payphone")));
+      req.write(payload);
+      req.end();
+    }
+  );
 
   let parsed: PayphoneConfirmResponse | null = null;
   try {
-    parsed = (await res.json()) as PayphoneConfirmResponse;
+    parsed = JSON.parse(body) as PayphoneConfirmResponse;
   } catch {
     parsed = null;
   }
 
-  if (!res.ok && !parsed) {
-    throw new Error(`Payphone respondió ${res.status}`);
+  if ((status < 200 || status >= 300) && !parsed) {
+    throw new Error(`Payphone respondió ${status}`);
   }
 
   return parsed ?? {};
