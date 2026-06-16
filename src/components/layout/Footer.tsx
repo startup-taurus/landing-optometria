@@ -8,7 +8,7 @@ import {
 } from "@/lib/contact";
 
 const productLinks = [
-  { label: "Características", href: "#caracteristicas" },
+  { label: "Producto", href: "#producto" },
   { label: "Cómo funciona", href: "#como-funciona" },
   { label: "Preguntas frecuentes", href: "#faq" },
   { label: "Contacto", href: "#contacto" },
@@ -22,65 +22,54 @@ const legalLinks = [
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="relative bg-gradient-to-br from-[#071A1F] via-[#0D252C] to-[#123A43] text-white pt-16 pb-10 overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full bg-[#14B875]/10 blur-3xl pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full bg-[#087A5A]/12 blur-3xl pointer-events-none"
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+    <footer className="relative border-t border-line bg-surface-2 pb-10 pt-16">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-5">
-            <div className="flex items-center gap-2.5 mb-4">
+            <div className="mb-4 flex items-center gap-2.5">
               <Image
                 src="/brand/isologo.png"
                 alt=""
                 width={40}
                 height={40}
-                className="h-10 w-10 select-none object-contain"
+                className="h-9 w-9 select-none object-contain"
                 draggable={false}
               />
-              <span className="font-sora font-bold text-white text-xl leading-none tracking-tight select-none">
+              <span className="font-display text-xl font-bold tracking-tight text-ink">
                 Dioptrika
               </span>
             </div>
-            <p className="text-white/65 text-sm font-inter leading-relaxed max-w-sm mb-6">
-              Software clínico especializado para ópticas. Centraliza historias
-              clínicas, órdenes de laboratorio, inventario y facturación.
+            <p className="mb-6 max-w-sm text-sm leading-relaxed text-muted">
+              Software clínico especializado para ópticas. Centraliza historias clínicas,
+              órdenes de laboratorio, inventario y facturación.
             </p>
             <div className="flex flex-wrap gap-3">
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-btn text-white text-sm font-medium transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-btn px-4 py-2 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
                 style={{ background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)" }}
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="h-4 w-4" />
                 {WHATSAPP_DISPLAY}
               </a>
               <a
                 href={CONTACT_EMAIL_HREF}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-btn bg-white/8 border border-[#1D4650] text-white text-sm font-medium transition-all hover:bg-white/12 hover:border-[#14B875]/50 hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-btn border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-brand/45 hover:text-brand-ink"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="h-4 w-4" />
                 {CONTACT_EMAIL}
               </a>
             </div>
           </div>
 
           <div className="md:col-span-3 md:col-start-8">
-            <p className="font-sora font-semibold text-sm mb-4 text-white/85">
-              Producto
-            </p>
-            <ul className="space-y-2.5 text-sm font-inter text-white/60">
+            <p className="mb-4 font-display text-sm font-semibold text-ink">Producto</p>
+            <ul className="space-y-2.5 text-sm text-muted">
               {productLinks.map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} className="hover:text-[#14B875] transition-colors">
+                  <a href={l.href} className="transition-colors hover:text-brand-ink">
                     {l.label}
                   </a>
                 </li>
@@ -89,13 +78,11 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <p className="font-sora font-semibold text-sm mb-4 text-white/85">
-              Legal
-            </p>
-            <ul className="space-y-2.5 text-sm font-inter text-white/60">
+            <p className="mb-4 font-display text-sm font-semibold text-ink">Legal</p>
+            <ul className="space-y-2.5 text-sm text-muted">
               {legalLinks.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} className="hover:text-[#14B875] transition-colors">
+                  <a href={l.href} className="transition-colors hover:text-brand-ink">
                     {l.label}
                   </a>
                 </li>
@@ -104,12 +91,12 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm font-inter text-white/45">
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-line pt-6 text-sm text-muted sm:flex-row">
           <p>© {year} Dioptrika. Todos los derechos reservados.</p>
           <p className="flex items-center gap-2">
-            <span className="text-white/55">Producto de</span>
-            <span className="text-white/70 font-medium tracking-wide">LatamSoft</span>
-            <span className="text-white/20">·</span>
+            <span>Producto de</span>
+            <span className="font-medium text-ink-2">LatamSoft</span>
+            <span className="text-line-strong">·</span>
             <span>Hecho en Latinoamérica</span>
           </p>
         </div>

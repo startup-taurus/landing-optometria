@@ -148,7 +148,7 @@ export default function PayphoneBox({ clientTransactionId, email, phone, onError
     <div className="w-full">
       <div id={CONTAINER_ID} ref={ref} className="w-full min-h-[60px]" />
       {!ready && (
-        <p className="text-center font-inter text-sm text-[#B7D1D2]/70 py-3">
+        <p className="text-center font-body text-sm text-muted py-3">
           Cargando pasarela segura…
         </p>
       )}

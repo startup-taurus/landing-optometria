@@ -2,42 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Dioptrika brand tokens */
-  --dioptrika-green-master: #01AF76;
+/* ============================================================
+   Dioptrika — sistema de tokens semánticos (instrumento óptico)
+   Los colores se guardan como canales "R G B" para que los
+   modificadores de opacidad de Tailwind (bg-brand/10) funcionen.
+   Tema CLARO por defecto · OSCURO con [data-theme="dark"].
+   ============================================================ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Body comparte familia con display (Schibsted Grotesk, contraste de peso). */
+  --font-body: var(--font-display);
+
+  --canvas: 247 250 249;     /* blanco óptico — fondo de página */
+  --surface: 255 255 255;    /* paneles / tarjetas */
+  --surface-2: 237 243 240;  /* hundido / inputs / fills sutiles */
+  --ink: 14 32 36;           /* titulares y texto fuerte (~14:1) */
+  --ink-2: 43 62 67;         /* texto secundario */
+  --muted: 76 95 100;        /* cuerpo atenuado (≥4.5:1) */
+  --line: 222 233 228;       /* hairlines */
+  --line-strong: 199 216 209;/* bordes de énfasis / ticks */
+  --brand: 20 184 117;       /* verde de marca — acentos, fills */
+  --brand-deep: 8 122 90;    /* acento profundo / hover */
+  --brand-ink: 10 111 79;    /* verde como TEXTO sobre claro (≥4.5:1) */
+  --cta: 11 123 87;          /* fondo del botón primario (texto blanco AA) */
+  --on-cta: 255 255 255;     /* texto sobre botón primario */
+  --focus: 20 184 117;       /* anillo de foco */
+
+  --shadow-float: 0 24px 60px -28px rgba(14, 32, 36, 0.22);
+  --shadow-sm: 0 1px 2px rgba(14, 32, 36, 0.05), 0 6px 18px -10px rgba(14, 32, 36, 0.10);
+
+  /* Brand raw (referencia / piezas que aún usen el hex exacto) */
   --dioptrika-green: #14B875;
   --dioptrika-green-deep: #087A5A;
   --dioptrika-petroleum: #123A43;
-  --dioptrika-dark: #071A1F;
-  --dioptrika-dark-surface: #0D252C;
   --dioptrika-white: #F8FBFA;
   --dioptrika-graphite: #1F2B36;
-  --dioptrika-muted: #6B7280;
-  --dioptrika-muted-dark: #B7D1D2;
-  --dioptrika-border-light: #DCEBE7;
-  --dioptrika-border-dark: #1D4650;
-
-  /* Semantic aliases (dark mode by default) */
-  --bg: var(--dioptrika-dark);
-  --surface: var(--dioptrika-dark-surface);
-  --text: var(--dioptrika-white);
-  --text-muted: var(--dioptrika-muted-dark);
-  --primary: var(--dioptrika-green);
-  --primary-deep: var(--dioptrika-green-deep);
-  --border: var(--dioptrika-border-dark);
-
-  /* Legacy aliases (kept for backward compatibility with any stragglers) */
-  --navy: var(--dioptrika-petroleum);
-  --sky: var(--dioptrika-green);
-  --teal: var(--dioptrika-green-deep);
 }
 
-[data-theme="light"] {
-  --bg: var(--dioptrika-white);
-  --surface: #FFFFFF;
-  --text: var(--dioptrika-graphite);
-  --text-muted: var(--dioptrika-muted);
-  --border: var(--dioptrika-border-light);
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --canvas: 7 26 31;
+  --surface: 13 37 44;
+  --surface-2: 16 46 53;
+  --ink: 244 250 248;
+  --ink-2: 214 230 228;
+  --muted: 169 199 200;
+  --line: 29 70 80;
+  --line-strong: 42 90 102;
+  --brand: 24 196 126;
+  --brand-deep: 15 160 104;
+  --brand-ink: 52 214 153;
+  --cta: 20 184 117;
+  --on-cta: 4 35 26;
+  --focus: 43 208 140;
+
+  --shadow-float: 0 30px 70px -30px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 24px -14px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -48,28 +71,30 @@
 
 html {
   scroll-behavior: auto;
-  background: var(--dioptrika-dark);
-  color-scheme: dark;
+  background: rgb(var(--canvas));
 }
 
 body {
-  font-family: var(--font-body), 'Inter', system-ui, sans-serif;
-  color: var(--text);
-  background: var(--bg);
+  font-family: var(--font-body), 'Schibsted Grotesk', system-ui, sans-serif;
+  color: rgb(var(--ink));
+  background: rgb(var(--canvas));
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 ::selection {
-  background: rgba(20, 184, 117, 0.30);
-  color: var(--dioptrika-white);
+  background: rgb(var(--brand) / 0.22);
+  color: rgb(var(--ink));
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display), 'Sora', 'Manrope', sans-serif;
+  font-family: var(--font-display), 'Schibsted Grotesk', system-ui, sans-serif;
   text-wrap: balance;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
+  color: rgb(var(--ink));
 }
 
 p {
@@ -77,162 +102,70 @@ p {
 }
 
 @layer utilities {
-  .text-aurora {
-    background: linear-gradient(120deg, #14B875 0%, #5FD4A0 50%, #01AF76 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Kicker mono: etiqueta de instrumento. Uso deliberado, no en cada sección. */
+  .kicker {
+    font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--brand-ink));
   }
 
-  .text-aurora-deep {
-    background: linear-gradient(120deg, #087A5A 0%, #14B875 60%, #01AF76 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Dato/medida óptica en mono (dioptrías, ejes, unidades). */
+  .data {
+    font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 
-  /* Aberración cromática sutil (franja de lente) para titulares destacados */
-  .text-chromatic {
-    text-shadow:
-      -0.7px 0 0 rgba(255, 40, 110, 0.20),
-      0.7px 0 0 rgba(40, 200, 255, 0.20);
+  /* Hairline divisoria con desvanecido (regla de instrumento). */
+  .rule-soft {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--line-strong)) 18%,
+      rgb(var(--line-strong)) 82%,
+      transparent
+    );
   }
 
-  /* Giro lento para la retícula óptica decorativa */
+  /* Medida de lectura cómoda. */
+  .measure { max-width: 68ch; }
+
+  /* Cuadrícula óptica fina de fondo (reemplaza blobs/ruido). */
+  .optical-grid {
+    background-image:
+      linear-gradient(rgb(var(--line) / 0.6) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--line) / 0.6) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 30%, transparent 75%);
+  }
+
+  /* Panel de checkout "instrumento" — siempre oscuro (preserva Payphone). */
+  .instrument-panel {
+    background: #0B1D22;
+    color: #F4FAF8;
+    border: 1px solid #1D4650;
+  }
+
+  /* Giro lento para la retícula óptica decorativa (motivo de marca). */
   .reticle-spin {
     transform-origin: 50% 50%;
-    animation: dpk-reticle-spin 60s linear infinite;
+    animation: dpk-reticle-spin 80s linear infinite;
   }
   @keyframes dpk-reticle-spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
 
-  .border-aurora {
-    position: relative;
-  }
-  .border-aurora::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(140deg, rgba(20,184,117,0.65), rgba(8,122,90,0.45) 50%, rgba(255,255,255,0));
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .glass {
-    background: rgba(13, 37, 44, 0.70);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-  }
-
-  .glass-dark {
-    background: rgba(7, 26, 31, 0.65);
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-  }
-
-  .glass-light {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-  }
-
-  /* ----- Liquid glass (refracción real) -----
-     Base = glass sólido y legible (funciona en todos los navegadores).
-     ::before = capa de refracción con el filtro SVG (mejora progresiva,
-     principalmente Chromium). El texto del contenido queda intacto: solo se
-     ondula lo que se ve A TRAVÉS del vidrio. */
-  .glass-liquid {
-    position: relative;
-    isolation: isolate;
-    background: rgba(13, 37, 44, 0.78);
-    backdrop-filter: blur(16px) saturate(165%);
-    -webkit-backdrop-filter: blur(16px) saturate(165%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
-      0 18px 48px -20px rgba(0, 0, 0, 0.55);
-  }
-  /* Brillo especular sutil (acabado "vidrio") — barato, sin filtros SVG */
-  .glass-liquid::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      140deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0) 38%
-    );
-  }
-
-  /* Sin soporte de backdrop-filter -> fondo sólido legible */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass-liquid {
-      background: rgba(13, 37, 44, 0.92);
-    }
-  }
-
-  /* Destello (sheen) que barre la superficie al pasar el cursor */
-  .card-sheen {
-    overflow: hidden;
-  }
-  .card-sheen::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 1;
-    background: linear-gradient(
-      115deg,
-      transparent 30%,
-      rgba(255, 255, 255, 0.16) 48%,
-      transparent 66%
-    );
-    transform: translateX(-130%);
-    transition: transform 0.7s ease;
-  }
-  .card-sheen:hover::before {
-    transform: translateX(130%);
-  }
-
-  /* Light "respiration islands" — use on sections that opt out of dark theme */
-  .light-island {
-    background: var(--dioptrika-white);
-    color: var(--dioptrika-graphite);
-  }
-  .light-island ::selection {
-    background: rgba(20, 184, 117, 0.25);
-    color: var(--dioptrika-graphite);
-  }
-
+  /* Oculta scrollbar en carruseles. */
   .module-track {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
-  .module-track::-webkit-scrollbar {
-    display: none;
-  }
-
-  .noise-overlay::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
-    opacity: 0.04;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-  }
+  .module-track::-webkit-scrollbar { display: none; }
 }
 
 .svg-line {
@@ -241,14 +174,18 @@ p {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0D252C;
+  background: rgb(var(--canvas));
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #14B875, #087A5A);
-  border-radius: 4px;
+  background: rgb(var(--line-strong));
+  border-radius: 999px;
+  border: 3px solid rgb(var(--canvas));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--brand) / 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -290,10 +227,43 @@ p {
   --dpk-muted: #B7D1D2;
   --dpk-muted-soft: rgba(183, 209, 210, 0.55);
 
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
   color: var(--dpk-text);
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* Tema CLARO: redefine SOLO las variables de color → la cajita cambia de tema
+   sin tocar ninguna regla, ningún markup ni el comportamiento del widget. Los
+   iframes de tarjeta/OTP/3DS son cross-origin y no se ven afectados por CSS. */
+[data-theme="light"] #pp-button {
+  --dpk-green: #0B7B57;
+  --dpk-green-deep: #066b4e;
+  --dpk-green-soft: rgba(20, 184, 117, 0.10);
+  --dpk-green-ring: rgba(20, 184, 117, 0.22);
+  --dpk-dark: #ffffff;
+  --dpk-surface: #f1f6f4;
+  --dpk-surface-2: #edf3f0;
+  --dpk-border: #d7e4de;
+  --dpk-border-soft: rgba(199, 216, 209, 0.7);
+  --dpk-text: #0e2024;
+  --dpk-muted: #4c5f64;
+  --dpk-muted-soft: rgba(76, 95, 100, 0.55);
+}
+
+/* Placeholder y errores con contraste correcto sobre fondo claro. */
+[data-theme="light"] #pp-button input::placeholder,
+[data-theme="light"] #pp-button .ppb-form-control::placeholder {
+  color: rgba(76, 95, 100, 0.65) !important;
+}
+[data-theme="light"] #pp-button .ppb-text-danger,
+[data-theme="light"] #pp-button .ppb-error-message,
+[data-theme="light"] #pp-button .ppb-error-message-content,
+[data-theme="light"] #pp-button .ppb-error-message-description {
+  color: #c2362c !important;
+}
+[data-theme="light"] #pp-button .ppb-footer-image {
+  filter: contrast(1.05) brightness(0.92);
 }
 
 #pp-button .payment-box {

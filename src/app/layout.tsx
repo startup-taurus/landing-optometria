@@ -1,27 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
+import { Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 import StructuredData from "@/components/seo/StructuredData";
 
-// Tipografía de marca. next/font/google las descarga en BUILD y las sirve desde
-// tu propio origen → CERO requests a Google en runtime (privacidad + velocidad,
-// igual que antes). Elegidas por su carácter y por ser poco frecuentes en sitios
-// generados por IA:
-//   display (titulares) -> Bricolage Grotesque (grotesca contemporánea con personalidad)
-//   body (cuerpo/UI)    -> Hanken Grotesk (limpia, legible, cálida)
-// Mapeadas a las MISMAS CSS vars que ya consume Tailwind (font-sora/font-inter).
-const display = Bricolage_Grotesque({
+// Tipografía "instrumento óptico". next/font/google las descarga en BUILD y las
+// sirve desde tu propio origen → CERO requests a Google en runtime.
+//   display + body -> Schibsted Grotesk (una sola familia, contraste de peso:
+//                     grotesca precisa, moderna, legible; poco usada por IA)
+//   mono           -> Spline Sans Mono (SOLO datos ópticos / micro-labels:
+//                     dioptrías, ejes, unidades — la marca ES medición)
+// --font-body se mapea a --font-display en globals.css.
+const display = Schibsted_Grotesk({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-display",
   display: "swap",
-  fallback: ["Clash Display", "Sora", "system-ui", "sans-serif"],
+  fallback: ["system-ui", "sans-serif"],
 });
 
-const body = Hanken_Grotesk({
+const mono = Spline_Sans_Mono({
   subsets: ["latin"],
-  variable: "--font-body",
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
   display: "swap",
-  fallback: ["Satoshi", "Inter", "system-ui", "sans-serif"],
+  fallback: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
 });
+
+// Evita el "flash" de tema: fija data-theme ANTES del paint. Prioridad:
+// ?theme= (override explícito) > localStorage > CLARO por defecto.
+// Permitido por la CSP ('unsafe-inline' en script-src).
+const themeInitScript = `(function(){try{var d=document.documentElement;var p=new URLSearchParams(location.search).get('theme');var s=localStorage.getItem('theme');var t=(p==='dark'||p==='light')?p:((s==='dark'||s==='light')?s:'light');d.setAttribute('data-theme',t);d.classList.toggle('dark',t==='dark');d.style.colorScheme=t;}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
 import {
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
@@ -99,21 +106,25 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#071A1F",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7FAF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#071A1F" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="es"
-      className={`dark ${display.variable} ${body.variable}`}
-      data-theme="dark"
+      data-theme="light"
+      className={`${display.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <body>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <StructuredData />
         {children}
       </body>

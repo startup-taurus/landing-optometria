@@ -6,9 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import Differentiators from "@/components/sections/Differentiators";
-import ScrollStatement from "@/components/sections/ScrollStatement";
 import Comparison from "@/components/sections/Comparison";
-import Features from "@/components/sections/Features";
 import ModuleShowcase from "@/components/sections/ModuleShowcase";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/Pricing";
@@ -30,9 +28,7 @@ export default function Home() {
       <main>
         <Hero />
         <Differentiators />
-        <ScrollStatement />
         <Comparison />
-        <Features />
         <ModuleShowcase />
         <HowItWorks />
         <Pricing />

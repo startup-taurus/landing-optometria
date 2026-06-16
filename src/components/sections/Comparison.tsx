@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
-import { fadeInLeft, fadeInRight, VIEWPORT_DEFAULT } from "@/lib/animations";
+import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 const without = [
   "Datos del paciente repartidos entre Excel, agenda y papel",
   "Pedidos al laboratorio dictados por teléfono o WhatsApp suelto",
-  "Stock de monturas y lentes en cuadernos o planillas que se desfasan",
+  "Stock de monturas y lentes en cuadernos que se desfasan",
   "Recordatorios de citas escritos a mano o copiados uno por uno",
   "Cada sucursal con su propia versión de la verdad",
   "Reportes que toman horas de armar a fin de mes",
@@ -17,141 +17,100 @@ const without = [
 const withSystem = [
   "Ficha única del paciente con foto, historial y refracciones en línea",
   "Órdenes a laboratorio con especificaciones precisas y trazabilidad",
-  "Inventario en tiempo real, alertas de stock bajo automáticas",
-  "WhatsApp integrado: confirmaciones y recordatorios automáticos al paciente",
-  "Multi-sucursal con stock transferible y vista del admin por sucursal",
-  "Dashboard en tiempo real: ventas, citas, diagnósticos frecuentes",
+  "Inventario en tiempo real, con alertas de stock bajo automáticas",
+  "WhatsApp integrado: confirmaciones y recordatorios automáticos",
+  "Multi-sucursal con stock transferible y vista del admin por local",
+  "Dashboard en tiempo real: ventas, citas y diagnósticos frecuentes",
 ];
 
 export default function Comparison() {
   return (
-    <section className="relative py-24 sm:py-28 overflow-hidden bg-[#071A1F]">
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/40 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/30 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-[#14B875]/5 blur-3xl pointer-events-none"
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="text-center mb-12 sm:mb-16 max-w-2xl mx-auto">
+    <section className="relative overflow-hidden bg-canvas py-24 sm:py-28">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
-              El antes y el después
-            </span>
-          </Reveal>
-          <Reveal variant="up" delay={0.05}>
             <h2
-              className="font-sora font-bold text-white mb-5"
-              style={{ fontSize: "clamp(30px, 4vw, 48px)" }}
+              className="font-display font-bold text-ink"
+              style={{ fontSize: "clamp(1.9rem, 4vw, 3rem)" }}
             >
               De Excel y papel{" "}
-              <span className="text-aurora">a una óptica que funciona sola</span>
+              <span className="text-brand-ink">a una óptica que funciona sola</span>
             </h2>
           </Reveal>
-          <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-[#B7D1D2] text-lg">
-              Si todavía gestionas tu óptica con planillas, libretas y herramientas
-              genéricas que no entienden de refracciones, esto es lo que cambia con
-              Dioptrika.
+          <Reveal variant="up" delay={0.06}>
+            <p className="mx-auto mt-5 max-w-xl text-[1.0625rem] leading-relaxed text-muted">
+              Si todavía gestionas con planillas, libretas y herramientas genéricas que no
+              entienden de refracciones, esto es lo que cambia con Dioptrika.
             </p>
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {/* Without card */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
+          {/* Sin sistema */}
           <motion.div
-            variants={fadeInLeft}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={VIEWPORT_DEFAULT}
-            whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
-            className="relative rounded-card border border-[#1D4650] p-7 sm:p-8"
-            style={{
-              background: "rgba(7, 26, 31, 0.75)",
-              backdropFilter: "blur(20px) saturate(140%)",
-              WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-card border border-line bg-surface-2 p-7 sm:p-8"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-red-500/12 border border-red-500/20 flex items-center justify-center">
-                <X className="w-5 h-5 text-red-400" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="font-inter text-xs uppercase tracking-widest text-[#B7D1D2]/55">Sin sistema especializado</p>
-                <h3 className="font-sora font-bold text-white text-lg">Excel, papel o herramientas genéricas</h3>
-              </div>
+            <div className="mb-6">
+              <span className="kicker !text-muted">Hoy, sin sistema</span>
+              <h3 className="mt-2 font-display text-lg font-bold text-ink-2">
+                Excel, papel o herramientas genéricas
+              </h3>
             </div>
-            <ul className="space-y-3.5">
+            <ul className="space-y-1">
               {without.map((item, i) => (
                 <motion.li
                   key={item}
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
                   viewport={VIEWPORT_DEFAULT}
-                  transition={{ delay: 0.1 + i * 0.06 }}
-                  className="flex items-start gap-3"
+                  transition={{ delay: 0.08 + i * 0.05 }}
+                  className={`flex items-start gap-3 py-2.5 ${
+                    i < without.length - 1 ? "border-b border-line/70" : ""
+                  }`}
                 >
-                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-red-500/15 border border-red-500/20 items-center justify-center">
-                    <X className="w-2.5 h-2.5 text-red-400" strokeWidth={3} />
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border border-line-strong text-muted">
+                    <X className="h-3 w-3" strokeWidth={2.5} />
                   </span>
-                  <span className="font-inter text-[#B7D1D2]/75 text-sm leading-relaxed">
-                    {item}
-                  </span>
+                  <span className="text-[14px] leading-relaxed text-muted">{item}</span>
                 </motion.li>
               ))}
             </ul>
           </motion.div>
 
-          {/* With Dioptrika card */}
+          {/* Con Dioptrika */}
           <motion.div
-            variants={fadeInRight}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={VIEWPORT_DEFAULT}
-            transition={{ delay: 0.05 }}
-            whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 22 } }}
-            className="glass-liquid relative rounded-card p-7 sm:p-8"
-            style={{
-              border: "1px solid rgba(20, 184, 117, 0.28)",
-              boxShadow: "0 24px 80px -12px rgba(20,184,117,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}
+            transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-card border border-brand/35 bg-surface p-7 shadow-float sm:p-8"
           >
-            <div
-              aria-hidden
-              className="absolute -top-20 -right-20 w-56 h-56 rounded-full bg-[#14B875]/10 blur-3xl pointer-events-none"
-            />
-            <div className="relative flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(20,184,117,0.6)]">
-                <Check className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <div>
-                <p className="font-inter text-xs uppercase tracking-widest text-[#14B875]">Con Dioptrika</p>
-                <h3 className="font-sora font-bold text-white text-lg">Plataforma especializada</h3>
-              </div>
+            <div className="mb-6">
+              <span className="kicker">Con Dioptrika</span>
+              <h3 className="mt-2 font-display text-lg font-bold text-ink">
+                Una plataforma especializada
+              </h3>
             </div>
-            <ul className="relative space-y-3.5">
+            <ul className="space-y-1">
               {withSystem.map((item, i) => (
                 <motion.li
                   key={item}
-                  initial={{ opacity: 0, x: 16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
                   viewport={VIEWPORT_DEFAULT}
-                  transition={{ delay: 0.1 + i * 0.06 }}
-                  className="flex items-start gap-3"
+                  transition={{ delay: 0.12 + i * 0.05 }}
+                  className={`flex items-start gap-3 py-2.5 ${
+                    i < withSystem.length - 1 ? "border-b border-line" : ""
+                  }`}
                 >
-                  <span className="mt-1 inline-flex shrink-0 w-4 h-4 rounded-full bg-gradient-to-br from-[#14B875] to-[#087A5A] items-center justify-center">
-                    <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-cta text-cta-on">
+                    <Check className="h-3 w-3" strokeWidth={3} />
                   </span>
-                  <span className="font-inter text-[#F8FBFA] text-sm leading-relaxed">
-                    {item}
-                  </span>
+                  <span className="text-[14px] leading-relaxed text-ink-2">{item}</span>
                 </motion.li>
               ))}
             </ul>

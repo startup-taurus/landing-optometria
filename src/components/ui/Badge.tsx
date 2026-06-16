@@ -3,20 +3,23 @@ import { cn } from "@/lib/utils";
 interface BadgeProps {
   children: React.ReactNode;
   className?: string;
-  tone?: "dark" | "light";
+  dot?: boolean;
 }
 
-export default function Badge({ children, className, tone = "dark" }: BadgeProps) {
+export default function Badge({ children, className, dot = true }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium font-inter",
-        tone === "dark"
-          ? "bg-[#14B875]/10 text-[#14B875] border border-[#14B875]/30"
-          : "bg-[#14B875]/8 text-[#087A5A] border border-[#14B875]/25",
+        "inline-flex items-center gap-2 rounded-pill border border-line bg-surface px-3.5 py-1.5 text-[13px] font-medium text-ink-2 shadow-soft",
         className
       )}
     >
+      {dot && (
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-brand opacity-60 motion-safe:animate-ping" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
+        </span>
+      )}
       {children}
     </span>
   );

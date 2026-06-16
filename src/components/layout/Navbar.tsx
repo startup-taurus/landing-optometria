@@ -1,16 +1,16 @@
 'use client';
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
-import MagneticButton from "@/components/ui/MagneticButton";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { useActiveSection } from "@/hooks/useActiveSection";
 
 const NAV_LINKS = [
-  { label: "Características", href: "#caracteristicas" },
+  { label: "Producto", href: "#producto" },
   { label: "Cómo funciona", href: "#como-funciona" },
   { label: "Planes", href: "#planes" },
   { label: "FAQ", href: "#faq" },
@@ -19,40 +19,16 @@ const NAV_LINKS = [
 
 const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1));
 
-const SCROLL_RANGE: [number, number] = [0, 80];
-
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
   const activeSection = useActiveSection(SECTION_IDS);
 
-  const navTop = useTransform(scrollY, SCROLL_RANGE, [0, 14]);
-  const navMaxWidth = useTransform(scrollY, SCROLL_RANGE, ["100%", "960px"]);
-  const navRadius = useTransform(scrollY, SCROLL_RANGE, [0, 9999]);
-  const navBg = useTransform(scrollY, SCROLL_RANGE, [
-    "rgba(7,26,31,0)",
-    "rgba(13,37,44,0.78)",
-  ]);
-  const navBorder = useTransform(scrollY, SCROLL_RANGE, [
-    "rgba(29,70,80,0)",
-    "rgba(29,70,80,0.65)",
-  ]);
-  const navShadow = useTransform(scrollY, SCROLL_RANGE, [
-    "0 0 0 rgba(0,0,0,0)",
-    "0 12px 40px -10px rgba(0,0,0,0.55)",
-  ]);
-  const navBackdrop = useTransform(scrollY, SCROLL_RANGE, [
-    "blur(0px) saturate(100%)",
-    "blur(18px) saturate(160%)",
-  ]);
-  const navMarginX = useTransform(scrollY, SCROLL_RANGE, ["0px", "12px"]);
+  useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 24));
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -60,27 +36,18 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <motion.nav
-          style={{
-            top: navTop,
-            maxWidth: navMaxWidth,
-            marginLeft: navMarginX,
-            marginRight: navMarginX,
-            borderRadius: navRadius,
-            backgroundColor: navBg,
-            borderColor: navBorder,
-            boxShadow: navShadow,
-            backdropFilter: navBackdrop,
-            WebkitBackdropFilter: navBackdrop,
-          }}
-          className="pointer-events-auto relative mx-auto border border-transparent transition-[max-width,margin] duration-300 ease-out"
+      <div className="fixed inset-x-0 top-0 z-50 pointer-events-none">
+        <div
+          className={`pointer-events-auto mx-auto transition-[max-width,margin,background-color,border-color,box-shadow,backdrop-filter] duration-500 ease-out-expo border ${
+            scrolled
+              ? "mt-3 mx-3 sm:mx-auto max-w-[980px] rounded-pill border-line bg-surface/80 shadow-soft backdrop-blur-xl supports-[backdrop-filter]:bg-surface/70"
+              : "mt-0 max-w-7xl rounded-none border-transparent bg-transparent"
+          }`}
         >
           <div className="px-4 sm:px-5 h-16 flex items-center justify-between gap-4">
-            <motion.a
+            <a
               href="#"
-              className="flex items-center gap-2.5 group shrink-0"
-              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-2.5 shrink-0 group"
               aria-label="Dioptrika — inicio"
             >
               <Image
@@ -89,60 +56,55 @@ export default function Navbar() {
                 width={40}
                 height={40}
                 priority
-                className="h-9 w-9 sm:h-10 sm:w-10 select-none object-contain"
+                className="h-8 w-8 sm:h-9 sm:w-9 select-none object-contain transition-transform duration-300 group-hover:scale-105"
                 draggable={false}
               />
-              <span className="font-sora font-bold text-white text-xl leading-none tracking-tight select-none">
+              <span className="font-display font-bold text-ink text-xl leading-none tracking-tight select-none">
                 Dioptrika
               </span>
-            </motion.a>
+            </a>
 
-            <nav className="hidden md:flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-7">
               {NAV_LINKS.map((link) => {
                 const isActive = activeSection === link.href.slice(1);
                 return (
-                  <motion.a
+                  <a
                     key={link.href}
                     href={link.href}
-                    initial="idle"
-                    animate={isActive ? "active" : "idle"}
-                    whileHover="hovered"
-                    className={`relative font-inter text-sm font-medium transition-colors ${
-                      isActive ? "text-[#14B875]" : "text-[#B7D1D2] hover:text-white"
+                    className={`relative font-body text-sm font-medium transition-colors duration-200 ${
+                      isActive ? "text-brand-ink" : "text-muted hover:text-ink"
                     }`}
                   >
                     {link.label}
-                    <motion.span
+                    <span
                       aria-hidden
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#14B875] to-[#087A5A] origin-left rounded-full"
-                      variants={{
-                        idle: { scaleX: 0 },
-                        active: { scaleX: 1 },
-                        hovered: { scaleX: 1 },
-                      }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className={`absolute -bottom-1.5 left-0 h-px bg-brand transition-all duration-300 ease-out-expo ${
+                        isActive ? "w-full opacity-100" : "w-0 opacity-0"
+                      }`}
                     />
-                  </motion.a>
+                  </a>
                 );
               })}
             </nav>
 
-            <div className="hidden md:block">
-              <MagneticButton href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <Button size="sm">Solicitar demo</Button>
-              </MagneticButton>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <div className="hidden md:block">
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+                  <Button size="sm">Solicitar demo</Button>
+                </a>
+              </div>
+              <button
+                onClick={() => setOpen((v) => !v)}
+                className="md:hidden w-9 h-9 inline-flex items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand/55"
+                aria-label={open ? "Cerrar menú" : "Abrir menú"}
+                aria-expanded={open}
+              >
+                {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
-
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="md:hidden w-10 h-10 inline-flex items-center justify-center rounded-full text-white hover:bg-white/10 transition-colors"
-              aria-label={open ? "Cerrar menú" : "Abrir menú"}
-              aria-expanded={open}
-            >
-              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
           </div>
-        </motion.nav>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -154,54 +116,54 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className="md:hidden fixed inset-0 z-40 bg-[#071A1F]/70 backdrop-blur-sm"
+              className="md:hidden fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
             />
             <motion.div
               key="drawer"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 240, damping: 30 }}
-              className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[82%] max-w-sm bg-[#0D252C] shadow-[0_-20px_60px_rgba(0,0,0,0.5)] flex flex-col border-l border-[#1D4650]"
+              transition={{ type: "spring", stiffness: 260, damping: 30 }}
+              className="md:hidden fixed top-0 right-0 bottom-0 z-50 w-[84%] max-w-sm bg-surface flex flex-col border-l border-line shadow-float"
             >
-              <div className="h-16 flex items-center justify-between px-5 border-b border-[#1D4650]">
+              <div className="h-16 flex items-center justify-between px-5 border-b border-line">
                 <div className="flex items-center gap-2.5">
                   <Image
                     src="/brand/isologo.png"
                     alt=""
-                    width={40}
-                    height={40}
-                    className="h-9 w-9 select-none object-contain"
+                    width={36}
+                    height={36}
+                    className="h-8 w-8 select-none object-contain"
                     draggable={false}
                   />
-                  <span className="font-sora font-bold text-white text-xl leading-none tracking-tight select-none">
+                  <span className="font-display font-bold text-ink text-lg tracking-tight">
                     Dioptrika
                   </span>
                 </div>
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-10 h-10 inline-flex items-center justify-center rounded-lg text-white hover:bg-white/10"
+                  className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-line text-ink"
                   aria-label="Cerrar menú"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <nav className="flex-1 px-6 py-8 flex flex-col gap-1">
+              <nav className="flex-1 px-5 py-6 flex flex-col gap-1">
                 {NAV_LINKS.map((link, i) => (
                   <motion.a
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 18 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 + i * 0.07 }}
-                    className="px-4 py-3 rounded-btn font-sora font-semibold text-white text-lg hover:bg-white/5 hover:text-[#14B875] transition-colors"
+                    transition={{ delay: 0.04 + i * 0.06 }}
+                    className="px-4 py-3 rounded-btn font-display font-semibold text-ink text-lg hover:bg-brand/[0.07] hover:text-brand-ink transition-colors"
                   >
                     {link.label}
                   </motion.a>
                 ))}
               </nav>
-              <div className="px-6 pb-8">
+              <div className="px-5 pb-7">
                 <a
                   href={WHATSAPP_URL}
                   target="_blank"

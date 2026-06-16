@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: "class",
+  darkMode: ["class", '[data-theme="dark"]'],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,108 +10,85 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Dioptrika brand tokens (semantic names preserved to minimize churn)
-        navy: {
-          DEFAULT: "#123A43", // petroleum
-          deep: "#071A1F",    // dark background
-          light: "#1D4650",   // dark border
+        // ── Tokens semánticos (cambian con [data-theme]) ──
+        // Guardados como canales RGB → soportan modificadores de opacidad.
+        canvas: "rgb(var(--canvas) / <alpha-value>)",
+        surface: {
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          2: "rgb(var(--surface-2) / <alpha-value>)",
         },
-        sky: {
-          DEFAULT: "#14B875", // dioptrika green
-          soft: "#5FD4A0",
-          deep: "#01AF76",    // green master (logo sample)
+        ink: {
+          DEFAULT: "rgb(var(--ink) / <alpha-value>)",
+          2: "rgb(var(--ink-2) / <alpha-value>)",
         },
-        teal: {
-          DEFAULT: "#087A5A", // green deep
-          soft: "#7AD9B5",
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        line: {
+          DEFAULT: "rgb(var(--line) / <alpha-value>)",
+          strong: "rgb(var(--line-strong) / <alpha-value>)",
         },
-        text: {
-          DEFAULT: "#F8FBFA", // white optical
-          muted: "#B7D1D2",   // muted dark
+        brand: {
+          DEFAULT: "rgb(var(--brand) / <alpha-value>)",
+          deep: "rgb(var(--brand-deep) / <alpha-value>)",
+          ink: "rgb(var(--brand-ink) / <alpha-value>)",
         },
-        border: "#1D4650",
-        bg: {
-          DEFAULT: "#071A1F", // dark
-          soft: "#0D252C",    // dark surface
-          slate: "#0D252C",
-          blue: "#123A43",    // petroleum accent
+        cta: {
+          DEFAULT: "rgb(var(--cta) / <alpha-value>)",
+          on: "rgb(var(--on-cta) / <alpha-value>)",
         },
-        light: {
-          bg: "#F8FBFA",
-          surface: "#FFFFFF",
-          text: "#1F2B36",
-          muted: "#6B7280",
-          border: "#DCEBE7",
-        },
+        focus: "rgb(var(--focus) / <alpha-value>)",
+
+        // ── Brand raw (referencia / piezas con hex exacto, p.ej. Payphone) ──
         dioptrika: {
           green: "#14B875",
           "green-master": "#01AF76",
           "green-deep": "#087A5A",
-          "green-soft": "#5FD4A0",
           petroleum: "#123A43",
           dark: "#071A1F",
           "dark-surface": "#0D252C",
-          "border-dark": "#1D4650",
           white: "#F8FBFA",
           graphite: "#1F2B36",
-          "muted-dark": "#B7D1D2",
-          "border-light": "#DCEBE7",
         },
       },
       fontFamily: {
-        // Tipografía de marca self-hosted (Fontshare). Las CSS vars las define
-        // next/font/local en layout.tsx. Se conservan los nombres de clase
-        // (font-sora / font-inter / font-jakarta) para no tocar cada componente:
-        //   display (titulares) -> Clash Display
-        //   body (cuerpo/UI)    -> Satoshi
-        display: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
-        body: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
-        sora: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
-        jakarta: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
-        inter: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
+        // Sistema tipográfico: Schibsted Grotesk (display + body, una familia
+        // con contraste de peso) + Geist Mono (datos ópticos / micro-labels).
+        display: ["var(--font-display)", "Schibsted Grotesk", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "Schibsted Grotesk", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        // Alias heredados (componentes aún usan font-sora / font-inter / font-jakarta)
+        sora: ["var(--font-display)", "Schibsted Grotesk", "system-ui", "sans-serif"],
+        jakarta: ["var(--font-display)", "Schibsted Grotesk", "system-ui", "sans-serif"],
+        inter: ["var(--font-body)", "Schibsted Grotesk", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        card: "20px",
+        card: "14px",
         btn: "10px",
+        pill: "999px",
       },
       boxShadow: {
-        card: "0 4px 24px rgba(0,0,0,0.22)",
-        "card-hover": "0 18px 48px rgba(0,0,0,0.35)",
-        "glow-sky": "0 18px 60px -10px rgba(20,184,117,0.45)",
-        "glow-teal": "0 18px 60px -10px rgba(8,122,90,0.45)",
-        "glow-navy": "0 24px 80px -20px rgba(18,58,67,0.65)",
+        float: "var(--shadow-float)",
+        soft: "var(--shadow-sm)",
       },
-      backgroundImage: {
-        "gradient-aurora":
-          "linear-gradient(120deg, #14B875 0%, #5FD4A0 35%, #087A5A 75%, #123A43 100%)",
-        "gradient-mesh":
-          "radial-gradient(at 20% 20%, rgba(20,184,117,0.16) 0%, transparent 50%), radial-gradient(at 80% 0%, rgba(8,122,90,0.14) 0%, transparent 50%), radial-gradient(at 50% 100%, rgba(1,175,118,0.10) 0%, transparent 55%)",
-        "gradient-text-aurora":
-          "linear-gradient(120deg, #14B875 0%, #5FD4A0 50%, #01AF76 100%)",
-        "gradient-card-border":
-          "linear-gradient(140deg, rgba(20,184,117,0.55), rgba(8,122,90,0.4) 50%, rgba(255,255,255,0))",
-        noise:
-          "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>\")",
+      maxWidth: {
+        measure: "68ch",
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "out-quint": "cubic-bezier(0.22, 1, 0.36, 1)",
       },
       keyframes: {
-        "blob-drift": {
-          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
-          "33%": { transform: "translate(30px, -20px) scale(1.06)" },
-          "66%": { transform: "translate(-20px, 30px) scale(0.96)" },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        "gradient-pan": {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
+        focus: {
+          "0%": { opacity: "0", filter: "blur(10px)", transform: "scale(0.985)" },
+          "100%": { opacity: "1", filter: "blur(0)", transform: "scale(1)" },
         },
       },
       animation: {
-        "blob-drift": "blob-drift 18s ease-in-out infinite",
-        shimmer: "shimmer 2.4s linear infinite",
-        "gradient-pan": "gradient-pan 8s ease infinite",
+        "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
+        focus: "focus 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },

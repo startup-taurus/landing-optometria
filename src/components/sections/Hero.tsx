@@ -1,111 +1,134 @@
 'use client';
 
 import { useRef } from "react";
-import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { Eye, TrendingUp, Glasses, ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, Eye, FlaskConical, ChevronDown } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import MagneticButton from "@/components/ui/MagneticButton";
-import AnimatedGradientBackground from "@/components/ui/AnimatedGradientBackground";
-import Reticle from "@/components/ui/Reticle";
 import { WHATSAPP_URL } from "@/lib/contact";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// Revelado por máscara estilo Sira: cada "línea" del titular vive dentro de un
-// contenedor con overflow-hidden y entra deslizándose desde abajo (yPercent).
+// Revelado por máscara: cada línea del titular entra desde abajo dentro de un
+// contenedor overflow-hidden (motivo "enfoque" — de difuso a nítido).
 function Line({ children }: { children: React.ReactNode }) {
   return (
-    <span className="block overflow-hidden pb-[0.16em]">
+    <span className="block overflow-hidden pb-[0.12em]">
       <span className="hero-line block">{children}</span>
     </span>
   );
 }
 
-function BrowserMockup() {
+/* Retícula óptica fina (lente / mira) — reemplaza blobs y ruido. */
+function LensReticle({ className = "" }: { className?: string }) {
   return (
-    <div className="relative w-full max-w-xl mx-auto">
-      <div className="relative rounded-2xl border border-[#1D4650]/80 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.75),0_0_0_1px_rgba(20,184,117,0.06)] overflow-hidden bg-[#071A1F]">
-        <div className="bg-[#0D252C] border-b border-[#1D4650] px-4 py-2.5 flex items-center gap-3">
-          <div className="flex gap-1.5 shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
-          </div>
-          <div className="flex-1 bg-[#071A1F] rounded-md px-3 py-1 text-xs text-[#B7D1D2]/45 font-inter border border-[#1D4650] truncate">
-            app.dioptrika.com
-          </div>
+    <svg
+      aria-hidden
+      viewBox="0 0 400 400"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="200" cy="200" r="60" strokeWidth="1" />
+      <circle cx="200" cy="200" r="120" strokeWidth="1" opacity="0.7" />
+      <circle cx="200" cy="200" r="185" strokeWidth="1" opacity="0.45" />
+      <path d="M200 8 V392 M8 200 H392" strokeWidth="1" opacity="0.5" />
+      <path d="M200 120 v-14 M200 280 v14 M120 200 h-14 M280 200 h14" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/* Consola clínica: la firma óptica del producto (refracción OD/OI en mono). */
+function ClinicalConsole() {
+  return (
+    <div className="hero-visual relative w-full max-w-xl">
+      <div className="relative overflow-hidden rounded-card border border-line bg-surface shadow-float">
+        {/* barra superior del módulo */}
+        <div className="flex items-center gap-3 border-b border-line bg-surface-2 px-4 py-2.5">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand/12 text-brand-ink">
+            <Eye className="h-3.5 w-3.5" strokeWidth={2} />
+          </span>
+          <span className="data flex-1 truncate text-[12px] text-muted">app.dioptrika.com</span>
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-brand-ink">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand motion-safe:animate-pulse" />
+            En línea
+          </span>
         </div>
 
-        <div className="flex h-[268px]">
-          <div className="w-12 bg-[#071A1F] flex flex-col items-center py-4 gap-3 border-r border-[#1D4650]">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center shadow-[0_4px_12px_rgba(20,184,117,0.5)]">
-              <Eye className="w-3.5 h-3.5 text-white" />
-            </div>
-            {[...Array(4)].map((_, i) => (
-              <div
+        <div className="grid grid-cols-[44px_1fr]">
+          {/* riel lateral */}
+          <div className="flex flex-col items-center gap-3 border-r border-line bg-surface-2/60 py-4">
+            <span className="h-7 w-7 rounded-lg bg-cta" />
+            {[0, 1, 2, 3].map((i) => (
+              <span
                 key={i}
-                className={`w-6 h-6 rounded-lg ${
-                  i === 0
-                    ? "bg-[#14B875]/20 border border-[#14B875]/35"
-                    : "bg-[#1D4650]/50"
-                }`}
+                className={`h-6 w-6 rounded-lg ${i === 0 ? "bg-brand/20 ring-1 ring-brand/40" : "bg-line"}`}
               />
             ))}
           </div>
 
-          <div className="flex-1 bg-[#0D252C] p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="h-2.5 w-20 bg-[#F8FBFA]/65 rounded-full mb-1.5" />
-                <div className="h-2 w-14 bg-[#B7D1D2]/22 rounded-full" />
+          {/* contenido */}
+          <div className="p-4 sm:p-5">
+            {/* cabecera paciente */}
+            <div className="mb-4 flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-brand/15 font-display text-sm font-bold text-brand-ink">
+                MP
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-sm font-semibold text-ink">María Pérez</p>
+                <p className="text-[12px] text-muted">Refracción · hoy 09:30</p>
               </div>
-              <div className="h-6 w-16 bg-gradient-to-br from-[#14B875] to-[#087A5A] rounded-lg shadow-[0_4px_12px_rgba(20,184,117,0.45)]" />
+              <span className="rounded-pill border border-brand/30 bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-ink">
+                En curso
+              </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            {/* tabla de refracción — la firma óptica */}
+            <div className="overflow-hidden rounded-xl border border-line">
+              <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2 border-b border-line bg-surface-2 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-muted">
+                <span>Refracción</span>
+                <span className="w-14 text-right">OD</span>
+                <span className="w-14 text-right">OI</span>
+              </div>
               {[
-                { label: "Pacientes", value: "1,284", color: "text-[#14B875]" },
-                { label: "Citas hoy", value: "38", color: "text-[#5FD4A0]" },
-                { label: "Pedidos", value: "12", color: "text-[#7AD9B5]" },
-              ].map((m, i) => (
-                <motion.div
-                  key={m.label}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1 + i * 0.1, duration: 0.5 }}
-                  className="bg-[#123A43] rounded-xl p-2.5 border border-[#1D4650]"
+                { k: "Esfera", od: "-1.25", oi: "-1.50" },
+                { k: "Cilindro", od: "-0.75", oi: "-0.50" },
+                { k: "Eje", od: "180°", oi: "175°" },
+              ].map((r, i) => (
+                <div
+                  key={r.k}
+                  className={`hero-rxrow grid grid-cols-[1fr_auto_auto] items-center gap-2 px-3 py-2 ${
+                    i < 2 ? "border-b border-line" : ""
+                  }`}
                 >
-                  <p className={`text-sm font-sora font-bold ${m.color}`}>{m.value}</p>
-                  <p className="text-[10px] text-[#B7D1D2]/55 font-inter">{m.label}</p>
-                </motion.div>
+                  <span className="text-[13px] text-ink-2">{r.k}</span>
+                  <span className="data w-14 text-right text-[13px] font-medium text-ink">{r.od}</span>
+                  <span className="data w-14 text-right text-[13px] text-muted">{r.oi}</span>
+                </div>
               ))}
             </div>
 
-            <div className="bg-[#123A43] rounded-xl border border-[#1D4650] p-3 h-[88px] flex items-end gap-[3px]">
-              {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 68].map((h, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${h}%` }}
-                  transition={{ delay: 1.4 + i * 0.04, duration: 0.6, ease: "easeOut" }}
-                  className="flex-1 rounded-t-sm"
-                  style={{
-                    background:
-                      i === 10
-                        ? "linear-gradient(180deg, #14B875 0%, #087A5A 100%)"
-                        : i % 2 === 0
-                        ? `rgba(20,184,117,${0.16 + i * 0.024})`
-                        : `rgba(8,122,90,${0.14 + i * 0.024})`,
-                  }}
-                />
-              ))}
+            {/* pedido a laboratorio */}
+            <div className="mt-3 flex items-center gap-3 rounded-xl border border-line bg-surface-2/50 px-3 py-2.5">
+              <FlaskConical className="h-4 w-4 shrink-0 text-brand-ink" strokeWidth={1.8} />
+              <span className="flex-1 text-[12px] text-ink-2">
+                Pedido <span className="data text-ink">LB-1042</span> enviado a laboratorio
+              </span>
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
             </div>
           </div>
         </div>
+      </div>
+
+      {/* anotación flotante: dato óptico, no métrica de vanidad */}
+      <div className="hero-readout absolute -bottom-5 -left-4 hidden rounded-xl border border-line bg-surface px-3.5 py-2.5 shadow-float sm:block">
+        <p className="text-[10px] uppercase tracking-wide text-muted">Agudeza visual</p>
+        <p className="data mt-0.5 text-lg font-semibold text-ink">
+          20<span className="text-muted">/</span>20
+        </p>
       </div>
     </div>
   );
@@ -120,49 +143,47 @@ export default function Hero() {
       const reduce =
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return; // estado natural, sin animación
+      if (reduce) return;
 
-      // --- Estados iniciales (se fijan antes del paint → sin parpadeo) ---
-      gsap.set(".hero-line", { yPercent: 118, opacity: 0 });
-      gsap.set(
-        [".hero-badge", ".hero-sub", ".hero-cta", ".hero-bullets", ".hero-tagline"],
-        { y: 26, opacity: 0 }
-      );
-      gsap.set(".hero-visual", { y: 48, opacity: 0, scale: 0.96 });
-      gsap.set(".hero-infocard", { x: 44, y: -8, opacity: 0 });
-      gsap.set(".hero-floatstat", { x: -32, opacity: 0 });
+      gsap.set(".hero-line", { yPercent: 118 });
+      gsap.set([".hero-badge", ".hero-sub", ".hero-cta", ".hero-bullets", ".hero-foot"], {
+        y: 22,
+        opacity: 0,
+      });
+      gsap.set(".hero-visual", { opacity: 0, filter: "blur(12px)", scale: 0.97, y: 24 });
+      gsap.set(".hero-readout", { opacity: 0, x: -18 });
+      gsap.set(".hero-rxrow", { opacity: 0, x: 10 });
 
-      // --- Timeline de entrada (estilo Sira: revelado suave y escalonado) ---
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
       tl.to(".hero-badge", { y: 0, opacity: 1, duration: 0.7 }, 0.1)
-        .to(".hero-line", { yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.12 }, 0.18)
-        .to(".hero-sub", { y: 0, opacity: 1, duration: 0.85 }, "-=0.6")
-        .to(".hero-cta", { y: 0, opacity: 1, duration: 0.85 }, "-=0.65")
-        .to(".hero-bullets", { y: 0, opacity: 1, duration: 0.8 }, "-=0.7")
-        .to(".hero-visual", { y: 0, opacity: 1, scale: 1, duration: 1.15 }, 0.42)
-        .to(".hero-infocard", { x: 0, y: 0, opacity: 1, duration: 0.95 }, "-=0.75")
-        .to(".hero-floatstat", { x: 0, opacity: 1, duration: 0.85 }, "-=0.75")
-        .to(".hero-tagline", { y: 0, opacity: 1, duration: 0.7 }, "-=0.45");
+        .to(".hero-line", { yPercent: 0, duration: 1.0, stagger: 0.1 }, 0.16)
+        .to(".hero-sub", { y: 0, opacity: 1, duration: 0.8 }, "-=0.6")
+        .to(".hero-cta", { y: 0, opacity: 1, duration: 0.8 }, "-=0.64")
+        .to(".hero-bullets", { y: 0, opacity: 1, duration: 0.75 }, "-=0.66")
+        .to(
+          ".hero-visual",
+          { opacity: 1, filter: "blur(0px)", scale: 1, y: 0, duration: 1.1 },
+          0.4
+        )
+        .to(".hero-rxrow", { opacity: 1, x: 0, duration: 0.5, stagger: 0.08 }, "-=0.7")
+        .to(".hero-readout", { opacity: 1, x: 0, duration: 0.7 }, "-=0.5")
+        .to(".hero-foot", { y: 0, opacity: 1, duration: 0.6 }, "-=0.4");
 
-      // --- Parallax al hacer scroll (Lenis ya alimenta a ScrollTrigger) ---
+      // Parallax sutil al hacer scroll.
       const st = { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true };
-      gsap.to(".hero-visual", { yPercent: -26, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-infocard", { yPercent: -48, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-floatstat", { yPercent: 36, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-reticle", { yPercent: 34, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-copy", { yPercent: -12, opacity: 0.5, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-visual", { yPercent: -14, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-reticle", { yPercent: 22, rotate: 18, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-copy", { yPercent: -6, opacity: 0.6, ease: "none", scrollTrigger: st });
 
-      // --- Parallax sutil con el cursor sobre el visual (tilt 3D) ---
+      // Tilt 3D muy leve con el cursor.
       const visual = visualRef.current;
       if (visual && window.matchMedia("(pointer: fine)").matches) {
         const rotX = gsap.quickTo(visual, "rotationX", { duration: 0.6, ease: "power3.out" });
         const rotY = gsap.quickTo(visual, "rotationY", { duration: 0.6, ease: "power3.out" });
         const onMove = (e: PointerEvent) => {
           const r = visual.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width - 0.5;
-          const py = (e.clientY - r.top) / r.height - 0.5;
-          rotY(px * 12);
-          rotX(-py * 10);
+          rotY((((e.clientX - r.left) / r.width) - 0.5) * 7);
+          rotX(-(((e.clientY - r.top) / r.height) - 0.5) * 6);
         };
         const onLeave = () => {
           rotX(0);
@@ -182,126 +203,73 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden bg-[#071A1F] noise-overlay"
+      className="relative flex min-h-screen items-center overflow-hidden bg-canvas"
     >
-      <AnimatedGradientBackground variant="hero" />
-      <Reticle className="hero-reticle pointer-events-none absolute -left-52 top-1/2 -translate-y-1/2 hidden lg:block h-[640px] w-[640px] text-[#14B875]/[0.06]" />
-      {/* Halo radial cinematográfico (mantiene la paleta teal) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(1100px 620px at 78% 18%, rgba(20,184,117,0.10), transparent 60%), radial-gradient(900px 600px at 0% 100%, rgba(8,122,90,0.10), transparent 55%)",
-        }}
-      />
+      {/* cuadrícula óptica sutil arriba */}
+      <div aria-hidden className="optical-grid pointer-events-none absolute inset-0 opacity-60" />
+      {/* retícula de lente (motivo de marca) */}
+      <LensReticle className="hero-reticle pointer-events-none absolute -right-40 top-24 hidden h-[560px] w-[560px] text-brand/15 lg:block" />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-32 pb-20 lg:pt-28 lg:pb-24 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-14 items-center">
-        {/* ---------- Copy (izquierda) ---------- */}
-        <div className="hero-copy flex flex-col gap-6 will-change-transform">
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-32 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-24 lg:pt-28">
+        {/* ---------- Copy ---------- */}
+        <div className="hero-copy flex flex-col gap-6">
           <div className="hero-badge">
             <Badge>Software clínico especializado para ópticas</Badge>
           </div>
 
           <h1
-            className="font-sora font-extrabold text-white leading-[0.98] tracking-tight"
-            style={{ fontSize: "clamp(40px, 6vw, 82px)" }}
+            className="font-display font-extrabold leading-[1.0] tracking-[-0.03em] text-ink"
+            style={{ fontSize: "clamp(2.6rem, 6vw, 5rem)" }}
           >
-            <Line>
-              <span className="text-aurora text-chromatic">Precisión clínica</span>
-            </Line>
+            <Line>Precisión clínica</Line>
             <Line>para gestionar ópticas</Line>
             <Line>
-              con <span className="text-aurora">claridad</span>.
+              con <span className="text-brand-ink">claridad</span>.
             </Line>
           </h1>
 
-          <p className="hero-sub font-inter text-[#B7D1D2] text-lg leading-relaxed max-w-xl">
-            Centraliza historias clínicas, órdenes de laboratorio, inventario y
-            facturación en un sistema especializado para ópticas. Multi-sucursal y
-            pensado para la realidad de Latinoamérica.
+          <p className="hero-sub measure text-[1.0625rem] leading-relaxed text-muted">
+            Centraliza historias clínicas, órdenes de laboratorio, inventario y facturación en
+            un sistema especializado para ópticas. Multi-sucursal y pensado para la realidad de
+            Latinoamérica.
           </p>
 
           <div className="hero-cta flex flex-wrap items-center gap-3 pt-1">
             <MagneticButton href="#planes">
               <Button size="lg">
                 Ver planes
-                <ArrowRight className="w-4 h-4" strokeWidth={2.2} />
+                <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
               </Button>
             </MagneticButton>
-            <MagneticButton href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="lg">
                 Solicitar demo
               </Button>
-            </MagneticButton>
+            </a>
           </div>
 
-          <div className="hero-bullets flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+          <div className="hero-bullets flex flex-wrap items-center gap-x-5 gap-y-2 pt-1">
             {["Implementación guiada", "Soporte en español", "Sin contratos"].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm font-inter text-[#B7D1D2]/80">
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#14B875] shrink-0" />
+              <div key={item} className="flex items-center gap-2 text-sm text-ink-2">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
                 {item}
               </div>
             ))}
           </div>
         </div>
 
-        {/* ---------- Visual (derecha) ---------- */}
-        <div className="relative mx-auto w-full max-w-xl [perspective:1200px]">
-          <div
-            ref={visualRef}
-            className="hero-visual relative will-change-transform [transform-style:preserve-3d]"
-          >
-            <BrowserMockup />
-
-            {/* Tarjeta de cristal flotante (posición estilo Sira: arriba-derecha) */}
-            <div className="hero-infocard absolute -right-5 -top-7 z-20 hidden sm:block w-[224px]">
-              <div className="glass-liquid card-sheen rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#14B875] shrink-0" />
-                  <span className="text-[11px] font-inter uppercase tracking-widest text-[#B7D1D2]/70">
-                    Hecho para ópticas
-                  </span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-0.5 w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center shadow-[0_6px_18px_rgba(20,184,117,0.45)]">
-                    <Glasses className="w-[18px] h-[18px] text-white" strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="font-sora font-semibold text-white text-sm leading-tight">
-                      Historia clínica + laboratorio
-                    </p>
-                    <p className="mt-1 text-[11px] font-inter text-[#B7D1D2]/65 leading-snug">
-                      Refracción, pedidos y facturación EC en un solo lugar.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tarjeta de estadística flotante (abajo-izquierda) */}
-            <div className="hero-floatstat absolute -left-6 bottom-10 z-20 hidden lg:block">
-              <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">
-                <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
-                  Pacientes activos
-                </p>
-                <p className="text-2xl font-sora font-bold text-[#14B875]">1,284</p>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <TrendingUp className="w-3 h-3 text-[#14B875] shrink-0" />
-                  <span className="text-xs font-inter text-[#14B875]">+12% este mes</span>
-                </div>
-              </div>
-            </div>
+        {/* ---------- Visual ---------- */}
+        <div className="relative mx-auto w-full max-w-xl [perspective:1300px]">
+          <div ref={visualRef} className="[transform-style:preserve-3d]">
+            <ClinicalConsole />
           </div>
         </div>
       </div>
 
-      {/* ---------- Tagline + cue de scroll (abajo, centrado) ---------- */}
-      <div className="hero-tagline absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-center px-6">
-        <p className="font-inter text-sm text-[#B7D1D2]/70">
-          Menos administración. Más tiempo para tus pacientes.
-        </p>
-        <ChevronDown className="w-5 h-5 text-[#14B875]/70 animate-bounce" />
+      {/* ---------- pie / cue de scroll ---------- */}
+      <div className="hero-foot absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 px-6 text-center sm:flex">
+        <p className="text-sm text-muted">Menos administración. Más tiempo para tus pacientes.</p>
+        <ChevronDown className="h-5 w-5 text-brand-ink/70 motion-safe:animate-bounce" />
       </div>
     </section>
   );

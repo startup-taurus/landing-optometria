@@ -20,32 +20,28 @@ function FAQItem({
 }) {
   return (
     <div
-      className={`rounded-card border bg-[#123A43] transition-colors ${
-        open
-          ? "border-[#14B875]/45 shadow-[0_0_40px_-15px_rgba(20,184,117,0.45)]"
-          : "border-[#1D4650]"
+      className={`rounded-card border bg-surface transition-colors ${
+        open ? "border-brand/40 shadow-soft" : "border-line"
       }`}
     >
       <button
         type="button"
         onClick={onClick}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-6 px-5 sm:px-7 py-5 text-left group"
+        className="group flex w-full items-center justify-between gap-6 px-5 py-5 text-left sm:px-6"
       >
-        <span className="font-sora font-semibold text-white text-base sm:text-lg">
-          {q}
-        </span>
+        <span className="font-display text-base font-semibold text-ink sm:text-[17px]">{q}</span>
         <motion.span
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
-            open
-              ? "bg-gradient-to-br from-[#14B875] to-[#087A5A] text-white"
-              : "bg-[#0D252C] text-[#B7D1D2] group-hover:bg-[#14B875]/15 group-hover:text-[#14B875]"
-          } transition-colors`}
           aria-hidden
+          className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors ${
+            open
+              ? "bg-cta text-cta-on"
+              : "bg-surface-2 text-muted group-hover:bg-brand/12 group-hover:text-brand-ink"
+          }`}
         >
-          <Plus className="w-4 h-4" strokeWidth={2.4} />
+          <Plus className="h-4 w-4" strokeWidth={2.4} />
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
@@ -56,16 +52,12 @@ function FAQItem({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{
-              height: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-              opacity: { duration: 0.25, delay: 0.05 },
+              height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
+              opacity: { duration: 0.22, delay: 0.04 },
             }}
             className="overflow-hidden"
           >
-            <div className="px-5 sm:px-7 pb-6 -mt-1">
-              <p className="font-inter text-[#B7D1D2] leading-relaxed text-sm sm:text-base">
-                {a}
-              </p>
-            </div>
+            <p className="px-5 pb-6 text-[14.5px] leading-relaxed text-muted sm:px-6">{a}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -77,37 +69,27 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="relative py-24 sm:py-28 overflow-hidden bg-[#0D252C]">
-      <div
-        aria-hidden
-        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[640px] h-[640px] rounded-full bg-[#14B875]/6 blur-3xl pointer-events-none"
-      />
-
-      <div className="relative max-w-4xl mx-auto px-6">
-        <div className="text-center mb-12 sm:mb-14">
+    <section id="faq" className="relative overflow-hidden bg-surface-2 py-24 sm:py-28">
+      <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
+      <div className="relative mx-auto max-w-3xl px-6">
+        <div className="mb-12 text-center sm:mb-14">
           <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
-              Preguntas frecuentes
-            </span>
-          </Reveal>
-          <Reveal variant="up" delay={0.05}>
             <h2
-              className="font-sora font-bold text-white mb-4"
-              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+              className="font-display font-bold text-ink"
+              style={{ fontSize: "clamp(1.9rem, 3.6vw, 2.75rem)" }}
             >
-              Lo que las ópticas{" "}
-              <span className="text-aurora">nos preguntan</span>
+              Lo que las ópticas <span className="text-brand-ink">nos preguntan</span>
             </h2>
           </Reveal>
-          <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-[#B7D1D2] text-lg">
+          <Reveal variant="up" delay={0.05}>
+            <p className="mx-auto mt-4 max-w-md text-[1.0625rem] leading-relaxed text-muted">
               Si la tuya no está, escríbenos por WhatsApp y te respondemos directo.
             </p>
           </Reveal>
         </div>
 
-        <Reveal variant="up" delay={0.1}>
-          <div className="space-y-3 sm:space-y-4">
+        <Reveal variant="up" delay={0.08}>
+          <div className="space-y-3">
             {faqs.map((f, i) => (
               <FAQItem
                 key={f.q}
@@ -121,14 +103,14 @@ export default function FAQ() {
         </Reveal>
 
         <Reveal variant="up" delay={0.1}>
-          <div className="mt-12 text-center">
+          <div className="mt-10 text-center">
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-btn bg-[#123A43] border border-[#1D4650] font-inter text-sm font-medium text-white hover:bg-[#14B875]/10 hover:border-[#14B875]/40 transition-all"
+              className="inline-flex items-center gap-2 rounded-btn border border-line bg-surface px-5 py-3 text-sm font-medium text-ink transition-colors hover:border-brand/45 hover:text-brand-ink"
             >
-              <MessageCircle className="w-4 h-4 text-[#14B875]" />
+              <MessageCircle className="h-4 w-4 text-brand-ink" />
               ¿Tu pregunta no está? Escríbenos por WhatsApp
             </a>
           </div>

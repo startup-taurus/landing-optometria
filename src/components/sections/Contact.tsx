@@ -22,13 +22,7 @@ interface FormState {
   message: string;
 }
 
-const INITIAL: FormState = {
-  name: "",
-  clinic: "",
-  email: "",
-  phone: "",
-  message: "",
-};
+const INITIAL: FormState = { name: "", clinic: "", email: "", phone: "", message: "" };
 
 export default function Contact() {
   const [form, setForm] = useState<FormState>(INITIAL);
@@ -58,54 +52,36 @@ export default function Contact() {
   }
 
   return (
-    <section
-      id="contacto"
-      className="relative py-24 sm:py-28 overflow-hidden bg-[#0D252C]"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#14B875]/35 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute -top-40 -right-40 w-[480px] h-[480px] rounded-full bg-[#14B875]/8 blur-3xl pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute -bottom-40 -left-40 w-[420px] h-[420px] rounded-full bg-[#087A5A]/8 blur-3xl pointer-events-none"
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+    <section id="contacto" className="relative overflow-hidden bg-canvas py-24 sm:py-28">
+      <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <motion.div
             variants={fadeInLeft}
             initial="hidden"
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
           >
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#14B875] mb-4">
-              Contacto
-            </span>
+            <span className="kicker">Contacto</span>
             <h2
-              className="font-sora font-bold text-white mb-5"
-              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+              className="mt-4 font-display font-bold text-ink"
+              style={{ fontSize: "clamp(1.9rem, 3.6vw, 2.75rem)" }}
             >
               ¿Listo para gestionar tu óptica con{" "}
-              <span className="text-aurora">claridad</span>?
+              <span className="text-brand-ink">claridad</span>?
             </h2>
-            <p className="font-inter text-[#B7D1D2] text-lg leading-relaxed mb-8">
-              Cuéntanos sobre tu óptica y te respondemos por WhatsApp con una
-              propuesta a tu medida. Sin compromisos, sin permanencias.
+            <p className="mt-5 max-w-md text-[1.0625rem] leading-relaxed text-muted">
+              Cuéntanos sobre tu óptica y te respondemos por WhatsApp con una propuesta a tu
+              medida. Sin compromisos, sin permanencias.
             </p>
 
-            <div className="relative">
+            <div className="mt-8">
               <ContactRow
                 icon={MessageCircle}
                 channel="WhatsApp"
                 value={WHATSAPP_DISPLAY}
                 supportText="Respuesta en menos de 24 horas"
                 href={WHATSAPP_URL}
-                accent="#25D366"
                 external
               />
               <ContactRow
@@ -114,14 +90,12 @@ export default function Contact() {
                 value={CONTACT_EMAIL}
                 supportText="Te respondemos en 1 día hábil"
                 href={CONTACT_EMAIL_HREF}
-                accent="#14B875"
               />
               <ContactRow
                 icon={MapPin}
                 channel="Ubicación"
                 value="Atendemos en toda Latinoamérica"
                 supportText="Cobertura remota desde Ecuador"
-                accent="#5FD4A0"
               />
             </div>
           </motion.div>
@@ -135,23 +109,15 @@ export default function Contact() {
           >
             <form
               onSubmit={handleSubmit}
-              className="relative rounded-card p-7 sm:p-8 border-aurora"
-              style={{
-                background: "rgba(7, 26, 31, 0.7)",
-                backdropFilter: "blur(24px) saturate(160%)",
-                WebkitBackdropFilter: "blur(24px) saturate(160%)",
-                boxShadow: "0 24px 80px -16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
-              }}
+              className="rounded-card border border-line bg-surface p-7 shadow-float sm:p-8"
             >
-              <h3 className="font-sora font-semibold text-white text-xl mb-1">
-                Solicitar información
-              </h3>
-              <p className="font-inter text-[#B7D1D2]/70 text-sm mb-6">
-                Te respondemos por WhatsApp en menos de 24h
+              <h3 className="font-display text-xl font-semibold text-ink">Solicitar información</h3>
+              <p className="mt-1 text-sm text-muted">
+                Te respondemos por WhatsApp en menos de 24 h.
               </p>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="mt-6 space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     label="Nombre"
                     type="text"
@@ -185,7 +151,7 @@ export default function Contact() {
                 />
                 <FieldArea
                   label="Mensaje"
-                  placeholder="Cuéntanos sobre tu óptica..."
+                  placeholder="Cuéntanos sobre tu óptica…"
                   value={form.message}
                   onChange={(v) => update("message", v)}
                 />
@@ -193,13 +159,13 @@ export default function Contact() {
                 <Button size="lg" className="w-full justify-center" disabled={sent}>
                   {sent ? (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Abriendo WhatsApp...
+                      <CheckCircle2 className="h-4 w-4" />
+                      Abriendo WhatsApp…
                     </>
                   ) : (
                     <>
                       Enviar por WhatsApp
-                      <Send className="w-4 h-4" />
+                      <Send className="h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -209,6 +175,75 @@ export default function Contact() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ContactRow({
+  icon: Icon,
+  channel,
+  value,
+  supportText,
+  href,
+  external,
+}: {
+  icon: typeof MessageCircle;
+  channel: string;
+  value: string;
+  supportText: string;
+  href?: string;
+  external?: boolean;
+}) {
+  const inner = (
+    <>
+      <Icon
+        className="h-4 w-4 shrink-0 text-muted transition-colors duration-300 group-hover:text-brand-ink"
+        strokeWidth={1.6}
+      />
+      <div className="flex min-w-0 flex-1 items-baseline gap-3">
+        <span className="data shrink-0 text-[11px] uppercase tracking-wide text-muted">
+          {channel}
+        </span>
+        <span
+          aria-hidden
+          className="hidden h-px flex-1 self-center bg-line transition-colors duration-300 group-hover:bg-brand/50 sm:block"
+        />
+        <span className="truncate font-display text-[15px] font-semibold text-ink sm:text-base">
+          {value}
+        </span>
+      </div>
+      {href && (
+        <ArrowUpRight
+          className="h-4 w-4 shrink-0 text-muted transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand-ink"
+          strokeWidth={1.6}
+        />
+      )}
+    </>
+  );
+
+  const rowClasses =
+    "group relative flex items-center gap-4 border-b border-line py-4 transition-colors last:border-b-0";
+
+  const supportNode = <p className="ml-7 mt-1 text-xs text-muted">{supportText}</p>;
+
+  if (href) {
+    return (
+      <div>
+        <a
+          href={href}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          className={rowClasses}
+        >
+          {inner}
+        </a>
+        {supportNode}
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className={rowClasses}>{inner}</div>
+      {supportNode}
+    </div>
   );
 }
 
@@ -229,8 +264,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block font-inter text-sm font-medium text-[#B7D1D2] mb-1.5">
-        {label}{required && <span className="text-[#14B875]"> *</span>}
+      <span className="mb-1.5 block text-sm font-medium text-ink-2">
+        {label}
+        {required && <span className="text-brand-ink"> *</span>}
       </span>
       <input
         type={type}
@@ -238,86 +274,9 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full px-4 py-3 rounded-btn border border-[#1D4650] bg-[#0D252C]/80 font-inter text-sm text-[#F8FBFA] placeholder:text-[#B7D1D2]/35 focus:outline-none focus:ring-2 focus:ring-[#14B875]/35 focus:border-[#14B875] transition-all"
+        className="w-full rounded-btn border border-line bg-surface-2/60 px-4 py-3 text-sm text-ink placeholder:text-muted/70 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-focus/35"
       />
     </label>
-  );
-}
-
-function ContactRow({
-  icon: Icon,
-  channel,
-  value,
-  supportText,
-  href,
-  accent,
-  external,
-}: {
-  icon: typeof MessageCircle;
-  channel: string;
-  value: string;
-  supportText: string;
-  href?: string;
-  accent: string;
-  external?: boolean;
-}) {
-  const inner = (
-    <>
-      <Icon
-        className="w-4 h-4 shrink-0 text-[#B7D1D2]/55 transition-colors duration-300 group-hover:[color:var(--accent)]"
-        strokeWidth={1.5}
-      />
-      <div className="flex-1 min-w-0 flex items-baseline gap-3">
-        <span className="font-inter text-[11px] uppercase tracking-[0.18em] text-[#B7D1D2]/50 shrink-0">
-          {channel}
-        </span>
-        <span
-          aria-hidden
-          className="hidden sm:block flex-1 h-px self-center bg-[length:6px_1px] bg-repeat-x bg-[linear-gradient(to_right,#1D4650_50%,transparent_50%)] transition-all duration-300 group-hover:bg-[linear-gradient(to_right,var(--accent),var(--accent))]"
-        />
-        <span className="font-sora font-semibold text-white text-[15px] sm:text-base truncate">
-          {value}
-        </span>
-      </div>
-      {href && (
-        <ArrowUpRight
-          className="w-4 h-4 shrink-0 text-[#B7D1D2]/40 transition-all duration-300 group-hover:[color:var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-          strokeWidth={1.5}
-        />
-      )}
-    </>
-  );
-
-  const rowClasses =
-    "group relative flex items-center gap-4 py-4 border-b border-[#1D4650] last:border-b-0 transition-colors";
-  const styleVar = { ["--accent" as string]: accent } as React.CSSProperties;
-
-  const supportNode = (
-    <p className="font-inter text-xs text-[#B7D1D2]/45 mt-1 ml-7">
-      {supportText}
-    </p>
-  );
-
-  if (href) {
-    return (
-      <div style={styleVar}>
-        <a
-          href={href}
-          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          className={rowClasses}
-        >
-          {inner}
-        </a>
-        {supportNode}
-      </div>
-    );
-  }
-
-  return (
-    <div style={styleVar}>
-      <div className={rowClasses}>{inner}</div>
-      {supportNode}
-    </div>
   );
 }
 
@@ -334,15 +293,13 @@ function FieldArea({
 }) {
   return (
     <label className="block">
-      <span className="block font-inter text-sm font-medium text-[#B7D1D2] mb-1.5">
-        {label}
-      </span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-2">{label}</span>
       <textarea
         rows={4}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-btn border border-[#1D4650] bg-[#0D252C]/80 font-inter text-sm text-[#F8FBFA] placeholder:text-[#B7D1D2]/35 focus:outline-none focus:ring-2 focus:ring-[#14B875]/35 focus:border-[#14B875] transition-all resize-none"
+        className="w-full resize-none rounded-btn border border-line bg-surface-2/60 px-4 py-3 text-sm text-ink placeholder:text-muted/70 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-focus/35"
       />
     </label>
   );
