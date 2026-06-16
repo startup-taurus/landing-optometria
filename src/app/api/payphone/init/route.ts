@@ -64,7 +64,13 @@ export async function POST(req: Request) {
       lead: { name, email, phone },
     });
   } catch (err) {
+    // NO continuar: si no se guardó la fila pendiente, un pago aprobado luego no
+    // tendría dónde reconciliarse. Mejor abortar el inicio que cobrar a ciegas.
     console.error("[payphone/init] error guardando lead:", (err as Error).message);
+    return NextResponse.json(
+      { error: "No pudimos iniciar el pago. Intenta de nuevo en unos segundos." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ clientTransactionId, phone, email });

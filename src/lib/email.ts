@@ -105,12 +105,16 @@ export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> 
   });
 }
 
-export async function sendInternalNotification(tx: StoredTransaction): Promise<void> {
-  // NOTIFY_EMAIL admite varios correos separados por coma (ej: "a@x.com,b@y.com").
-  const recipients = (process.env.NOTIFY_EMAIL || "")
+// NOTIFY_EMAIL admite varios correos separados por coma (ej: "a@x.com,b@y.com").
+function notifyRecipients(): string[] {
+  return (process.env.NOTIFY_EMAIL || "")
     .split(/[,;\s]+/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+export async function sendInternalNotification(tx: StoredTransaction): Promise<void> {
+  const recipients = notifyRecipients();
   if (recipients.length === 0) {
     console.log("[email] NOTIFY_EMAIL vacío, no se envía aviso interno");
     return;
@@ -132,5 +136,37 @@ export async function sendInternalNotification(tx: StoredTransaction): Promise<v
     to: recipients,
     subject: `Nueva venta Dioptrika $30 — ${tx.lead.name}`,
     html: shell("Nueva venta confirmada", body),
+  });
+}
+
+// Aviso cuando Payphone APRUEBA pero el monto cobrado != plan ($30). No hay
+// reconciliación automática, así que un humano debe revisar y reembolsar.
+export async function sendAmountMismatchAlert(
+  tx: StoredTransaction,
+  chargedCents?: number
+): Promise<void> {
+  const recipients = notifyRecipients();
+  if (recipients.length === 0) {
+    console.log("[email] NOTIFY_EMAIL vacío, no se envía alerta de monto");
+    return;
+  }
+  const body = `
+    <p style="color:#ffb4b4;font-weight:600">⚠️ Pago APROBADO por Payphone con un monto que NO coincide con el plan.</p>
+    <p>Revisar en el panel de Payphone y <strong>reembolsar manualmente</strong> si corresponde. NO se entregaron credenciales.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
+      ${row("Esperado", "$30.00")}
+      ${row("Cobrado", fmtAmountCents(chargedCents))}
+      ${row("Nombre", tx.lead.name)}
+      ${row("Email", tx.lead.email)}
+      ${row("Teléfono", tx.lead.phone)}
+      ${row("Referencia", tx.clientTransactionId)}
+      ${tx.payphoneTransactionId ? row("ID Payphone", String(tx.payphoneTransactionId)) : ""}
+      ${tx.authorizationCode ? row("Autorización", tx.authorizationCode) : ""}
+    </table>
+  `;
+  await sendViaResend({
+    to: recipients,
+    subject: `⚠️ Monto NO coincide — revisar/reembolsar — ${tx.lead.name}`,
+    html: shell("Monto de pago no coincide", body),
   });
 }

@@ -34,7 +34,9 @@ export interface LeadInput {
 
 export interface StoredTransaction {
   clientTransactionId: string;
-  status: "pending" | "approved" | "failed";
+  // "amount_mismatch": Payphone aprobó pero el monto cobrado != PLAN_AMOUNT_TOTAL.
+  // Se separa de "failed" para que un humano pueda reconciliar/reembolsar.
+  status: "pending" | "approved" | "failed" | "amount_mismatch";
   createdAt: string;
   confirmedAt?: string;
   lead: LeadInput;
@@ -42,6 +44,9 @@ export interface StoredTransaction {
   authorizationCode?: string;
   cardBrand?: string;
   lastDigits?: string;
+  // Sello de cuándo se enviaron los correos. Garantiza que el recibo/aviso se
+  // mande UNA sola vez aunque la confirmación se ejecute varias veces.
+  emailedAt?: string;
 }
 
 function getSecret(): string {
@@ -169,11 +174,25 @@ export async function confirmTransactionWithPayphone(input: {
     parsed = null;
   }
 
-  if ((status < 200 || status >= 300) && !parsed) {
-    throw new Error(`Payphone respondió ${status}`);
+  // Cualquier estado no-2xx (401/403/429/5xx, o un error con cuerpo JSON como el
+  // Error 23) es un fallo de transporte/servidor: lanzamos para que el llamador NO
+  // lo marque como `failed` definitivo y la transacción quede elegible para reintento
+  // dentro de la ventana de 5 min de Payphone. Antes se devolvía el cuerpo y se
+  // registraba `failed` por error.
+  if (status < 200 || status >= 300) {
+    const detail = parsed?.message
+      ? `: ${parsed.message}`
+      : body
+        ? `: ${body.slice(0, 200)}`
+        : "";
+    throw new Error(`Payphone respondió ${status}${detail}`);
+  }
+  // 2xx pero cuerpo no interpretable: tampoco podemos decidir el resultado → reintentable.
+  if (!parsed) {
+    throw new Error(`Payphone respondió ${status} con cuerpo no interpretable`);
   }
 
-  return parsed ?? {};
+  return parsed;
 }
 
 export function isApproved(r: PayphoneConfirmResponse): boolean {

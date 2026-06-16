@@ -1,129 +1,138 @@
-'use client';
-
-import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { CheckCircle2, XCircle, Loader2, ArrowLeft, MessageCircle } from "lucide-react";
+import { headers } from "next/headers";
+import { CheckCircle2, XCircle, ArrowLeft, MessageCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { confirmPayment, type ConfirmOutcome } from "@/lib/confirm-payment";
+import { rateLimit } from "@/lib/rate-limit";
 
-interface ConfirmResult {
-  success: boolean;
-  reference?: string;
-  payment?: {
-    transactionId?: number;
-    authorizationCode?: string;
-    cardBrand?: string;
-    lastDigits?: string;
-    amount?: number;
-  };
-  error?: string;
-  alreadyConfirmed?: boolean;
+// Confirmamos del lado servidor (usa el módulo `https` y el almacén en disco) y la
+// página depende de los query params del redirect → debe ser dinámica y en Node.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+function first(v: string | string[] | undefined): string {
+  return (Array.isArray(v) ? v[0] : v) ?? "";
 }
 
-type Status = "loading" | "approved" | "failed";
+function ipFromHeaders(): string {
+  const h = headers();
+  const xff = h.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim() || "unknown";
+  return h.get("x-real-ip")?.trim() || "unknown";
+}
 
-function PaymentResult() {
-  const params = useSearchParams();
-  const [status, setStatus] = useState<Status>("loading");
-  const [result, setResult] = useState<ConfirmResult | null>(null);
+// ---------------------------------------------------------------------------
+// IMPORTANTE: la confirmación ocurre AQUÍ, durante el render del lado servidor que
+// dispara el redirect de Payphone. A diferencia del flujo anterior (un fetch desde
+// el navegador en un useEffect), una vez que el request llega al servidor, Node
+// ejecuta confirmPayment hasta el final aunque el usuario cierre la pestaña. Eso
+// elimina la dependencia de que el navegador siga abierto y cierra la ventana de
+// reversión automática a los 5 min de Payphone.
+// ---------------------------------------------------------------------------
+export default async function PayphoneResponsePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const id = first(searchParams.id);
+  const clientTransactionId =
+    first(searchParams.clientTransactionId) || first(searchParams.clientTxId);
 
-  useEffect(() => {
-    const id = params.get("id");
-    const clientTransactionId =
-      params.get("clientTransactionId") || params.get("clientTxId");
+  let outcome: ConfirmOutcome;
 
-    if (!id || !clientTransactionId) {
-      setStatus("failed");
-      setResult({ success: false, error: "Parámetros incompletos en la respuesta de Payphone." });
-      return;
-    }
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/payphone/confirm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: Number(id), clientTransactionId }),
-        });
-        const data = (await res.json()) as ConfirmResult;
-        if (cancelled) return;
-        setResult(data);
-        setStatus(data.success ? "approved" : "failed");
-      } catch {
-        if (cancelled) return;
-        setStatus("failed");
-        setResult({ success: false, error: "No pudimos contactar el servidor de verificación." });
-      }
-    })();
-
-    return () => {
-      cancelled = true;
+  if (!id || !clientTransactionId) {
+    outcome = {
+      success: false,
+      error: "Parámetros incompletos en la respuesta de Payphone.",
+      httpStatus: 400,
     };
-  }, [params]);
-
-  if (status === "loading") {
-    return (
-      <Card>
-        <Loader2 className="w-12 h-12 text-[#14B875] animate-spin mx-auto mb-5" />
-        <h1 className="font-sora text-2xl font-bold text-white text-center mb-2">
-          Verificando tu pago…
-        </h1>
-        <p className="font-inter text-[#B7D1D2] text-sm text-center">
-          Estamos validando la transacción con Payphone. No cierres esta ventana.
-        </p>
-      </Card>
-    );
+  } else {
+    // Defensa en profundidad: límite generoso por IP (no afecta a un usuario real;
+    // el verdadero gate es el HMAC del clientTransactionId + la idempotencia).
+    const limit = rateLimit(`response:${ipFromHeaders()}`, {
+      capacity: 20,
+      refillPerSec: 1,
+    });
+    if (!limit.ok) {
+      outcome = {
+        success: false,
+        error: "Demasiados intentos. Espera un momento e intenta de nuevo.",
+        httpStatus: 429,
+      };
+    } else {
+      try {
+        outcome = await confirmPayment({ id, clientTransactionId });
+      } catch (err) {
+        console.error("[payphone/response] error confirmando:", (err as Error).message);
+        outcome = {
+          success: false,
+          error: "No pudimos verificar el pago. Si el cargo aparece, contáctanos.",
+          httpStatus: 500,
+        };
+      }
+    }
   }
 
-  if (status === "approved") {
-    const p = result?.payment;
-    return (
-      <Card>
-        <div className="mx-auto mb-5 w-16 h-16 rounded-full bg-[#14B875]/15 flex items-center justify-center">
-          <CheckCircle2 className="w-10 h-10 text-[#14B875]" />
-        </div>
-        <h1 className="font-sora text-2xl font-bold text-white text-center mb-2">
-          ¡Pago recibido!
-        </h1>
-        <p className="font-inter text-[#B7D1D2] text-center mb-6">
-          Gracias por confiar en Dioptrika. En las próximas 24 horas hábiles te
-          enviaremos tus credenciales y los pasos de acceso al correo registrado.
-        </p>
+  return (
+    <main
+      className="min-h-screen flex items-center justify-center px-5 py-16"
+      style={{ background: "linear-gradient(180deg, #071A1F 0%, #0D252C 100%)" }}
+    >
+      {outcome.success ? (
+        <ApprovedCard outcome={outcome} />
+      ) : (
+        <FailedCard message={outcome.error} />
+      )}
+    </main>
+  );
+}
 
-        <div className="rounded-card border border-[#1D4650] bg-[#0B1D22]/70 p-5 mb-6 space-y-2">
-          <Row label="Referencia" value={result?.reference || "—"} mono />
-          {p?.authorizationCode && <Row label="Autorización" value={p.authorizationCode} mono />}
-          {p?.cardBrand && p?.lastDigits && (
-            <Row label="Tarjeta" value={`${p.cardBrand} ···· ${p.lastDigits}`} />
-          )}
-          {typeof p?.amount === "number" && (
-            <Row label="Monto" value={`$${(p.amount / 100).toFixed(2)} USD`} />
-          )}
-        </div>
+function ApprovedCard({ outcome }: { outcome: ConfirmOutcome }) {
+  const p = outcome.payment;
+  return (
+    <Card>
+      <div className="mx-auto mb-5 w-16 h-16 rounded-full bg-[#14B875]/15 flex items-center justify-center">
+        <CheckCircle2 className="w-10 h-10 text-[#14B875]" />
+      </div>
+      <h1 className="font-sora text-2xl font-bold text-white text-center mb-2">
+        ¡Pago recibido!
+      </h1>
+      <p className="font-inter text-[#B7D1D2] text-center mb-6">
+        Gracias por confiar en Dioptrika. En las próximas 24 horas hábiles te
+        enviaremos tus credenciales y los pasos de acceso al correo registrado.
+      </p>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="/" className="flex-1">
-            <Button variant="outline" className="w-full justify-center">
-              <ArrowLeft className="w-4 h-4" /> Volver al inicio
-            </Button>
-          </Link>
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1"
-          >
-            <Button variant="whatsapp" className="w-full justify-center">
-              <MessageCircle className="w-4 h-4" /> Soporte
-            </Button>
-          </a>
-        </div>
-      </Card>
-    );
-  }
+      <div className="rounded-card border border-[#1D4650] bg-[#0B1D22]/70 p-5 mb-6 space-y-2">
+        <Row label="Referencia" value={outcome.reference || "—"} mono />
+        {p?.authorizationCode && <Row label="Autorización" value={p.authorizationCode} mono />}
+        {p?.cardBrand && p?.lastDigits && (
+          <Row label="Tarjeta" value={`${p.cardBrand} ···· ${p.lastDigits}`} />
+        )}
+        {typeof p?.amount === "number" && (
+          <Row label="Monto" value={`$${(p.amount / 100).toFixed(2)} USD`} />
+        )}
+      </div>
 
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Link href="/" className="flex-1">
+          <Button variant="outline" className="w-full justify-center">
+            <ArrowLeft className="w-4 h-4" /> Volver al inicio
+          </Button>
+        </Link>
+        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex-1">
+          <Button variant="whatsapp" className="w-full justify-center">
+            <MessageCircle className="w-4 h-4" /> Soporte
+          </Button>
+        </a>
+      </div>
+    </Card>
+  );
+}
+
+function FailedCard({ message }: { message?: string }) {
   return (
     <Card>
       <div className="mx-auto mb-5 w-16 h-16 rounded-full bg-red-500/15 flex items-center justify-center">
@@ -133,19 +142,14 @@ function PaymentResult() {
         No pudimos confirmar el pago
       </h1>
       <p className="font-inter text-[#B7D1D2] text-center mb-6">
-        {result?.error ||
+        {message ||
           "La transacción no fue aprobada o expiró. Si crees que es un error, contáctanos por WhatsApp."}
       </p>
       <div className="flex flex-col sm:flex-row gap-3">
         <Link href="/#planes" className="flex-1">
           <Button className="w-full justify-center">Reintentar pago</Button>
         </Link>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1"
-        >
+        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex-1">
           <Button variant="outline" className="w-full justify-center">
             <MessageCircle className="w-4 h-4" /> Contactar soporte
           </Button>
@@ -183,18 +187,5 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
         {value}
       </span>
     </div>
-  );
-}
-
-export default function PayphoneResponsePage() {
-  return (
-    <main
-      className="min-h-screen flex items-center justify-center px-5 py-16"
-      style={{ background: "linear-gradient(180deg, #071A1F 0%, #0D252C 100%)" }}
-    >
-      <Suspense fallback={null}>
-        <PaymentResult />
-      </Suspense>
-    </main>
   );
 }
