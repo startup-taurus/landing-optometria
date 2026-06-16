@@ -229,14 +229,23 @@ function OrderSummary() {
         </div>
       </div>
 
+      {/* Stagger SOLO de la lista (columna izquierda, transform/opacity, sin
+          reflow). No toca el iframe de pago de la columna derecha. */}
       <ul className="space-y-2.5 py-5">
-        {PLAN_FEATURES.map((f) => (
-          <li key={f} className="flex items-start gap-2.5">
+        {PLAN_FEATURES.map((f, i) => (
+          <motion.li
+            key={f}
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={VIEWPORT_DEFAULT}
+            transition={{ duration: 0.45, delay: 0.06 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-start gap-2.5"
+          >
             <span className="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-brand/15">
               <Check className="h-2.5 w-2.5 text-brand-ink" strokeWidth={3.5} />
             </span>
             <span className="text-[13px] leading-snug text-ink-2">{f}</span>
-          </li>
+          </motion.li>
         ))}
       </ul>
 
@@ -320,7 +329,7 @@ function FormStage({
         <Field
           label="Nombre completo"
           type="text"
-          placeholder="Jordan Moran"
+          placeholder="Jordan Reyes"
           value={form.name}
           onChange={(v) => update("name", v)}
           required

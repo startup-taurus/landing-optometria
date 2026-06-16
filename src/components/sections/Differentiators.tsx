@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
+import ScrollHighlight from "@/components/ui/ScrollHighlight";
 import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface Item {
@@ -52,25 +53,27 @@ export default function Differentiators() {
           <Reveal variant="up">
             <span className="kicker">Por qué Dioptrika</span>
           </Reveal>
-          <Reveal variant="up" delay={0.05}>
-            <h2
-              className="mt-4 font-display font-bold text-ink"
-              style={{ fontSize: "clamp(1.9rem, 3.8vw, 3rem)" }}
-            >
-              No es un sistema genérico.{" "}
-              <span className="text-brand-ink">Está hecho para ópticas.</span>
-            </h2>
-          </Reveal>
+          <ScrollHighlight
+            as="h2"
+            className="mt-4 font-display font-bold"
+            style={{ fontSize: "clamp(1.9rem, 3.8vw, 3rem)" }}
+            segments={[
+              { text: "No es un sistema genérico. " },
+              { text: "Está hecho para ópticas.", accent: true },
+            ]}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          {/* Diferenciador principal */}
+          {/* Diferenciador principal — entra amplio desde la izquierda y queda
+              fijo (sin deriva por scroll, coordinado con los satélites). */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -56 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={VIEWPORT_DEFAULT}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-3"
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 22 } }}
+            className="h-full lg:col-span-3"
           >
             <div className="flex h-full flex-col justify-between rounded-card border border-line bg-surface p-8 shadow-soft sm:p-10">
               <div>
@@ -117,17 +120,17 @@ export default function Differentiators() {
             </div>
           </motion.div>
 
-          {/* Satélites */}
-          <div className="lg:col-span-2 flex flex-col rounded-card border border-line bg-surface px-6 shadow-soft sm:px-7">
+          {/* Satélites — entran desde la derecha en cascada y quedan fijos. */}
+          <div className="flex h-full flex-col rounded-card border border-line bg-surface px-6 shadow-soft sm:px-7 lg:col-span-2">
             {satellites.map((s, i) => {
               const Icon = s.icon;
               return (
                 <motion.div
                   key={s.title}
-                  initial={{ opacity: 0, x: 18 }}
+                  initial={{ opacity: 0, x: 40 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={VIEWPORT_DEFAULT}
-                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                   className={`flex flex-1 flex-col justify-center py-6 ${
                     i < satellites.length - 1 ? "border-b border-line" : ""
                   }`}

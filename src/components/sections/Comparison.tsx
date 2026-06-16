@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
+import ScrollHighlight from "@/components/ui/ScrollHighlight";
 import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 const without = [
@@ -28,15 +29,16 @@ export default function Comparison() {
     <section className="relative overflow-hidden bg-canvas py-24 sm:py-28">
       <div className="mx-auto max-w-5xl px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
-          <Reveal variant="up">
-            <h2
-              className="font-display font-bold text-ink"
-              style={{ fontSize: "clamp(1.9rem, 4vw, 3rem)" }}
-            >
-              De Excel y papel{" "}
-              <span className="text-brand-ink">a una óptica que funciona sola</span>
-            </h2>
-          </Reveal>
+          {/* Reveal palabra-por-palabra al hacer scroll (acento → verde marca). */}
+          <ScrollHighlight
+            as="h2"
+            className="font-display font-bold"
+            style={{ fontSize: "clamp(1.9rem, 4vw, 3rem)" }}
+            segments={[
+              { text: "De Excel y papel " },
+              { text: "a una óptica que funciona sola", accent: true },
+            ]}
+          />
           <Reveal variant="up" delay={0.06}>
             <p className="mx-auto mt-5 max-w-xl text-[1.0625rem] leading-relaxed text-muted">
               Si todavía gestionas con planillas, libretas y herramientas genéricas que no
@@ -46,13 +48,15 @@ export default function Comparison() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">
-          {/* Sin sistema */}
+          {/* Sin sistema — entra amplio desde la izquierda y se queda fija
+              (sin deriva por scroll: las dos columnas se mueven coordinadas). */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -64 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={VIEWPORT_DEFAULT}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-card border border-line bg-surface-2 p-7 sm:p-8"
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 22 } }}
+            className="h-full rounded-card border border-line bg-surface-2 p-7 sm:p-8"
           >
             <div className="mb-6">
               <span className="kicker !text-muted">Hoy, sin sistema</span>
@@ -67,7 +71,7 @@ export default function Comparison() {
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={VIEWPORT_DEFAULT}
-                  transition={{ delay: 0.08 + i * 0.05 }}
+                  transition={{ duration: 0.45, delay: 0.08 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   className={`flex items-start gap-3 py-2.5 ${
                     i < without.length - 1 ? "border-b border-line/70" : ""
                   }`}
@@ -81,13 +85,14 @@ export default function Comparison() {
             </ul>
           </motion.div>
 
-          {/* Con Dioptrika */}
+          {/* Con Dioptrika — entra amplio desde la derecha y se queda fija. */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 64 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={VIEWPORT_DEFAULT}
-            transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-card border border-brand/35 bg-surface p-7 shadow-float sm:p-8"
+            transition={{ duration: 0.8, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 22 } }}
+            className="h-full rounded-card border border-brand/35 bg-surface p-7 shadow-float sm:p-8"
           >
             <div className="mb-6">
               <span className="kicker">Con Dioptrika</span>
@@ -102,7 +107,7 @@ export default function Comparison() {
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={VIEWPORT_DEFAULT}
-                  transition={{ delay: 0.12 + i * 0.05 }}
+                  transition={{ duration: 0.45, delay: 0.12 + i * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   className={`flex items-start gap-3 py-2.5 ${
                     i < withSystem.length - 1 ? "border-b border-line" : ""
                   }`}

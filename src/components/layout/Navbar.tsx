@@ -71,15 +71,17 @@ export default function Navbar() {
                   <a
                     key={link.href}
                     href={link.href}
-                    className={`relative font-body text-sm font-medium transition-colors duration-200 ${
+                    className={`group relative font-body text-sm font-medium transition-colors duration-200 ${
                       isActive ? "text-brand-ink" : "text-muted hover:text-ink"
                     }`}
                   >
                     {link.label}
+                    {/* Subrayado con scaleX (GPU): crece desde la izquierda al
+                        pasar el cursor; queda completo en la sección activa. */}
                     <span
                       aria-hidden
-                      className={`absolute -bottom-1.5 left-0 h-px bg-brand transition-all duration-300 ease-out-expo ${
-                        isActive ? "w-full opacity-100" : "w-0 opacity-0"
+                      className={`absolute -bottom-1.5 left-0 h-px w-full origin-left bg-brand transition-transform duration-300 ease-out-expo ${
+                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                       }`}
                     />
                   </a>

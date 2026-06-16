@@ -166,6 +166,48 @@ p {
     -ms-overflow-style: none;
   }
   .module-track::-webkit-scrollbar { display: none; }
+
+  /* Scroll-driven text reveal: cada palabra interpola de --muted a --ink según
+     el progreso de scroll. Legible en ambos extremos (muted ya pasa AA). Por
+     defecto --lit:1 (texto a tinta) → móvil / reduce-motion / sin-JS lo ven
+     nítido. En desktop el GSAP fija --lit:0 y lo lleva a 1 con scrub. */
+  /* Apagado = tinta translúcida (se adapta a cualquier fondo); encendido =
+     tinta plena (o verde de marca en palabras de acento). El delta es grande a
+     propósito para que el cambio de color al subir/bajar se note claramente.
+     Por defecto --lit:1 (encendido) → móvil/reduce/sin-JS lo ven a tinta. */
+  .sh-word {
+    --lit: 1;
+    --sh-on: rgb(var(--ink));
+    color: color-mix(
+      in oklab,
+      color-mix(in oklab, rgb(var(--ink)), transparent 62%),
+      var(--sh-on) calc(var(--lit) * 100%)
+    );
+  }
+  /* Palabra de acento: enciende hacia el verde de marca (titulares a 2 colores). */
+  .sh-word--accent {
+    --sh-on: rgb(var(--brand-ink));
+  }
+  @supports not (color: color-mix(in oklab, red, blue)) {
+    .sh-word { color: rgb(var(--ink)); }
+    .sh-word--accent { color: rgb(var(--brand-ink)); }
+  }
+}
+
+/* Brillo "liquid glass" de la consola del hero: un especular radial que sigue
+   al cursor (--mx/--my los actualiza el pointermove) + un sheen diagonal fijo.
+   Solo afecta a un elemento (sin recalc en cascada). */
+.hero-spec {
+  background:
+    radial-gradient(circle 200px at var(--mx, 32%) var(--my, 12%),
+      rgba(255, 255, 255, 0.18), transparent 56%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.10), transparent 42%);
+}
+[data-theme="dark"] .hero-spec {
+  background:
+    radial-gradient(circle 230px at var(--mx, 32%) var(--my, 12%),
+      rgba(255, 255, 255, 0.16), transparent 58%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 44%);
 }
 
 .svg-line {

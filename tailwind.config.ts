@@ -85,10 +85,15 @@ const config: Config = {
           "0%": { opacity: "0", filter: "blur(10px)", transform: "scale(0.985)" },
           "100%": { opacity: "1", filter: "blur(0)", transform: "scale(1)" },
         },
+        "float-soft": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-7px)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both",
         focus: "focus 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
+        "float-soft": "float-soft 6s ease-in-out infinite",
       },
     },
   },

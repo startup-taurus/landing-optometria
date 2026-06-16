@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useState, type FormEvent } from "react";
 import { Mail, MapPin, MessageCircle, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { fadeInLeft, fadeInRight, VIEWPORT_DEFAULT } from "@/lib/animations";
+import { slideInLeft, slideInRight, VIEWPORT_DEFAULT } from "@/lib/animations";
 import {
   CONTACT_EMAIL,
   CONTACT_EMAIL_HREF,
@@ -57,7 +57,7 @@ export default function Contact() {
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <motion.div
-            variants={fadeInLeft}
+            variants={slideInLeft}
             initial="hidden"
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
@@ -101,7 +101,7 @@ export default function Contact() {
           </motion.div>
 
           <motion.div
-            variants={fadeInRight}
+            variants={slideInRight}
             initial="hidden"
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}

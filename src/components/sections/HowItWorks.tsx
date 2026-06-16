@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import TiltCard from "@/components/ui/TiltCard";
+import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface Step {
   icon: LucideIcon;
@@ -81,18 +83,30 @@ export default function HowItWorks() {
               const Icon = step.icon;
               const isActive = active === i;
               return (
-                <button
+                <motion.button
                   key={i}
                   type="button"
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActive(i)}
-                  className={`group flex w-full items-start gap-4 rounded-card border px-4 py-4 text-left transition-all duration-300 ease-out-expo sm:px-5 ${
+                  initial={{ opacity: 0, x: -18 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={VIEWPORT_DEFAULT}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  className={`group relative flex w-full items-start gap-4 rounded-card border px-4 py-4 text-left transition-[border-color,background-color,box-shadow] duration-300 ease-out-expo sm:px-5 ${
                     isActive
                       ? "border-brand/40 bg-surface shadow-soft"
                       : "border-line bg-surface/40 hover:border-line-strong hover:bg-surface"
                   }`}
                 >
+                  {isActive && (
+                    <motion.span
+                      layoutId="hiw-rail"
+                      aria-hidden
+                      className="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-brand"
+                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
+                    />
+                  )}
                   <span
                     className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition-colors ${
                       isActive ? "bg-cta text-cta-on" : "border border-line bg-surface-2 text-muted"
@@ -115,12 +129,13 @@ export default function HowItWorks() {
                       {step.description}
                     </span>
                   </span>
-                </button>
+                </motion.button>
               );
             })}
           </div>
 
           <div className="order-1 md:order-2 md:sticky md:top-28">
+            <TiltCard className="rounded-card">
             <div className="relative h-[360px] overflow-hidden rounded-card border border-line bg-surface shadow-float sm:h-[440px]">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
@@ -135,6 +150,7 @@ export default function HowItWorks() {
                 </motion.div>
               </AnimatePresence>
             </div>
+            </TiltCard>
             <div className="mt-4 flex items-center justify-center gap-2">
               {steps.map((_, i) => (
                 <button
@@ -218,9 +234,9 @@ function OperateScene() {
     { l: "Pedidos", v: "12" },
   ];
   const agenda = [
-    { time: "08:00", name: "M. Pérez", task: "Refracción" },
-    { time: "09:30", name: "L. Vega", task: "Adaptación LC" },
-    { time: "11:00", name: "J. Ríos", task: "Control anual" },
+    { time: "08:00", name: "F. Zambrano", task: "Refracción" },
+    { time: "09:30", name: "E. Reyes", task: "Adaptación LC" },
+    { time: "11:00", name: "D. Reyes", task: "Control anual" },
   ];
   return (
     <div className="flex h-full flex-col gap-3">
@@ -236,7 +252,7 @@ function OperateScene() {
         <div className="mb-1.5 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Eye className="h-3 w-3 text-brand-ink" />
-            <span className="text-[12px] font-semibold text-ink">M. Pérez · Refracción</span>
+            <span className="text-[12px] font-semibold text-ink">F. Zambrano · Refracción</span>
           </div>
           <span className="text-[10px] text-muted">OD / OI</span>
         </div>

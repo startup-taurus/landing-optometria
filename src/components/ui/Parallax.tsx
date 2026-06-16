@@ -5,17 +5,32 @@ import { gsap, useGSAP, DESKTOP_MOTION } from "@/lib/gsap";
 
 interface ParallaxProps {
   children: ReactNode;
-  /** Desplazamiento en % de la altura del elemento a lo largo del scroll.
-   *  Negativo = sube más rápido que el scroll; positivo = se queda atrás. */
+  /** Recorrido vertical en % de la altura (legacy). Negativo = sube más rápido
+   *  que el scroll; positivo = se queda atrás. Es el atajo para `y`. */
   speed?: number;
+  /** Recorrido total en cada eje (se reparte ±mitad alrededor del centro). */
+  y?: number;
+  x?: number;
+  /** Giro total en grados a lo largo del recorrido. */
+  rotate?: number;
   className?: string;
 }
 
-// Movimiento real atado al scroll (no solo fade). RENDIMIENTO: solo `transform`
-// (yPercent, en GPU), scrub directo, y se monta SOLO en desktop sin reduce-motion.
-// En móvil/low-end el contenido queda estático (cero ScrollTriggers).
-export default function Parallax({ children, speed = -14, className }: ParallaxProps) {
+// Movimiento real atado al scroll (no solo fade). RENDIMIENTO: SOLO `transform`
+// (xPercent/yPercent/rotate, en GPU), una única tween/ScrollTrigger con scrub, y
+// se monta SOLO en desktop sin reduce-motion. En móvil/low-end el contenido
+// queda estático (cero ScrollTriggers). Varias capas con distintos signos crean
+// el movimiento coordinado "de un lado a otro".
+export default function Parallax({
+  children,
+  speed = -14,
+  y,
+  x = 0,
+  rotate = 0,
+  className,
+}: ParallaxProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const yTravel = y ?? -speed; // `speed` mantiene el signo histórico
 
   useGSAP(
     () => {
@@ -23,11 +38,16 @@ export default function Parallax({ children, speed = -14, className }: ParallaxP
       if (!el) return;
       const mm = gsap.matchMedia();
       mm.add(DESKTOP_MOTION, () => {
+        // will-change SOLO mientras el efecto está montado (desktop). En móvil
+        // no se promueve la capa → menos memoria en equipos de pocos recursos.
+        gsap.set(el, { willChange: "transform" });
         gsap.fromTo(
           el,
-          { yPercent: -speed / 2 },
+          { yPercent: yTravel / 2, xPercent: x / 2, rotate: rotate / 2 },
           {
-            yPercent: speed / 2,
+            yPercent: -yTravel / 2,
+            xPercent: -x / 2,
+            rotate: -rotate / 2,
             ease: "none",
             scrollTrigger: {
               trigger: el,
@@ -37,13 +57,14 @@ export default function Parallax({ children, speed = -14, className }: ParallaxP
             },
           }
         );
+        return () => gsap.set(el, { willChange: "auto" });
       });
     },
     { scope: ref }
   );
 
   return (
-    <div ref={ref} className={className} style={{ willChange: "transform" }}>
+    <div ref={ref} className={className}>
       {children}
     </div>
   );

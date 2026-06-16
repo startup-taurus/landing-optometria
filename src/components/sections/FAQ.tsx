@@ -6,20 +6,27 @@ import { useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { FAQS as faqs } from "@/lib/faq";
+import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 function FAQItem({
   q,
   a,
   open,
   onClick,
+  index,
 }: {
   q: string;
   a: string;
   open: boolean;
   onClick: () => void;
+  index: number;
 }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={VIEWPORT_DEFAULT}
+      transition={{ duration: 0.5, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
       className={`rounded-card border bg-surface transition-colors ${
         open ? "border-brand/40 shadow-soft" : "border-line"
       }`}
@@ -61,7 +68,7 @@ function FAQItem({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 
@@ -88,19 +95,18 @@ export default function FAQ() {
           </Reveal>
         </div>
 
-        <Reveal variant="up" delay={0.08}>
-          <div className="space-y-3">
-            {faqs.map((f, i) => (
-              <FAQItem
-                key={f.q}
-                q={f.q}
-                a={f.a}
-                open={open === i}
-                onClick={() => setOpen(open === i ? null : i)}
-              />
-            ))}
-          </div>
-        </Reveal>
+        <div className="space-y-3">
+          {faqs.map((f, i) => (
+            <FAQItem
+              key={f.q}
+              index={i}
+              q={f.q}
+              a={f.a}
+              open={open === i}
+              onClick={() => setOpen(open === i ? null : i)}
+            />
+          ))}
+        </div>
 
         <Reveal variant="up" delay={0.1}>
           <div className="mt-10 text-center">

@@ -29,6 +29,27 @@ export const fadeInRight: Variants = {
   },
 };
 
+// Entradas laterales AMPLIAS ("de un lado a otro"): dos columnas que convergen
+// desde fuera con un ease-out fuerte. Solo transform/opacity (GPU). framer las
+// neutraliza bajo prefers-reduced-motion vía <MotionConfig reducedMotion="user">.
+export const slideInLeft: Variants = {
+  hidden: { opacity: 0, x: -64 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.8, ease: easeOut },
+  },
+};
+
+export const slideInRight: Variants = {
+  hidden: { opacity: 0, x: 64 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.8, ease: easeOut },
+  },
+};
+
 export const fadeInMockup: Variants = {
   hidden: { opacity: 0, x: 60 },
   visible: {

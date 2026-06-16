@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Reveal from "@/components/ui/Reveal";
+import ScrollHighlight from "@/components/ui/ScrollHighlight";
+import TiltCard from "@/components/ui/TiltCard";
+import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface ModuleData {
   icon: LucideIcon;
@@ -92,14 +95,15 @@ export default function ModuleShowcase() {
           <Reveal variant="up">
             <span className="kicker">La plataforma</span>
           </Reveal>
-          <Reveal variant="up" delay={0.05}>
-            <h2
-              className="mt-4 font-display font-bold text-ink"
-              style={{ fontSize: "clamp(1.9rem, 3.8vw, 3rem)" }}
-            >
-              Seis módulos que conversan entre sí
-            </h2>
-          </Reveal>
+          <ScrollHighlight
+            as="h2"
+            className="mt-4 font-display font-bold"
+            style={{ fontSize: "clamp(1.9rem, 3.8vw, 3rem)" }}
+            segments={[
+              { text: "Seis módulos que " },
+              { text: "conversan entre sí", accent: true },
+            ]}
+          />
           <Reveal variant="up" delay={0.1}>
             <p className="mt-4 text-[1.0625rem] leading-relaxed text-muted">
               Desde el primer paciente hasta el cierre de mes, cada módulo comparte los mismos
@@ -115,18 +119,32 @@ export default function ModuleShowcase() {
               const Icon = m.icon;
               const isActive = active === i;
               return (
-                <button
+                <motion.button
                   key={m.tag}
                   type="button"
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActive(i)}
-                  className={`group flex items-center gap-4 rounded-card border px-4 py-3.5 text-left transition-all duration-300 ease-out-expo ${
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={VIEWPORT_DEFAULT}
+                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                  className={`group relative flex items-center gap-4 rounded-card border px-4 py-3.5 text-left transition-[border-color,background-color,box-shadow] duration-300 ease-out-expo ${
                     isActive
                       ? "border-brand/40 bg-surface shadow-soft"
                       : "border-line bg-surface/40 hover:border-line-strong hover:bg-surface"
                   }`}
                 >
+                  {/* Riel activo que se desliza entre módulos (layout animation):
+                      el sistema "responde" físicamente a la selección. */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="module-rail"
+                      aria-hidden
+                      className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-brand"
+                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
+                    />
+                  )}
                   <span
                     className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors ${
                       isActive ? "bg-brand/14 text-brand-ink" : "bg-surface-2 text-muted group-hover:text-ink-2"
@@ -146,17 +164,14 @@ export default function ModuleShowcase() {
                       {m.title}
                     </span>
                   </span>
-                  <span
-                    aria-hidden
-                    className={`h-7 w-px transition-colors ${isActive ? "bg-brand" : "bg-transparent"}`}
-                  />
-                </button>
+                </motion.button>
               );
             })}
           </div>
 
-          {/* Preview */}
+          {/* Preview — vidrio 3D que se inclina al pasar el cursor (como el hero) */}
           <div className="lg:sticky lg:top-28">
+            <TiltCard className="rounded-card">
             <div className="overflow-hidden rounded-card border border-line bg-surface shadow-float">
               <div className="flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-5 py-3">
                 <p className="font-display text-sm font-semibold text-ink">{current.title}</p>
@@ -164,14 +179,14 @@ export default function ModuleShowcase() {
               </div>
               <div className="p-5">
                 <p className="mb-4 text-[14px] leading-relaxed text-muted">{current.description}</p>
-                <div className="h-[260px] rounded-xl border border-line bg-surface-2/60 p-3.5">
+                <div className="h-[260px] overflow-hidden rounded-xl border border-line bg-surface-2/60 p-3.5">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={active}
-                      initial={reduce ? false : { opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={reduce ? undefined : { opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      initial={reduce ? false : { opacity: 0, x: 22 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={reduce ? undefined : { opacity: 0, x: -22 }}
+                      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                       className="h-full"
                     >
                       {current.preview()}
@@ -180,6 +195,7 @@ export default function ModuleShowcase() {
                 </div>
               </div>
             </div>
+            </TiltCard>
           </div>
         </div>
 
@@ -207,10 +223,10 @@ function ClinicalPreview() {
     <div className="flex h-full flex-col gap-2.5">
       <div className="flex items-center gap-2.5">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-brand/15 data text-[11px] font-semibold text-brand-ink">
-          MP
+          ER
         </span>
         <div>
-          <p className="text-[13px] font-semibold text-ink">María Pérez</p>
+          <p className="text-[13px] font-semibold text-ink">Eliza Reyes</p>
           <p className="text-[11px] text-muted">34 años · miopía + astigmatismo</p>
         </div>
       </div>
@@ -239,9 +255,9 @@ function ClinicalPreview() {
 function AgendaPreview() {
   const hours = ["08:00", "09:00", "10:00", "11:00", "12:00"];
   const events: Record<number, string> = {
-    0: "M. Pérez · Refracción",
-    1: "L. Vega · Control",
-    3: "J. Ríos · Adaptación LC",
+    0: "F. Zambrano · Refracción",
+    1: "E. Reyes · Control",
+    3: "D. Reyes · Adaptación LC",
   };
   return (
     <div className="flex h-full flex-col justify-center gap-2">
