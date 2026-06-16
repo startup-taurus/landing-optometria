@@ -1,33 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
 import StructuredData from "@/components/seo/StructuredData";
 
-// Tipografía de marca, self-hosted (Fontshare). Sin requests a Google Fonts.
-// Clash Display = titulares/display; Satoshi = cuerpo/interfaz.
-// Se exponen como CSS vars y Tailwind las mapea (ver tailwind.config.ts).
-const clashDisplay = localFont({
-  src: [
-    { path: "./fonts/ClashDisplay-400.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/ClashDisplay-500.woff2", weight: "500", style: "normal" },
-    { path: "./fonts/ClashDisplay-600.woff2", weight: "600", style: "normal" },
-    { path: "./fonts/ClashDisplay-700.woff2", weight: "700", style: "normal" },
-  ],
+// Tipografía de marca. next/font/google las descarga en BUILD y las sirve desde
+// tu propio origen → CERO requests a Google en runtime (privacidad + velocidad,
+// igual que antes). Elegidas por su carácter y por ser poco frecuentes en sitios
+// generados por IA:
+//   display (titulares) -> Bricolage Grotesque (grotesca contemporánea con personalidad)
+//   body (cuerpo/UI)    -> Hanken Grotesk (limpia, legible, cálida)
+// Mapeadas a las MISMAS CSS vars que ya consume Tailwind (font-sora/font-inter).
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
-  preload: true,
-  fallback: ["Sora", "system-ui", "sans-serif"],
+  fallback: ["Clash Display", "Sora", "system-ui", "sans-serif"],
 });
 
-const satoshi = localFont({
-  src: [
-    { path: "./fonts/Satoshi-400.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/Satoshi-500.woff2", weight: "500", style: "normal" },
-    { path: "./fonts/Satoshi-700.woff2", weight: "700", style: "normal" },
-  ],
+const body = Hanken_Grotesk({
+  subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
-  preload: true,
-  fallback: ["Inter", "system-ui", "sans-serif"],
+  fallback: ["Satoshi", "Inter", "system-ui", "sans-serif"],
 });
 import {
   SITE_DESCRIPTION,
@@ -117,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="es"
-      className={`dark ${clashDisplay.variable} ${satoshi.variable}`}
+      className={`dark ${display.variable} ${body.variable}`}
       data-theme="dark"
     >
       <body>

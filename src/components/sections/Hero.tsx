@@ -1,78 +1,27 @@
 'use client';
 
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useMotionValue,
-  useSpring,
-  useReducedMotion,
-} from "framer-motion";
-import { Eye, TrendingUp } from "lucide-react";
-import { useRef, type ReactNode, type MouseEvent } from "react";
+import { useRef } from "react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { Eye, TrendingUp, Glasses, ArrowRight, ChevronDown } from "lucide-react";
 import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import MagneticButton from "@/components/ui/MagneticButton";
 import AnimatedGradientBackground from "@/components/ui/AnimatedGradientBackground";
 import Reticle from "@/components/ui/Reticle";
-import { fadeInUp, staggerHero, fadeInMockup } from "@/lib/animations";
+import { WHATSAPP_URL } from "@/lib/contact";
 
-function FloatingCard({
-  children,
-  className,
-  delay,
-  from,
-  depth = 0,
-}: {
-  children: ReactNode;
-  className: string;
-  delay: number;
-  from: { x?: number; y?: number };
-  depth?: number;
-}) {
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+// Revelado por máscara estilo Sira: cada "línea" del titular vive dentro de un
+// contenedor con overflow-hidden y entra deslizándose desde abajo (yPercent).
+function Line({ children }: { children: React.ReactNode }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: from.x ?? 0, y: from.y ?? 12, z: depth }}
-      animate={{ opacity: 1, x: 0, y: 0, z: depth }}
-      whileHover={{
-        z: depth + 40,
-        scale: 1.05,
-        transition: { type: "spring", stiffness: 300, damping: 20 },
-      }}
-      transition={{ delay, duration: 0.75, type: "spring", stiffness: 90, damping: 18 }}
-      style={{ transformStyle: "preserve-3d" }}
-      className={`absolute z-20 hidden xl:block ${className}`}
-    >
-      <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">
-        {children}
-      </div>
-    </motion.div>
-  );
-}
-
-function FloatingStats() {
-  return (
-    <>
-      <FloatingCard className="-left-6 top-8" delay={0.5} from={{ x: -28 }} depth={55}>
-        <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
-          Pacientes activos
-        </p>
-        <p className="text-2xl font-sora font-bold text-[#14B875]">1,284</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <TrendingUp className="w-3 h-3 text-[#14B875] shrink-0" />
-          <span className="text-xs font-inter text-[#14B875]">+12% este mes</span>
-        </div>
-      </FloatingCard>
-
-      <FloatingCard className="-right-6 bottom-14" delay={0.7} from={{ x: 28 }} depth={80}>
-        <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
-          Citas confirmadas
-        </p>
-        <p className="text-2xl font-sora font-bold text-white">38</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="inline-flex h-2 w-2 rounded-full bg-[#14B875] animate-pulse shrink-0" />
-          <span className="text-xs font-inter text-[#B7D1D2]/80">hoy en agenda</span>
-        </div>
-      </FloatingCard>
-    </>
+    <span className="block overflow-hidden pb-[0.16em]">
+      <span className="hero-line block">{children}</span>
+    </span>
   );
 }
 
@@ -127,7 +76,7 @@ function BrowserMockup() {
                   key={m.label}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + i * 0.1, duration: 0.5 }}
+                  transition={{ delay: 1.1 + i * 0.1, duration: 0.5 }}
                   className="bg-[#123A43] rounded-xl p-2.5 border border-[#1D4650]"
                 >
                   <p className={`text-sm font-sora font-bold ${m.color}`}>{m.value}</p>
@@ -142,7 +91,7 @@ function BrowserMockup() {
                   key={i}
                   initial={{ height: 0 }}
                   animate={{ height: `${h}%` }}
-                  transition={{ delay: 1.1 + i * 0.04, duration: 0.6, ease: "easeOut" }}
+                  transition={{ delay: 1.4 + i * 0.04, duration: 0.6, ease: "easeOut" }}
                   className="flex-1 rounded-t-sm"
                   style={{
                     background:
@@ -162,126 +111,198 @@ function BrowserMockup() {
   );
 }
 
-// Escenario 3D del hero: el mockup y las tarjetas siguen al cursor (tilt + parallax).
-// Desactiva el efecto si el usuario prefiere menos movimiento.
-function HeroVisual() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion();
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 140, damping: 18, mass: 0.5 });
-  const sy = useSpring(my, { stiffness: 140, damping: 18, mass: 0.5 });
-  const rotateX = useTransform(sy, [-0.5, 0.5], [10, -10]);
-  const rotateY = useTransform(sx, [-0.5, 0.5], [-14, 14]);
-
-  function handleMove(e: MouseEvent<HTMLDivElement>) {
-    if (!ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
-  }
-  function handleLeave() {
-    mx.set(0);
-    my.set(0);
-  }
-
-  if (reduce) {
-    return (
-      <div className="relative mx-auto w-full max-w-xl">
-        <BrowserMockup />
-        <FloatingStats />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      ref={ref}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      className="mx-auto w-full max-w-xl [perspective:1100px]"
-    >
-      <motion.div
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="relative will-change-transform"
-      >
-        <BrowserMockup />
-        <FloatingStats />
-      </motion.div>
-    </div>
-  );
-}
-
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-  const mockupY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, 0.4]);
+  const visualRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return; // estado natural, sin animación
+
+      // --- Estados iniciales (se fijan antes del paint → sin parpadeo) ---
+      gsap.set(".hero-line", { yPercent: 118, opacity: 0 });
+      gsap.set(
+        [".hero-badge", ".hero-sub", ".hero-cta", ".hero-bullets", ".hero-tagline"],
+        { y: 26, opacity: 0 }
+      );
+      gsap.set(".hero-visual", { y: 48, opacity: 0, scale: 0.96 });
+      gsap.set(".hero-infocard", { x: 44, y: -8, opacity: 0 });
+      gsap.set(".hero-floatstat", { x: -32, opacity: 0 });
+
+      // --- Timeline de entrada (estilo Sira: revelado suave y escalonado) ---
+      const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+      tl.to(".hero-badge", { y: 0, opacity: 1, duration: 0.7 }, 0.1)
+        .to(".hero-line", { yPercent: 0, opacity: 1, duration: 1.05, stagger: 0.12 }, 0.18)
+        .to(".hero-sub", { y: 0, opacity: 1, duration: 0.85 }, "-=0.6")
+        .to(".hero-cta", { y: 0, opacity: 1, duration: 0.85 }, "-=0.65")
+        .to(".hero-bullets", { y: 0, opacity: 1, duration: 0.8 }, "-=0.7")
+        .to(".hero-visual", { y: 0, opacity: 1, scale: 1, duration: 1.15 }, 0.42)
+        .to(".hero-infocard", { x: 0, y: 0, opacity: 1, duration: 0.95 }, "-=0.75")
+        .to(".hero-floatstat", { x: 0, opacity: 1, duration: 0.85 }, "-=0.75")
+        .to(".hero-tagline", { y: 0, opacity: 1, duration: 0.7 }, "-=0.45");
+
+      // --- Parallax al hacer scroll (Lenis ya alimenta a ScrollTrigger) ---
+      const st = { trigger: sectionRef.current, start: "top top", end: "bottom top", scrub: true };
+      gsap.to(".hero-visual", { yPercent: -26, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-infocard", { yPercent: -48, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-floatstat", { yPercent: 36, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-reticle", { yPercent: 34, ease: "none", scrollTrigger: st });
+      gsap.to(".hero-copy", { yPercent: -12, opacity: 0.5, ease: "none", scrollTrigger: st });
+
+      // --- Parallax sutil con el cursor sobre el visual (tilt 3D) ---
+      const visual = visualRef.current;
+      if (visual && window.matchMedia("(pointer: fine)").matches) {
+        const rotX = gsap.quickTo(visual, "rotationX", { duration: 0.6, ease: "power3.out" });
+        const rotY = gsap.quickTo(visual, "rotationY", { duration: 0.6, ease: "power3.out" });
+        const onMove = (e: PointerEvent) => {
+          const r = visual.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          rotY(px * 12);
+          rotX(-py * 10);
+        };
+        const onLeave = () => {
+          rotX(0);
+          rotY(0);
+        };
+        visual.addEventListener("pointermove", onMove);
+        visual.addEventListener("pointerleave", onLeave);
+        return () => {
+          visual.removeEventListener("pointermove", onMove);
+          visual.removeEventListener("pointerleave", onLeave);
+        };
+      }
+    },
+    { scope: sectionRef }
+  );
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center pt-20 lg:pt-16 overflow-hidden bg-[#071A1F]"
+      className="relative min-h-screen flex items-center overflow-hidden bg-[#071A1F] noise-overlay"
     >
       <AnimatedGradientBackground variant="hero" />
+      <Reticle className="hero-reticle pointer-events-none absolute -left-52 top-1/2 -translate-y-1/2 hidden lg:block h-[640px] w-[640px] text-[#14B875]/[0.06]" />
+      {/* Halo radial cinematográfico (mantiene la paleta teal) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(1100px 620px at 78% 18%, rgba(20,184,117,0.10), transparent 60%), radial-gradient(900px 600px at 0% 100%, rgba(8,122,90,0.10), transparent 55%)",
+        }}
+      />
 
-      <Reticle className="pointer-events-none absolute -left-44 top-1/2 -translate-y-1/2 hidden lg:block h-[560px] w-[560px] text-[#14B875]/[0.06]" />
-
-      <motion.div
-        style={{ opacity: heroFade }}
-        className="relative max-w-7xl mx-auto px-6 py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full"
-      >
-        <motion.div
-          variants={staggerHero}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col gap-6"
-        >
-          <motion.div variants={fadeInUp}>
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-32 pb-20 lg:pt-28 lg:pb-24 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-14 items-center">
+        {/* ---------- Copy (izquierda) ---------- */}
+        <div className="hero-copy flex flex-col gap-6 will-change-transform">
+          <div className="hero-badge">
             <Badge>Software clínico especializado para ópticas</Badge>
-          </motion.div>
+          </div>
 
-          <motion.h1
-            variants={fadeInUp}
-            className="font-sora font-extrabold text-white leading-[1.05] tracking-tight"
-            style={{ fontSize: "clamp(38px, 5.6vw, 68px)" }}
+          <h1
+            className="font-sora font-extrabold text-white leading-[0.98] tracking-tight"
+            style={{ fontSize: "clamp(40px, 6vw, 82px)" }}
           >
-            <span className="text-aurora text-chromatic">Precisión clínica</span> para
-            gestionar ópticas con claridad.
-          </motion.h1>
+            <Line>
+              <span className="text-aurora text-chromatic">Precisión clínica</span>
+            </Line>
+            <Line>para gestionar ópticas</Line>
+            <Line>
+              con <span className="text-aurora">claridad</span>.
+            </Line>
+          </h1>
 
-          <motion.p
-            variants={fadeInUp}
-            className="font-inter text-[#B7D1D2] text-lg leading-relaxed max-w-xl"
-          >
+          <p className="hero-sub font-inter text-[#B7D1D2] text-lg leading-relaxed max-w-xl">
             Centraliza historias clínicas, órdenes de laboratorio, inventario y
             facturación en un sistema especializado para ópticas. Multi-sucursal y
             pensado para la realidad de Latinoamérica.
-          </motion.p>
+          </p>
 
-          <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-4">
+          <div className="hero-cta flex flex-wrap items-center gap-3 pt-1">
+            <MagneticButton href="#planes">
+              <Button size="lg">
+                Ver planes
+                <ArrowRight className="w-4 h-4" strokeWidth={2.2} />
+              </Button>
+            </MagneticButton>
+            <MagneticButton href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg">
+                Solicitar demo
+              </Button>
+            </MagneticButton>
+          </div>
+
+          <div className="hero-bullets flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
             {["Implementación guiada", "Soporte en español", "Sin contratos"].map((item) => (
               <div key={item} className="flex items-center gap-2 text-sm font-inter text-[#B7D1D2]/80">
                 <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#14B875] shrink-0" />
                 {item}
               </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          variants={fadeInMockup}
-          initial="hidden"
-          animate="visible"
-          style={{ y: mockupY }}
-          className="will-change-transform"
-        >
-          <HeroVisual />
-        </motion.div>
-      </motion.div>
+        {/* ---------- Visual (derecha) ---------- */}
+        <div className="relative mx-auto w-full max-w-xl [perspective:1200px]">
+          <div
+            ref={visualRef}
+            className="hero-visual relative will-change-transform [transform-style:preserve-3d]"
+          >
+            <BrowserMockup />
+
+            {/* Tarjeta de cristal flotante (posición estilo Sira: arriba-derecha) */}
+            <div className="hero-infocard absolute -right-5 -top-7 z-20 hidden sm:block w-[224px]">
+              <div className="glass-liquid card-sheen rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="inline-flex h-1.5 w-1.5 rounded-full bg-[#14B875] shrink-0" />
+                  <span className="text-[11px] font-inter uppercase tracking-widest text-[#B7D1D2]/70">
+                    Hecho para ópticas
+                  </span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="mt-0.5 w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-[#14B875] to-[#087A5A] flex items-center justify-center shadow-[0_6px_18px_rgba(20,184,117,0.45)]">
+                    <Glasses className="w-[18px] h-[18px] text-white" strokeWidth={2} />
+                  </div>
+                  <div>
+                    <p className="font-sora font-semibold text-white text-sm leading-tight">
+                      Historia clínica + laboratorio
+                    </p>
+                    <p className="mt-1 text-[11px] font-inter text-[#B7D1D2]/65 leading-snug">
+                      Refracción, pedidos y facturación EC en un solo lugar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tarjeta de estadística flotante (abajo-izquierda) */}
+            <div className="hero-floatstat absolute -left-6 bottom-10 z-20 hidden lg:block">
+              <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">
+                <p className="text-[10px] font-inter text-[#B7D1D2]/65 uppercase tracking-widest mb-1.5">
+                  Pacientes activos
+                </p>
+                <p className="text-2xl font-sora font-bold text-[#14B875]">1,284</p>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <TrendingUp className="w-3 h-3 text-[#14B875] shrink-0" />
+                  <span className="text-xs font-inter text-[#14B875]">+12% este mes</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- Tagline + cue de scroll (abajo, centrado) ---------- */}
+      <div className="hero-tagline absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-center px-6">
+        <p className="font-inter text-sm text-[#B7D1D2]/70">
+          Menos administración. Más tiempo para tus pacientes.
+        </p>
+        <ChevronDown className="w-5 h-5 text-[#14B875]/70 animate-bounce" />
+      </div>
     </section>
   );
 }
