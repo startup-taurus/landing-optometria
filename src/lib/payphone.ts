@@ -455,6 +455,31 @@ export function isTokenChargeDeclined(r: PayphoneTokenChargeResponse): boolean {
   );
 }
 
+/**
+ * Rechazo por VALIDACIÓN de la solicitud (HTTP 4xx): Payphone devuelve un array
+ * `errors` y/o un `errorCode` != 0, SIN resultado de transacción (sin statusCode 2/3).
+ * Esto ocurre ANTES de tocar la tarjeta → NO hubo cobro → NO es ambiguo (a diferencia
+ * de un timeout de red): es SEGURO reintentar en el siguiente ciclo, sin pausar ni
+ * conciliar. En el sandbox de Payphone este rechazo es INTERMITENTE (el MISMO teléfono
+ * +593… se aprueba en un cobro y se rechaza con "Número de teléfono inválido" 2 min
+ * después — comprobado: una suscripción encadenó 5 cobros OK con el mismo formato),
+ * por eso lo tratamos como transitorio-reintentable, no como un fallo de datos.
+ */
+export function isTokenChargeValidationError(r: PayphoneTokenChargeResponse): boolean {
+  const errs = (r as { errors?: unknown }).errors;
+  const hasErrors = Array.isArray(errs) && errs.length > 0;
+  const code = (r as { errorCode?: unknown }).errorCode;
+  const hasErrCode = typeof code === "number" && code !== 0;
+  const noTxResult =
+    r.statusCode !== 2 &&
+    r.statusCode !== 3 &&
+    r.status !== "Approved" &&
+    r.status !== "Canceled" &&
+    r.transactionStatus !== "Approved" &&
+    r.transactionStatus !== "Canceled";
+  return (hasErrors || hasErrCode) && noTxResult;
+}
+
 // Arma un mensaje LEGIBLE a partir de la respuesta de error de Payphone, incluyendo
 // el array `errors[].errorDescriptions` (donde viene el detalle real, p.ej.
 // "Impossible to decode the data" cuando el `cardHolder` no se puede descifrar con

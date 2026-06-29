@@ -249,7 +249,10 @@ export async function sendDunningEmail(input: {
   });
 }
 
-// Alerta interna: un cobro quedó ambiguo y la suscripción se pausó para conciliar.
+// Alerta INTERNA (soporte): un cobro quedó AMBIGUO (timeout/red) y la suscripción se
+// pausó para conciliar. SOLO va a NOTIFY_EMAIL (equipo), NUNCA al cliente — el cliente
+// no tiene acceso a Payphone. Aquí SÍ hay que revisar Payphone porque no sabemos si el
+// dinero se movió.
 export async function sendReconcileAlert(input: {
   subscriptionId: string;
   customerEmail: string;
@@ -261,7 +264,7 @@ export async function sendReconcileAlert(input: {
     return;
   }
   const body = `
-    <p>Un cobro recurrente quedó en estado ambiguo y la suscripción se <strong>pausó</strong> para evitar doble cobro. Revisa en Payphone si el cobro se realizó y reactiva la suscripción manualmente.</p>
+    <p><strong>[Interno · soporte]</strong> Un cobro recurrente quedó en estado <strong>ambiguo</strong> (timeout o error de red, no sabemos si el dinero se movió) y la suscripción se <strong>pausó</strong> para evitar doble cobro. Revisa en Payphone si el cobro se realizó y reactiva la suscripción manualmente.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
       ${row("Suscripción", input.subscriptionId)}
       ${row("Cliente", input.customerEmail)}
@@ -270,7 +273,40 @@ export async function sendReconcileAlert(input: {
   `;
   await sendViaResend({
     to: recipients,
-    subject: "Cobro a conciliar — Dioptrika",
-    html: shell("Cobro recurrente a conciliar", body),
+    subject: "[Interno] Cobro a conciliar — Dioptrika",
+    html: shell("Cobro recurrente a conciliar (interno)", body),
+  });
+}
+
+// Alerta INTERNA (soporte): el cobro recurrente fue RECHAZADO por validación de
+// Payphone (HTTP 4xx) de forma PERSISTENTE. A diferencia del caso ambiguo, aquí NO se
+// cobró nada a la tarjeta (no hay reembolso ni conciliación de dinero): es un problema
+// de datos/configuración. SOLO va a NOTIFY_EMAIL (equipo), NUNCA al cliente. El detalle
+// (incl. el teléfono) también se imprime en la terminal del servidor.
+export async function sendChargeRejectedAlert(input: {
+  subscriptionId: string;
+  customerEmail: string;
+  phone: string;
+  message: string;
+  attempts: number;
+}): Promise<void> {
+  const recipients = notifyRecipients();
+  if (recipients.length === 0) {
+    console.log("[email] NOTIFY_EMAIL vacío, no se envía alerta de cobro rechazado");
+    return;
+  }
+  const body = `
+    <p><strong>[Interno · soporte]</strong> El cobro recurrente fue <strong>rechazado por validación de Payphone</strong> tras ${input.attempts} intento(s). <strong>NO se cobró</strong> a la tarjeta (no hay nada que reembolsar ni conciliar). La suscripción quedó en pausa; revisa los datos del titular y reactívala.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
+      ${row("Suscripción", input.subscriptionId)}
+      ${row("Cliente", input.customerEmail)}
+      ${row("Teléfono", input.phone)}
+      ${row("Detalle Payphone", input.message)}
+    </table>
+  `;
+  await sendViaResend({
+    to: recipients,
+    subject: "[Interno] Cobro recurrente rechazado — revisar — Dioptrika",
+    html: shell("Cobro recurrente rechazado (interno)", body),
   });
 }

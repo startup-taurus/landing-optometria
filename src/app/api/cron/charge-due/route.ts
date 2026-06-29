@@ -4,6 +4,7 @@ import {
   chargeTokenizedTransaction,
   isTokenChargeApproved,
   isTokenChargeDeclined,
+  isTokenChargeValidationError,
   describeTokenChargeError,
   computeAmounts,
   getPlanTotalCents,
@@ -22,7 +23,12 @@ import {
   getChargeCredentials,
   type Subscription,
 } from "@/lib/subscriptions";
-import { sendRenewalReceipt, sendDunningEmail, sendReconcileAlert } from "@/lib/email";
+import {
+  sendRenewalReceipt,
+  sendDunningEmail,
+  sendReconcileAlert,
+  sendChargeRejectedAlert,
+} from "@/lib/email";
 import { hasDatabase, withAdvisoryLock } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -210,7 +216,53 @@ async function chargeOne(sub: Subscription): Promise<"approved" | "declined" | "
     return "declined";
   }
 
-  // Respuesta NO clara (ni aprobada ni rechazada) → conciliar, nunca rechazar.
+  // Payphone RECHAZÓ la solicitud por validación (HTTP 4xx) → NO tocó la tarjeta, NO
+  // hubo cobro. NO es ambiguo (≠ timeout): es SEGURO reintentar. En el sandbox este
+  // rechazo es INTERMITENTE (el mismo teléfono +593… se aprueba en un cobro y se
+  // rechaza minutos después con "Número de teléfono inválido" — verificado: 5 cobros OK
+  // seguidos con el mismo formato). Por eso NO pausamos ni conciliamos: reprogramamos
+  // con backoff para que el siguiente ciclo lo cobre. El cliente NO recibe ningún correo
+  // técnico; el teléfono + detalle quedan en la TERMINAL, y solo si el rechazo se vuelve
+  // PERSISTENTE se avisa a soporte (interno).
+  if (isTokenChargeValidationError(resp)) {
+    const vdetail = describeTokenChargeError(resp);
+    console.error(
+      `[cron] validación rechazada por Payphone (SIN cobro) sub=${sub.id} ref=${clientTxId} ` +
+        `tel=${sub.phone} doc=${sub.documentId} ip=${validIpOr(sub.consentIp, "127.0.0.1")}: ` +
+        `${vdetail} → reintento programado`
+    );
+    const { pastDue } = await markChargeDeclined({
+      chargeId,
+      subscriptionId: sub.id,
+      statusCode: null,
+      message: vdetail,
+      maxRetries: MAX_RETRIES,
+      backoffMs: backoffMs(sub),
+      nowIso: new Date().toISOString(),
+    });
+    if (pastDue) {
+      // Rechazo PERSISTENTE (no fue un parpadeo del sandbox) → algo está mal de verdad.
+      // Avisar a SOPORTE (interno), nunca al cliente: no es problema de su tarjeta.
+      console.error(
+        `[cron] validación rechazada PERSISTENTE sub=${sub.id} (${MAX_RETRIES} intentos) ` +
+          `→ suscripción en pausa, avisando a soporte`
+      );
+      try {
+        await sendChargeRejectedAlert({
+          subscriptionId: sub.id,
+          customerEmail: sub.email,
+          phone: sub.phone,
+          message: vdetail,
+          attempts: MAX_RETRIES,
+        });
+      } catch {
+        /* best-effort */
+      }
+    }
+    return "declined";
+  }
+
+  // Respuesta NO clara (ni aprobada ni rechazada ni validación) → conciliar, nunca rechazar.
   const detail = describeTokenChargeError(resp);
   console.error(`[cron] respuesta desconocida sub=${sub.id} ref=${clientTxId}: ${detail}`);
   await markChargeNeedsReconciliation({
