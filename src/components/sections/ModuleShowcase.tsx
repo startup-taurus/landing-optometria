@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   CalendarDays,
   ClipboardList,
@@ -8,13 +8,13 @@ import {
   Boxes,
   Receipt,
   LineChart,
+  ChevronLeft,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Reveal from "@/components/ui/Reveal";
 import ScrollHighlight from "@/components/ui/ScrollHighlight";
-import TiltCard from "@/components/ui/TiltCard";
-import { VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface ModuleData {
   icon: LucideIcon;
@@ -83,15 +83,42 @@ const EXTRAS = [
 ];
 
 export default function ModuleShowcase() {
-  const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
-  const current = modules[active];
+  const n = modules.length;
+  const [active, setActive] = useState(0);
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const apply = () => setCompact(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const go = (dir: number) => setActive((a) => (a + dir + n) % n);
+
+  // Posición relativa con wrap (camino más corto) → coverflow "infinito".
+  const relOf = (i: number) => {
+    let r = i - active;
+    if (r > n / 2) r -= n;
+    if (r < -n / 2) r += n;
+    return r;
+  };
+
+  const spring = reduce
+    ? { duration: 0 }
+    : ({ type: "spring", stiffness: 240, damping: 28, mass: 0.9 } as const);
+
+  const maxVisible = compact ? 1 : 2;
+  const xUnit = compact ? 64 : 50; // % del ancho de la tarjeta por paso
+  const rotY = compact ? 14 : 27; // grados por paso
 
   return (
     <section id="producto" className="relative overflow-hidden bg-surface-2 py-24 sm:py-28">
       <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mb-12 max-w-2xl sm:mb-14">
+      <div className="mx-auto max-w-6xl px-6 2xl:max-w-[1720px]">
+        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <Reveal variant="up">
             <span className="kicker">La plataforma</span>
           </Reveal>
@@ -105,102 +132,106 @@ export default function ModuleShowcase() {
             ]}
           />
           <Reveal variant="up" delay={0.1}>
-            <p className="mt-4 text-[1.0625rem] leading-relaxed text-muted">
+            <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-muted">
               Desde el primer paciente hasta el cierre de mes, cada módulo comparte los mismos
-              datos. Selecciona uno para verlo.
+              datos. Recórrelos con las flechas, los puntos o tocando una tarjeta.
             </p>
           </Reveal>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
-          {/* Selector */}
-          <div className="flex flex-col gap-2" role="tablist" aria-label="Módulos">
+        {/* ── Carrusel coverflow 3D ── */}
+        <Reveal variant="up" delay={0.05}>
+          <div
+            className="relative mx-auto h-[520px] select-none"
+            style={{ perspective: 1500 }}
+            role="group"
+            aria-roledescription="carrusel"
+            aria-label="Módulos de Dioptrika"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                go(-1);
+              } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                go(1);
+              }
+            }}
+          >
             {modules.map((m, i) => {
-              const Icon = m.icon;
-              const isActive = active === i;
+              const rel = relOf(i);
+              const abs = Math.abs(rel);
+              const visible = abs <= maxVisible;
+              const isActive = rel === 0;
+              const scale = abs === 0 ? 1 : abs === 1 ? 0.86 : 0.74;
               return (
-                <motion.button
+                <motion.div
                   key={m.tag}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActive(i)}
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={VIEWPORT_DEFAULT}
-                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                  className={`group relative flex items-center gap-4 rounded-card border px-4 py-3.5 text-left transition-[border-color,background-color,box-shadow] duration-300 ease-out-expo ${
-                    isActive
-                      ? "border-brand/40 bg-surface shadow-soft"
-                      : "border-line bg-surface/40 hover:border-line-strong hover:bg-surface"
-                  }`}
+                  className="absolute inset-x-0 top-1/2 mx-auto w-[86vw] max-w-md"
+                  style={{
+                    zIndex: 30 - abs * 5,
+                    transformStyle: "preserve-3d",
+                    pointerEvents: visible ? "auto" : "none",
+                  }}
+                  initial={false}
+                  animate={{
+                    x: `${rel * xUnit}%`,
+                    y: "-50%",
+                    z: -abs * (compact ? 90 : 160),
+                    rotateY: rel * -rotY,
+                    scale,
+                    opacity: !visible ? 0 : abs === 0 ? 1 : abs === 1 ? 0.58 : 0.26,
+                  }}
+                  transition={spring}
                 >
-                  {/* Riel activo que se desliza entre módulos (layout animation):
-                      el sistema "responde" físicamente a la selección. */}
-                  {isActive && (
-                    <motion.span
-                      layoutId="module-rail"
-                      aria-hidden
-                      className="absolute inset-y-2 left-0 w-[3px] rounded-r-full bg-brand"
-                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                    />
-                  )}
-                  <span
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors ${
-                      isActive ? "bg-brand/14 text-brand-ink" : "bg-surface-2 text-muted group-hover:text-ink-2"
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" strokeWidth={1.7} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="data block text-[11px] uppercase tracking-wide text-muted">
-                      {String(i + 1).padStart(2, "0")} · {m.tag}
-                    </span>
-                    <span
-                      className={`block font-display text-[15px] font-semibold leading-tight ${
-                        isActive ? "text-ink" : "text-ink-2"
-                      }`}
-                    >
-                      {m.title}
-                    </span>
-                  </span>
-                </motion.button>
+                  <ModuleCard
+                    module={m}
+                    index={i}
+                    active={isActive}
+                    onSelect={isActive ? undefined : () => setActive(i)}
+                  />
+                </motion.div>
               );
             })}
-          </div>
 
-          {/* Preview — vidrio 3D que se inclina al pasar el cursor (como el hero) */}
-          <div className="lg:sticky lg:top-28">
-            <TiltCard className="rounded-card">
-            <div className="overflow-hidden rounded-card border border-line bg-surface shadow-float">
-              <div className="flex items-center justify-between gap-3 border-b border-line bg-surface-2 px-5 py-3">
-                <p className="font-display text-sm font-semibold text-ink">{current.title}</p>
-                <span className="data text-[11px] text-muted">{current.tag}</span>
-              </div>
-              <div className="p-5">
-                <p className="mb-4 text-[14px] leading-relaxed text-muted">{current.description}</p>
-                <div className="h-[260px] overflow-hidden rounded-xl border border-line bg-surface-2/60 p-3.5">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={active}
-                      initial={reduce ? false : { opacity: 0, x: 22 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={reduce ? undefined : { opacity: 0, x: -22 }}
-                      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full"
-                    >
-                      {current.preview()}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
-            </TiltCard>
+            {/* Flechas */}
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="Módulo anterior"
+              className="absolute left-0 top-1/2 z-40 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-surface/90 text-ink shadow-soft backdrop-blur transition-[transform,border-color,color] duration-200 hover:border-brand/50 hover:text-brand-ink active:scale-95 sm:left-2"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="Módulo siguiente"
+              className="absolute right-0 top-1/2 z-40 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-line bg-surface/90 text-ink shadow-soft backdrop-blur transition-[transform,border-color,color] duration-200 hover:border-brand/50 hover:text-brand-ink active:scale-95 sm:right-2"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={2} />
+            </button>
           </div>
+        </Reveal>
+
+        {/* Puntos de navegación */}
+        <div className="mt-8 flex items-center justify-center gap-2">
+          {modules.map((m, i) => (
+            <button
+              key={m.tag}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={`Ir a ${m.tag}`}
+              aria-current={active === i}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                active === i ? "w-7 bg-brand" : "w-2 bg-line-strong hover:bg-muted"
+              }`}
+            />
+          ))}
         </div>
 
         {/* Capacidades adicionales */}
-        <div className="mt-10 flex flex-wrap items-center gap-2.5">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5">
           <span className="data text-[11px] uppercase tracking-wide text-muted">y además</span>
           {EXTRAS.map((e) => (
             <span
@@ -213,6 +244,79 @@ export default function ModuleShowcase() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ───────────────── Tarjeta de módulo ───────────────── */
+
+function ModuleCard({
+  module,
+  index,
+  active,
+  onSelect,
+}: {
+  module: ModuleData;
+  index: number;
+  active: boolean;
+  onSelect?: () => void;
+}) {
+  const Icon = module.icon;
+  return (
+    <div
+      className={`group relative w-full overflow-hidden rounded-[22px] border bg-surface shadow-float transition-colors duration-300 ${
+        active ? "border-brand/35" : "border-line"
+      }`}
+    >
+      {/* sheen de marca (esquina) + filo de vidrio superior */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-brand/10 blur-2xl"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"
+      />
+
+      <div className="relative p-6 sm:p-7">
+        <div className="mb-5 flex items-center gap-3.5">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-brand/12 text-brand-ink ring-1 ring-brand/15">
+            <Icon className="h-6 w-6" strokeWidth={1.7} />
+          </span>
+          <div className="min-w-0">
+            <span className="data block text-[11px] uppercase tracking-[0.16em] text-muted">
+              Módulo {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="block font-display text-sm font-semibold text-brand-ink">
+              {module.tag}
+            </span>
+          </div>
+        </div>
+
+        <h3 className="font-display text-[1.6rem] font-bold leading-tight text-ink">
+          {module.title}
+        </h3>
+        <p className="mt-2.5 line-clamp-2 text-[14.5px] leading-relaxed text-muted">
+          {module.description}
+        </p>
+
+        <div
+          aria-hidden
+          className="mt-5 h-[224px] overflow-hidden rounded-2xl border border-line bg-surface-2/60 p-3.5"
+        >
+          {module.preview()}
+        </div>
+      </div>
+
+      {/* Tarjetas laterales: overlay clicable para traerlas al frente */}
+      {onSelect && (
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={`Ver módulo ${module.tag}`}
+          className="absolute inset-0 z-20 cursor-pointer rounded-[22px]"
+        />
+      )}
+    </div>
   );
 }
 

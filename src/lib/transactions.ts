@@ -1,22 +1,52 @@
 import { promises as fs } from "fs";
 import path from "path";
 import type { StoredTransaction } from "./payphone";
+import { hasDatabase, query } from "./db";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Persistencia de transacciones (registro del primer pago / pago único).
+//
+// Dos backends, misma firma pública (saveTransaction / getTransaction):
+//   · Si DATABASE_URL está configurado → PostgreSQL (tabla `transactions`, upsert
+//     atómico por client_transaction_id → seguro ante escrituras concurrentes).
+//   · Si NO → archivo JSON `data/transactions.json` con escritura atómica
+//     (tmp + rename) y un mutex en proceso (comportamiento anterior de dioptrika).
+//
+// Así, correr en local con `npm run dev` sin Postgres no rompe nada; al levantar
+// la base (Docker) se usa automáticamente el backend seguro. El StoredTransaction
+// se guarda tal cual (JSONB) para conservar exactamente la misma forma.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Backend Postgres ─────────────────────────────────────────────────────────
+async function pgSave(tx: StoredTransaction): Promise<void> {
+  await query(
+    `INSERT INTO transactions (client_transaction_id, data, updated_at)
+     VALUES ($1, $2, now())
+     ON CONFLICT (client_transaction_id)
+     DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
+    [tx.clientTransactionId, JSON.stringify(tx)]
+  );
+}
+
+async function pgGet(clientTransactionId: string): Promise<StoredTransaction | null> {
+  const rows = await query<{ data: StoredTransaction }>(
+    "SELECT data FROM transactions WHERE client_transaction_id = $1",
+    [clientTransactionId]
+  );
+  return rows[0]?.data ?? null;
+}
+
+// ── Backend archivo JSON (fallback) ──────────────────────────────────────────
 const DATA_DIR = path.join(process.cwd(), "data");
 const FILE = path.join(DATA_DIR, "transactions.json");
 const TMP = `${FILE}.tmp`;
 
-// ---------------------------------------------------------------------------
 // Mutex en proceso: serializa TODA lectura-modificación-escritura del archivo.
 // En el VPS único (un solo proceso Node) esto elimina la carrera clásica de
-// "lost update": dos requests concurrentes que leen el mismo snapshot y se
-// pisan al escribir. Cada operación corre después de que la anterior termine.
-// Si se escala a multi-instancia, migrar a SQLite/Postgres con UNIQUE(clientTxId).
-// ---------------------------------------------------------------------------
+// "lost update": dos requests concurrentes que leen el mismo snapshot y se pisan.
 let lock: Promise<unknown> = Promise.resolve();
 function withLock<T>(fn: () => Promise<T>): Promise<T> {
   const result = lock.then(() => fn());
-  // La cola sigue viva pase lo que pase (no se envenena si fn rechaza).
   lock = result.then(
     () => undefined,
     () => undefined
@@ -54,7 +84,7 @@ async function writeAllUnlocked(list: StoredTransaction[]): Promise<void> {
   await fs.rename(TMP, FILE);
 }
 
-export async function saveTransaction(tx: StoredTransaction): Promise<void> {
+async function fileSave(tx: StoredTransaction): Promise<void> {
   await withLock(async () => {
     const list = await readAllUnlocked();
     const idx = list.findIndex((t) => t.clientTransactionId === tx.clientTransactionId);
@@ -64,36 +94,22 @@ export async function saveTransaction(tx: StoredTransaction): Promise<void> {
   });
 }
 
-export async function getTransaction(
-  clientTransactionId: string
-): Promise<StoredTransaction | null> {
+async function fileGet(clientTransactionId: string): Promise<StoredTransaction | null> {
   return withLock(async () => {
     const list = await readAllUnlocked();
     return list.find((t) => t.clientTransactionId === clientTransactionId) ?? null;
   });
 }
 
-/**
- * Compare-and-set atómico. Ejecuta `mutator` con el registro actual (o null si no
- * existe) DENTRO del lock y persiste lo que devuelva. Si `mutator` devuelve null,
- * no se escribe nada. Devuelve el registro persistido (o el actual si no hubo cambio).
- *
- * Permite transiciones seguras "solo el ganador escribe", p.ej. pending -> approved,
- * sin que dos confirmaciones concurrentes apliquen ambas el cambio y dupliquen efectos.
- */
-export async function updateTransaction(
-  clientTransactionId: string,
-  mutator: (current: StoredTransaction | null) => StoredTransaction | null
+// ── API pública ──────────────────────────────────────────────────────────────
+export async function saveTransaction(tx: StoredTransaction): Promise<void> {
+  if (hasDatabase()) return pgSave(tx);
+  return fileSave(tx);
+}
+
+export async function getTransaction(
+  clientTransactionId: string
 ): Promise<StoredTransaction | null> {
-  return withLock(async () => {
-    const list = await readAllUnlocked();
-    const idx = list.findIndex((t) => t.clientTransactionId === clientTransactionId);
-    const current = idx >= 0 ? list[idx] : null;
-    const next = mutator(current);
-    if (next === null) return current;
-    if (idx >= 0) list[idx] = next;
-    else list.push(next);
-    await writeAllUnlocked(list);
-    return next;
-  });
+  if (hasDatabase()) return pgGet(clientTransactionId);
+  return fileGet(clientTransactionId);
 }

@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.gitignore
+*.log
+npm-debug.log*
+.DS_Store
+reset-dev.ps1
+server-run.log
+data
+README*
+.vscode
+.idea
+*.tsbuildinfo
+# OJO: NO ignoramos .env — el build necesita las NEXT_PUBLIC_* para hornearlas.

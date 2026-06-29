@@ -54,7 +54,7 @@ export default function Contact() {
   return (
     <section id="contacto" className="relative overflow-hidden bg-canvas py-24 sm:py-28">
       <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
-      <div className="relative mx-auto max-w-6xl px-6">
+      <div className="relative mx-auto max-w-6xl px-6 2xl:max-w-[1720px]">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <motion.div
             variants={slideInLeft}

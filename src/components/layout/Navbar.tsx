@@ -41,7 +41,7 @@ export default function Navbar() {
           className={`pointer-events-auto mx-auto transition-[max-width,margin,background-color,border-color,box-shadow,backdrop-filter] duration-500 ease-out-expo border ${
             scrolled
               ? "mt-3 mx-3 sm:mx-auto max-w-[980px] rounded-pill border-line bg-surface/80 shadow-soft backdrop-blur-xl supports-[backdrop-filter]:bg-surface/70"
-              : "mt-0 max-w-7xl rounded-none border-transparent bg-transparent"
+              : "mt-0 max-w-7xl 2xl:max-w-[1720px] rounded-none border-transparent bg-transparent"
           }`}
         >
           <div className="px-4 sm:px-5 h-16 flex items-center justify-between gap-4">

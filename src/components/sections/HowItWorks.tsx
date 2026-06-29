@@ -59,7 +59,7 @@ export default function HowItWorks() {
 
   return (
     <section id="como-funciona" className="relative overflow-hidden bg-canvas py-24 sm:py-28">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="mx-auto max-w-6xl px-6 2xl:max-w-[1720px]">
         <div className="mb-12 max-w-2xl sm:mb-14">
           <Reveal variant="up">
             <h2

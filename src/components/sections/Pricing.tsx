@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import {
   Check,
   Lock,
@@ -9,19 +9,33 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  RefreshCw,
   type LucideIcon,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import PayphoneBox from "@/components/payphone/PayphoneBox";
+import { PhoneCountryField } from "@/components/payphone/PhoneCountryField";
 import { fadeInUp, VIEWPORT_DEFAULT } from "@/lib/animations";
+import { TOKENIZATION_ENABLED, RECURRING_CONSENT_TEXT } from "@/lib/consent";
+import { DEFAULT_COUNTRY, countryByIso } from "@/lib/countries";
 
 interface LeadForm {
   name: string;
   email: string;
   phone: string;
+  countryIso: string;
+  documentId: string;
+  consent: boolean;
 }
 
-const INITIAL: LeadForm = { name: "", email: "", phone: "" };
+const INITIAL: LeadForm = {
+  name: "",
+  email: "",
+  phone: "",
+  countryIso: DEFAULT_COUNTRY.iso,
+  documentId: "",
+  consent: true, // pre-marcado: la renovación automática viene activada por defecto
+};
 
 const PLAN_FEATURES = [
   "Historia clínica oftalmológica ilimitada",
@@ -38,6 +52,15 @@ interface InitResult {
   clientTransactionId: string;
   phone: string;
   email: string;
+  reference?: string;
+  amount: number;
+  amountWithTax: number;
+  amountWithoutTax: number;
+  tax: number;
+}
+
+function money(cents: number): string {
+  return `$${(cents / 100).toFixed(2)}`;
 }
 
 export default function Pricing() {
@@ -50,31 +73,62 @@ export default function Pricing() {
     setForm((s) => ({ ...s, [key]: value }));
   }
 
+  // Llama a /init y devuelve los datos del intento (o lanza con el mensaje de error).
+  const callInit = useCallback(async (payload: LeadForm): Promise<InitResult> => {
+    const dial = countryByIso(payload.countryIso)?.dial ?? DEFAULT_COUNTRY.dial;
+    const res = await fetch("/api/payphone/init", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        countryCode: dial,
+        documentId: payload.documentId,
+        consent: payload.consent,
+        planId: "unico",
+      }),
+    });
+    const data = (await res.json()) as Partial<InitResult> & { error?: string };
+    if (
+      !res.ok ||
+      !data.clientTransactionId ||
+      !data.phone ||
+      !data.email ||
+      typeof data.amount !== "number"
+    ) {
+      throw new Error(data.error || "No pudimos iniciar el pago.");
+    }
+    return data as InitResult;
+  }, []);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErrorMsg("");
+    if (TOKENIZATION_ENABLED && !form.consent) {
+      setErrorMsg("Debes autorizar la renovación automática para continuar.");
+      return;
+    }
     setStage("loading");
     try {
-      const res = await fetch("/api/payphone/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = (await res.json()) as Partial<InitResult> & { error?: string };
-      if (!res.ok || !data.clientTransactionId || !data.phone || !data.email) {
-        throw new Error(data.error || "No pudimos iniciar el pago.");
-      }
-      setInitData({
-        clientTransactionId: data.clientTransactionId,
-        phone: data.phone,
-        email: data.email,
-      });
+      setInitData(await callInit(form));
       setStage("pay");
     } catch (err) {
       setErrorMsg((err as Error).message);
       setStage("error");
     }
   }
+
+  // La Cajita avisó "id duplicado": pedimos un clientTransactionId NUEVO y
+  // remontamos la Cajita con él (mismos datos del titular).
+  const refreshInit = useCallback(async () => {
+    try {
+      setInitData(await callInit(form));
+    } catch (err) {
+      setErrorMsg((err as Error).message);
+      setStage("error");
+    }
+  }, [callInit, form]);
 
   function reset() {
     setStage("form");
@@ -83,25 +137,25 @@ export default function Pricing() {
   }
 
   return (
-    <section id="planes" className="relative overflow-hidden bg-canvas py-24 sm:py-28">
+    <section id="planes" className="relative overflow-hidden bg-canvas py-20 sm:py-28">
       <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
 
-      <div className="relative mx-auto max-w-6xl px-6">
+      <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-6 2xl:max-w-[1560px]">
         <motion.div
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT_DEFAULT}
-          className="mx-auto mb-14 max-w-2xl text-center"
+          className="mx-auto mb-10 max-w-2xl text-center sm:mb-14"
         >
           <span className="kicker">Planes</span>
           <h2
-            className="mt-4 font-display font-bold text-ink"
-            style={{ fontSize: "clamp(1.9rem, 3.6vw, 2.75rem)" }}
+            className="mt-4 text-balance font-display font-bold text-ink"
+            style={{ fontSize: "clamp(1.75rem, 3.6vw, 2.75rem)" }}
           >
             Un solo plan. <span className="text-brand-ink">Todo incluido.</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-muted">
+          <p className="mx-auto mt-4 max-w-xl text-pretty text-[1.0625rem] leading-relaxed text-muted">
             Sin permanencias, sin sorpresas. Activas tu óptica hoy y empiezas a operar con
             Dioptrika en menos de 24 horas.
           </p>
@@ -112,14 +166,14 @@ export default function Pricing() {
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT_DEFAULT}
-          className="relative mx-auto max-w-5xl overflow-hidden rounded-[20px] border border-line bg-surface shadow-float"
+          className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-line bg-surface shadow-float 2xl:max-w-[1380px]"
         >
           <CheckoutHeader stage={stage} />
 
           <div className="grid grid-cols-1 gap-0 lg:grid-cols-[1fr_1.15fr]">
             <OrderSummary />
 
-            <div className="border-t border-line bg-surface-2/40 p-7 sm:p-9 lg:border-l lg:border-t-0">
+            <div className="border-t border-line bg-surface-2/40 p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-9">
               {stage === "form" && (
                 <FormStage form={form} update={update} onSubmit={handleSubmit} />
               )}
@@ -133,13 +187,13 @@ export default function Pricing() {
 
               {stage === "pay" && initData && (
                 <PayStage
-                  clientTransactionId={initData.clientTransactionId}
-                  email={initData.email}
-                  phone={initData.phone}
+                  initData={initData}
+                  documentId={form.documentId}
                   onError={(msg) => {
                     setErrorMsg(msg);
                     setStage("error");
                   }}
+                  onDuplicate={refreshInit}
                   onBack={reset}
                 />
               )}
@@ -165,7 +219,7 @@ function CheckoutHeader({ stage }: { stage: Stage }) {
     stage === "form" ? 0 : stage === "loading" || stage === "pay" ? 1 : stage === "error" ? 1 : 2;
 
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-line bg-surface-2/60 px-7 py-5 sm:px-9">
+    <div className="flex items-center justify-between gap-4 border-b border-line bg-surface-2/60 px-5 py-4 sm:px-9 sm:py-5">
       <div className="flex items-center gap-2.5">
         <div className="grid h-8 w-8 place-items-center rounded-lg bg-cta text-cta-on">
           <ShieldCheck className="h-4 w-4" strokeWidth={2.2} />
@@ -211,22 +265,16 @@ function CheckoutHeader({ stage }: { stage: Stage }) {
 
 function OrderSummary() {
   return (
-    <div className="p-7 sm:p-9">
+    <div className="p-5 sm:p-7 lg:p-9">
       <div className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
         Resumen de tu orden
       </div>
 
-      <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
-        <div className="min-w-0 flex-1">
-          <div className="mb-0.5 font-display text-base font-semibold text-ink">
-            Dioptrika — Plan Único
-          </div>
-          <div className="text-sm text-muted">Suscripción mensual · cancelas cuando quieras</div>
+      <div className="border-b border-line pb-5">
+        <div className="mb-0.5 font-display text-base font-semibold text-ink">
+          Dioptrika — Plan Único
         </div>
-        <div className="shrink-0 text-right">
-          <div className="data text-lg font-bold text-ink">$30.00</div>
-          <div className="text-[11px] text-muted">/ mes</div>
-        </div>
+        <div className="text-sm text-muted">Suscripción mensual · cancelas cuando quieras</div>
       </div>
 
       {/* Stagger SOLO de la lista (columna izquierda, transform/opacity, sin
@@ -249,19 +297,16 @@ function OrderSummary() {
         ))}
       </ul>
 
-      <div className="mt-2 space-y-2 border-t border-line pt-5">
-        <LineItem label="Subtotal" value="$26.09" muted />
-        <LineItem label="IVA (15%)" value="$3.91" muted />
-        <div className="mt-1 border-t border-dashed border-line pt-3">
-          <div className="flex items-baseline justify-between">
-            <span className="font-display text-base font-semibold text-ink">Total a pagar</span>
-            <div className="text-right">
-              <span className="data text-2xl font-bold text-ink">$30.00</span>
-              <span className="ml-1.5 text-[11px] text-muted">USD</span>
-            </div>
-          </div>
+      <div className="mt-2 flex items-baseline justify-between border-t border-line pt-5">
+        <span className="font-display text-base font-semibold text-ink">Plan Único</span>
+        <div className="text-right">
+          <span className="data text-2xl font-bold text-ink">$30.00</span>
+          <span className="ml-1.5 text-[11px] text-muted">/ mes</span>
         </div>
       </div>
+      <p className="mt-1.5 text-[11px] leading-snug text-muted">
+        + IVA 15% — se calcula y muestra al confirmar el pago.
+      </p>
 
       <div className="mt-6 flex items-center gap-2 rounded-lg border border-brand/25 bg-brand/[0.06] px-3 py-2.5">
         <Lock className="h-3.5 w-3.5 shrink-0 text-brand-ink" strokeWidth={2} />
@@ -273,25 +318,14 @@ function OrderSummary() {
   );
 }
 
-function LineItem({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <span className={`text-sm ${muted ? "text-muted" : "text-ink-2"}`}>{label}</span>
-      <span className={`data text-sm ${muted ? "text-ink-2" : "font-semibold text-ink"}`}>
-        {value}
-      </span>
-    </div>
-  );
-}
-
 function CheckoutFooter() {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2/50 px-7 py-4 sm:px-9">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface-2/50 px-5 py-4 sm:px-9">
       <div className="flex items-center gap-2 text-[11px] text-muted">
         <Lock className="h-3 w-3" strokeWidth={2} /> Pago procesado por{" "}
         <span className="font-semibold text-ink-2">Payphone Ecuador</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <CardBadge label="VISA" />
         <CardBadge label="Mastercard" />
         <CardBadge label="Diners" />
@@ -344,7 +378,19 @@ function FormStage({
           required
           autoComplete="email"
         />
-        <PhoneField value={form.phone} onChange={(v) => update("phone", v)} />
+        <PhoneCountryField
+          countryIso={form.countryIso}
+          onCountry={(v) => update("countryIso", v)}
+          value={form.phone}
+          onChange={(v) => update("phone", v)}
+        />
+
+        {TOKENIZATION_ENABLED && (
+          <>
+            <DocumentIdField value={form.documentId} onChange={(v) => update("documentId", v)} />
+            <ConsentCheckbox checked={form.consent} onChange={(v) => update("consent", v)} />
+          </>
+        )}
 
         <div className="pt-3">
           <Button size="lg" className="w-full justify-center">
@@ -362,17 +408,39 @@ function FormStage({
   );
 }
 
+function PriceBreakdown({ initData }: { initData: InitResult }) {
+  return (
+    <div className="mb-4 rounded-xl border border-line bg-surface p-4">
+      <div className="flex items-baseline justify-between py-1">
+        <span className="text-sm text-ink-2">Plan Único</span>
+        <span className="data text-sm font-semibold text-ink">{money(initData.amountWithTax)}</span>
+      </div>
+      <div className="flex items-baseline justify-between py-1">
+        <span className="text-sm text-ink-2">IVA (15%)</span>
+        <span className="data text-sm font-semibold text-ink">{money(initData.tax)}</span>
+      </div>
+      <div className="mt-1 flex items-baseline justify-between border-t border-dashed border-line pt-2.5">
+        <span className="font-display text-base font-semibold text-ink">Total a pagar</span>
+        <div className="text-right">
+          <span className="data text-xl font-bold text-ink">{money(initData.amount)}</span>
+          <span className="ml-1 text-[11px] text-muted">USD</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PayStage({
-  clientTransactionId,
-  email,
-  phone,
+  initData,
+  documentId,
   onError,
+  onDuplicate,
   onBack,
 }: {
-  clientTransactionId: string;
-  email: string;
-  phone: string;
+  initData: InitResult;
+  documentId: string;
   onError: (m: string) => void;
+  onDuplicate: () => void;
   onBack: () => void;
 }) {
   return (
@@ -391,12 +459,32 @@ function PayStage({
         Completa los datos de tu tarjeta en la pasarela cifrada de Payphone.
       </p>
 
-      <div className="mb-4 rounded-xl border border-line bg-surface-2/50 p-4 sm:p-5">
+      {/* El IVA y el total se muestran AQUÍ, en el paso de pago. */}
+      <PriceBreakdown initData={initData} />
+
+      {TOKENIZATION_ENABLED && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-brand/25 bg-brand/[0.06] px-3 py-2.5">
+          <RefreshCw className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-ink" strokeWidth={2} />
+          <span className="text-[12px] leading-snug text-ink-2">
+            Tu plan se renovará automáticamente cada mes. Podrás cancelarlo cuando quieras
+            desde el enlace que te enviaremos.
+          </span>
+        </div>
+      )}
+
+      <div className="mb-4">
         <PayphoneBox
-          clientTransactionId={clientTransactionId}
-          email={email}
-          phone={phone}
+          clientTransactionId={initData.clientTransactionId}
+          email={initData.email}
+          phone={initData.phone}
+          documentId={documentId || undefined}
+          amount={initData.amount}
+          amountWithTax={initData.amountWithTax}
+          amountWithoutTax={initData.amountWithoutTax}
+          tax={initData.tax}
+          reference={initData.reference}
           onError={onError}
+          onDuplicate={onDuplicate}
         />
       </div>
 
@@ -404,7 +492,9 @@ function PayStage({
         <span className="inline-flex items-center gap-1.5 text-[11px] text-muted">
           <Lock className="h-3 w-3" /> Conexión cifrada extremo a extremo
         </span>
-        <span className="data text-[10px] text-muted">Ref: {clientTransactionId.slice(4, 22)}</span>
+        <span className="data text-[10px] text-muted">
+          Ref: {initData.clientTransactionId.slice(4, 22)}
+        </span>
       </div>
     </div>
   );
@@ -458,57 +548,59 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         autoComplete={autoComplete}
-        className="w-full rounded-lg border border-line bg-surface px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-focus/35"
+        className="w-full rounded-lg border border-line bg-surface px-4 py-3 text-[16px] text-ink placeholder:text-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-focus/35 sm:text-[15px]"
       />
     </label>
   );
 }
 
-function PhoneField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  function handleChange(raw: string) {
-    const cleaned = raw.replace(/[^\d]/g, "").slice(0, 10);
-    onChange(cleaned);
-  }
-
-  const hint = (() => {
-    if (!value) return "Ingresa tu celular (10 dígitos, ej. 0994312472)";
-    const digits = value.replace(/\D/g, "");
-    let local = digits;
-    if (local.startsWith("593")) local = local.slice(3);
-    if (local.startsWith("0")) local = local.slice(1);
-    if (/^9\d{8}$/.test(local)) return `Se enviará como +593${local}`;
-    return "Debe ser un celular ecuatoriano válido (empieza con 09)";
-  })();
-
+function DocumentIdField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const digits = value.replace(/\D/g, "");
-  let local = digits;
-  if (local.startsWith("593")) local = local.slice(3);
-  if (local.startsWith("0")) local = local.slice(1);
-  const valid = /^9\d{8}$/.test(local);
-
+  const valid = /^\d{10}$/.test(digits) || /^\d{13}$/.test(digits);
+  const hint = !value
+    ? "Cédula (10 dígitos) o RUC (13 dígitos)"
+    : valid
+      ? "Documento válido"
+      : "Debe tener 10 (cédula) o 13 (RUC) dígitos";
   return (
     <label className="block">
       <span className="mb-2 block text-[12px] font-semibold uppercase tracking-wider text-muted">
-        Celular <span className="text-brand-ink">*</span>
+        Cédula o RUC <span className="text-brand-ink">*</span>
       </span>
-      <div className="relative flex items-stretch overflow-hidden rounded-lg border border-line bg-surface transition-all focus-within:border-brand focus-within:ring-2 focus-within:ring-focus/35">
-        <span className="data inline-flex select-none items-center border-r border-line bg-surface-2 px-3 text-sm text-muted">
-          🇪🇨 +593
-        </span>
-        <input
-          type="tel"
-          inputMode="numeric"
-          placeholder="0994312472"
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
-          required
-          autoComplete="tel-national"
-          className="flex-1 bg-transparent px-4 py-3 text-[15px] text-ink placeholder:text-muted/60 focus:outline-none"
-        />
-      </div>
+      <input
+        type="text"
+        inputMode="numeric"
+        placeholder="0102030405"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 13))}
+        required
+        autoComplete="off"
+        className="w-full rounded-lg border border-line bg-surface px-4 py-3 text-[16px] text-ink placeholder:text-muted/60 transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-focus/35 sm:text-[15px]"
+      />
       <span className={`mt-1.5 block text-[11px] ${valid ? "text-brand-ink" : "text-muted"}`}>
         {hint}
       </span>
+    </label>
+  );
+}
+
+function ConsentCheckbox({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line bg-surface px-4 py-3">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        required
+        className="mt-0.5 h-5 w-5 shrink-0 accent-[rgb(var(--brand))]"
+      />
+      <span className="text-[12px] leading-snug text-ink-2">{RECURRING_CONSENT_TEXT}</span>
     </label>
   );
 }

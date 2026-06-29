@@ -48,7 +48,7 @@ export default function Differentiators() {
   return (
     <section id="por-que" className="relative overflow-hidden bg-surface-2 py-24 sm:py-28">
       <div aria-hidden className="rule-soft absolute inset-x-0 top-0" />
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="mx-auto max-w-6xl px-6 2xl:max-w-[1720px]">
         <div className="mb-12 max-w-3xl sm:mb-16">
           <Reveal variant="up">
             <span className="kicker">Por qué Dioptrika</span>

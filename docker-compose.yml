@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Stack completo de Dioptrika: app (Next.js) + Postgres. TODO se crea solo.
+#
+#   docker compose up -d --build
+#
+# En el PRIMER arranque, el contenedor de Postgres crea automáticamente:
+#   · la base `dioptrika` y el usuario `dioptrika` con tu contraseña fuerte
+#     (POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD, desde .env), y
+#   · el ESQUEMA: monta ./migrations en /docker-entrypoint-initdb.d → corre
+#     001_init.sql al inicializar (tablas subscriptions/charges/transactions).
+#
+# La contraseña vive en .env (gitignored) → NUNCA en git. Aquí solo se referencia.
+# Puertos (solo 127.0.0.1): web=3006, db=5434 (flujora usa 3005/5433; no chocan).
+# Migraciones NUEVAS tras el primer arranque:
+#   docker compose exec -T db psql -U dioptrika -d dioptrika -f - < migrations/00X.sql
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: dioptrika-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dioptrika
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: dioptrika
+      # Conexiones piden contraseña cifrada (scram), no "trust".
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    # Solo localhost: NUNCA exponemos Postgres a internet. 5434 evita chocar con
+    # otro Postgres (5432) o con flujora (5433). La app lo alcanza por la red interna
+    # como db:5432; desde el host (psql / npm run dev / migraciones) por 127.0.0.1:5434.
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - dioptrika-pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dioptrika -d dioptrika"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: dioptrika-web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Dentro de la red de compose la BD es el servicio `db` en 5432 (no localhost).
+      # Este valor PISA al DATABASE_URL del .env (que apunta a 127.0.0.1:5434 para uso
+      # desde el host con npm run dev). Así funciona en ambos contextos.
+      DATABASE_URL: postgresql://dioptrika:${POSTGRES_PASSWORD}@db:5432/dioptrika
+    # Solo localhost (detrás de tu nginx). WEB_PORT viene del .env (default 3006).
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3006}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dioptrika-pgdata:

@@ -50,7 +50,7 @@ function ClinicalConsole() {
           <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand/12 text-brand-ink">
             <Eye className="h-3.5 w-3.5" strokeWidth={2} />
           </span>
-          <span className="data flex-1 truncate text-[12px] text-muted">app.dioptrika.com</span>
+          <span className="data flex-1 truncate text-[12px] text-muted">dioptrika.com</span>
           <span className="flex items-center gap-1.5 text-[11px] font-medium text-brand-ink">
             <span className="h-1.5 w-1.5 rounded-full bg-brand motion-safe:animate-pulse" />
             En línea
@@ -187,6 +187,14 @@ export default function Hero() {
           .to(".hero-rxrow", { opacity: 1, x: 0, duration: 0.5, stagger: 0.08 }, "-=0.95")
           .to(".hero-readout", { opacity: 1, x: 0, scale: 1, duration: 0.7 }, "-=0.6")
           .to(".hero-foot", { y: 0, opacity: 1, duration: 0.6 }, "-=0.35");
+
+        // Flotación 3D ambiental: la consola "flota" suave en el espacio (bob +
+        // balanceo 3D) con ciclos de distinta duración → se siente orgánico, no
+        // robótico. Vive en su propia capa (.hero-float) para no chocar con el
+        // tilt del cursor (.hero-console) ni la entrada (.hero-visual).
+        gsap.to(".hero-float", { y: -13, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.3 });
+        gsap.to(".hero-float", { rotationX: 2.6, duration: 4.3, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.3 });
+        gsap.to(".hero-float", { rotationY: -3.2, duration: 5.2, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.3 });
       }
 
       // ── Presentación por scroll: hero FIJADO mientras se compone (estilo Sira) ──
@@ -311,7 +319,7 @@ export default function Hero() {
         {/* retícula de lente (motivo de marca) */}
         <LensReticle className="hero-reticle pointer-events-none absolute -right-40 top-24 hidden h-[560px] w-[560px] text-brand/15 lg:block" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-32 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-24 lg:pt-28">
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-32 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-24 lg:pt-28 2xl:max-w-[1720px] 2xl:gap-20">
           {/* ---------- Copy ---------- */}
           <div className="hero-copy flex flex-col gap-6">
             <div className="hero-badge">
@@ -320,7 +328,7 @@ export default function Hero() {
 
             <h1
               className="font-display font-extrabold leading-[1.0] tracking-[-0.03em] text-ink"
-              style={{ fontSize: "clamp(2.6rem, 6vw, 5rem)" }}
+              style={{ fontSize: "clamp(2.6rem, 5.6vw, 5.75rem)" }}
             >
               <Line>Precisión clínica</Line>
               <Line>para gestionar ópticas</Line>
@@ -360,12 +368,15 @@ export default function Hero() {
           </div>
 
           {/* ---------- Visual ---------- */}
-          <div className="relative mx-auto w-full max-w-xl [perspective:1300px]">
+          <div className="relative mx-auto w-full max-w-xl [perspective:1300px] 2xl:max-w-2xl">
             {/* hero-stage: lo que crece/centra el scroll */}
             <div ref={stageRef} className="hero-stage [transform-style:preserve-3d]">
-              {/* hero-console: lo que ensambla la entrada + el tilt del cursor */}
+              {/* hero-console: el tilt 3D del cursor */}
               <div ref={consoleRef} className="hero-console [transform-style:preserve-3d]">
-                <ClinicalConsole />
+                {/* hero-float: flotación 3D ambiental (independiente del tilt) */}
+                <div className="hero-float [transform-style:preserve-3d]">
+                  <ClinicalConsole />
+                </div>
               </div>
             </div>
           </div>

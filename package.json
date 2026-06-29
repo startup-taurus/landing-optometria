@@ -6,7 +6,8 @@
     "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -16,12 +17,15 @@
     "lenis": "^1.1.9",
     "lucide-react": "^0.400.0",
     "next": "^14.2.35",
+    "pg": "^8.22.0",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.33.5",
     "tailwind-merge": "^2.4.0"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

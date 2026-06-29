@@ -1,4 +1,5 @@
 import type { StoredTransaction } from "./payphone";
+import { WHATSAPP_DISPLAY } from "./contact";
 
 interface SendArgs {
   to: string | string[];
@@ -85,17 +86,32 @@ function row(label: string, value: string): string {
   </tr>`;
 }
 
-export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> {
+export async function sendCustomerReceipt(
+  tx: StoredTransaction,
+  cancelUrl?: string
+): Promise<void> {
+  // Bloque de gestión/cancelación self-service. Solo cuando hay suscripción
+  // (cobro recurrente): el cliente DEBE guardar este enlace para cancelar cuando
+  // quiera, sin depender de soporte.
+  const cancelBlock = cancelUrl
+    ? `
+    <div style="margin:18px 0;padding:14px 16px;border:1px solid ${BRAND_COLOR}40;border-radius:12px;background:${BRAND_COLOR}14">
+      <p style="margin:0 0 8px;color:#FFFFFF;font-size:14px;font-weight:600">Tu plan se renueva automáticamente cada mes.</p>
+      <p style="margin:0 0 10px;color:#B7D1D2;font-size:13px">Puedes cancelarlo cuando quieras desde tu enlace personal. <strong>Guárdalo</strong>, es solo tuyo:</p>
+      <p style="margin:0"><a href="${cancelUrl}" style="color:${BRAND_COLOR};font-size:14px;font-weight:700;word-break:break-all">Gestionar o cancelar mi suscripción</a></p>
+    </div>`
+    : "";
   const body = `
     <p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago correctamente.</p>
     <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y un correo del equipo de soporte con los pasos para empezar a usar Dioptrika.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
       ${row("Plan", "Dioptrika — Plan Único mensual")}
-      ${row("Monto", fmtAmountCents(tx.payphoneTransactionId ? 3000 : 3000))}
+      ${row("Monto", fmtAmountCents(tx.amount))}
       ${row("Referencia", tx.clientTransactionId)}
       ${tx.authorizationCode ? row("Autorización", tx.authorizationCode) : ""}
       ${tx.cardBrand && tx.lastDigits ? row("Tarjeta", `${tx.cardBrand} ···· ${tx.lastDigits}`) : ""}
     </table>
+    ${cancelBlock}
     <p style="color:#7d9999;font-size:13px">Guarda este correo como comprobante. Si tienes dudas, escríbenos por WhatsApp al <strong>+593 99 592 3599</strong>.</p>
   `;
   await sendViaResend({
@@ -168,5 +184,93 @@ export async function sendAmountMismatchAlert(
     to: recipients,
     subject: `⚠️ Monto NO coincide — revisar/reembolsar — ${tx.lead.name}`,
     html: shell("Monto de pago no coincide", body),
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COBRO RECURRENTE (tokenización) — recibos de renovación, dunning y conciliación.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Recibo de RENOVACIÓN automática (cobro recurrente aprobado).
+export async function sendRenewalReceipt(input: {
+  name: string;
+  email: string;
+  planLabel: string;
+  amountCents: number;
+  reference: string;
+  authorizationCode?: string | null;
+  cardBrand?: string | null;
+  lastDigits?: string | null;
+  nextChargeAt?: string | null;
+}): Promise<void> {
+  const body = `
+    <p>¡Hola ${escapeHtml(input.name)}! Renovamos tu plan automáticamente.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
+      ${row("Plan", input.planLabel)}
+      ${row("Monto", fmtAmountCents(input.amountCents))}
+      ${row("Referencia", input.reference)}
+      ${input.authorizationCode ? row("Autorización", input.authorizationCode) : ""}
+      ${input.cardBrand && input.lastDigits ? row("Tarjeta", `${input.cardBrand} ···· ${input.lastDigits}`) : ""}
+      ${input.nextChargeAt ? row("Próxima renovación", new Date(input.nextChargeAt).toLocaleDateString("es-EC")) : ""}
+    </table>
+    <p style="color:#7d9999;font-size:13px">Si quieres cancelar la renovación automática, escríbenos por WhatsApp al <strong>${WHATSAPP_DISPLAY}</strong>.</p>
+  `;
+  await sendViaResend({
+    to: input.email,
+    subject: "Renovación procesada — Dioptrika",
+    html: shell("Renovación de tu plan", body),
+  });
+}
+
+// Aviso de cobro FALLIDO (dunning): la tarjeta fue rechazada.
+export async function sendDunningEmail(input: {
+  name: string;
+  email: string;
+  planLabel: string;
+  amountCents: number;
+  willRetry: boolean;
+}): Promise<void> {
+  const retryLine = input.willRetry
+    ? "<p>Volveremos a intentar el cobro en los próximos días. No necesitas hacer nada si tu tarjeta ya tiene fondos.</p>"
+    : "<p>No pudimos completar el cobro tras varios intentos. Tu plan quedó en pausa. Escríbenos para reactivarlo.</p>";
+  const body = `
+    <p>Hola ${escapeHtml(input.name)}, no pudimos procesar la renovación de tu plan.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
+      ${row("Plan", input.planLabel)}
+      ${row("Monto", fmtAmountCents(input.amountCents))}
+    </table>
+    ${retryLine}
+    <p style="color:#7d9999;font-size:13px">¿Necesitas ayuda? Escríbenos por WhatsApp al <strong>${WHATSAPP_DISPLAY}</strong>.</p>
+  `;
+  await sendViaResend({
+    to: input.email,
+    subject: "No pudimos renovar tu plan — Dioptrika",
+    html: shell("Problema con tu renovación", body),
+  });
+}
+
+// Alerta interna: un cobro quedó ambiguo y la suscripción se pausó para conciliar.
+export async function sendReconcileAlert(input: {
+  subscriptionId: string;
+  customerEmail: string;
+  message: string;
+}): Promise<void> {
+  const recipients = notifyRecipients();
+  if (recipients.length === 0) {
+    console.log("[email] NOTIFY_EMAIL vacío, no se envía alerta de conciliación");
+    return;
+  }
+  const body = `
+    <p>Un cobro recurrente quedó en estado ambiguo y la suscripción se <strong>pausó</strong> para evitar doble cobro. Revisa en Payphone si el cobro se realizó y reactiva la suscripción manualmente.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
+      ${row("Suscripción", input.subscriptionId)}
+      ${row("Cliente", input.customerEmail)}
+      ${row("Detalle", input.message)}
+    </table>
+  `;
+  await sendViaResend({
+    to: recipients,
+    subject: "Cobro a conciliar — Dioptrika",
+    html: shell("Cobro recurrente a conciliar", body),
   });
 }

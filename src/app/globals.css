@@ -70,8 +70,15 @@
 }
 
 html {
+  /* DEFENSA CRÍTICA (cajita Payphone): su hoja de estilos v2.0 inyecta
+     `:root { font-size: 13px }` SIN scope al abrir el pago. Como toda la página
+     usa rem (Tailwind), eso reescala TODO al ~81% → la cajita "se contrae" y se
+     queda pegada incluso al volver atrás. Re-fijamos la base en 16px con
+     !important para ganarle (el `:root` de Payphone no usa !important). */
+  font-size: 16px !important;
   scroll-behavior: auto;
   background: rgb(var(--canvas));
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -82,6 +89,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
+  font-size: 16px;
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
@@ -242,75 +250,80 @@ p {
 }
 
 /* ============================================================
-   Payphone Cajita — overrides visuales (tema Dioptrika oscuro)
-   Mapeado a las clases REALES del bundle v1.1:
-   - .payment-box                 contenedor principal
-   - .ppb-form-control            inputs
-   - .ppb-input-group             input + icono
-   - .ppb-input-group-text        icono adyacente
-   - .ppb-label                   labels
-   - .ppb-btn.ppb-btn-pay         botón principal Pagar
-   - .btn-card                    selector método tarjeta
-   - .ppb-text-danger             errores
-   - .ppb-hr / .ppb-dashed        separadores
-   - .country-selector            selector cédula
+   Payphone Cajita — diseño PORTADO de landing-management (flujora).
+   Tema CLARO igual que en flujora: el selector de método queda como SOLO los
+   logos (sin recuadros), inputs claros con foco verde, botón Pagar en degradado
+   verde. Como el checkout de dioptrika es OSCURO, la cajita lleva su PROPIA
+   superficie blanca para que se lea bien y se vea como un panel limpio.
+
+   PRINCIPIO: adaptamos COLOR / TIPOGRAFÍA / radios / sombras y micro-interacciones
+   autocontenidas. El LAYOUT lo gobierna Payphone (su CSS oficial v2.0 es Bootstrap):
+   NO tocamos su grilla (.ppb-row/.ppb-col) ni el ancho flex de los inputs dentro de
+   .ppb-input-group ni la geometría del selector de país. Los íconos llevan
+   flex-shrink:0 para no aplastarse.
    ============================================================ */
 #pp-button {
-  --dpk-green: #14B875;
-  --dpk-green-deep: #087A5A;
-  --dpk-green-soft: rgba(20, 184, 117, 0.12);
-  --dpk-green-ring: rgba(20, 184, 117, 0.18);
-  --dpk-dark: #071A1F;
-  --dpk-surface: #0B1D22;
-  --dpk-surface-2: #0D252C;
-  --dpk-border: #1D4650;
-  --dpk-border-soft: rgba(29, 70, 80, 0.5);
-  --dpk-text: #F8FBFA;
-  --dpk-muted: #B7D1D2;
-  --dpk-muted-soft: rgba(183, 209, 210, 0.55);
+  --pp-green: #14B875;
+  --pp-green-deep: #0FA068;
+  --pp-green-soft: rgba(20, 184, 117, 0.10);
+  --pp-green-ring: rgba(20, 184, 117, 0.22);
+  --pp-accent: #14B875;
+  --pp-dark: #ffffff;
+  --pp-surface: #f6f8f7;
+  --pp-surface-2: #edf1ef;
+  --pp-border: #e4eae7;
+  --pp-border-soft: rgba(210, 220, 215, 0.7);
+  --pp-text: #0e1a15;
+  --pp-muted: #5e6a63;
 
-  font-family: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
-  color: var(--dpk-text);
+  /* Superficie propia: la cajita es CLARA y vive sobre el checkout OSCURO. */
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 18px;
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  color: var(--pp-text);
   font-size: 14px;
   line-height: 1.5;
 }
 
-/* Tema CLARO: redefine SOLO las variables de color → la cajita cambia de tema
-   sin tocar ninguna regla, ningún markup ni el comportamiento del widget. Los
-   iframes de tarjeta/OTP/3DS son cross-origin y no se ven afectados por CSS. */
-[data-theme="light"] #pp-button {
-  --dpk-green: #0B7B57;
-  --dpk-green-deep: #066b4e;
-  --dpk-green-soft: rgba(20, 184, 117, 0.10);
-  --dpk-green-ring: rgba(20, 184, 117, 0.22);
-  --dpk-dark: #ffffff;
-  --dpk-surface: #f1f6f4;
-  --dpk-surface-2: #edf3f0;
-  --dpk-border: #d7e4de;
-  --dpk-border-soft: rgba(199, 216, 209, 0.7);
-  --dpk-text: #0e2024;
-  --dpk-muted: #4c5f64;
-  --dpk-muted-soft: rgba(76, 95, 100, 0.55);
-}
+/* Tema OSCURO: la cajita RESPONDE al cambio de tema de la página. En modo oscuro
+   redefine SOLO las variables de color + su superficie → deja de verse como un
+   bloque blanco y combina con el checkout oscuro. (Default = claro, como flujora.)
+   Todas las reglas de abajo usan var(--pp-*), así que cambian de tema sin tocarlas.
+   Los iframes de tarjeta/OTP/3DS son cross-origin y no se ven afectados por CSS. */
+[data-theme="dark"] #pp-button {
+  --pp-green: #14B875;
+  --pp-green-deep: #0FA068;
+  --pp-green-soft: rgba(20, 184, 117, 0.12);
+  --pp-green-ring: rgba(20, 184, 117, 0.20);
+  --pp-dark: #071A1F;
+  --pp-surface: #0B1D22;
+  --pp-surface-2: #0D252C;
+  --pp-border: #1D4650;
+  --pp-border-soft: rgba(29, 70, 80, 0.55);
+  --pp-text: #F8FBFA;
+  --pp-muted: #B7D1D2;
 
-/* Placeholder y errores con contraste correcto sobre fondo claro. */
-[data-theme="light"] #pp-button input::placeholder,
-[data-theme="light"] #pp-button .ppb-form-control::placeholder {
-  color: rgba(76, 95, 100, 0.65) !important;
+  background: #0B1D22;
+  box-shadow: inset 0 0 0 1px var(--pp-border);
 }
-[data-theme="light"] #pp-button .ppb-text-danger,
-[data-theme="light"] #pp-button .ppb-error-message,
-[data-theme="light"] #pp-button .ppb-error-message-content,
-[data-theme="light"] #pp-button .ppb-error-message-description {
-  color: #c2362c !important;
+[data-theme="dark"] #pp-button input::placeholder,
+[data-theme="dark"] #pp-button .ppb-form-control::placeholder {
+  color: rgba(183, 209, 210, 0.42) !important;
 }
-[data-theme="light"] #pp-button .ppb-footer-image {
-  filter: contrast(1.05) brightness(0.92);
+[data-theme="dark"] #pp-button .ppb-text-danger,
+[data-theme="dark"] #pp-button .ppb-error-message,
+[data-theme="dark"] #pp-button .ppb-error-message-content,
+[data-theme="dark"] #pp-button .ppb-error-message-description {
+  color: #fca5a5 !important;
+}
+[data-theme="dark"] #pp-button .ppb-footer-image {
+  filter: brightness(1.18) contrast(0.95);
 }
 
 #pp-button .payment-box {
   background: transparent !important;
-  color: var(--dpk-text) !important;
+  color: var(--pp-text) !important;
   padding: 0 !important;
 }
 
@@ -320,64 +333,91 @@ p {
   box-sizing: border-box;
 }
 
-/* Reset de elementos sueltos */
 #pp-button .ppb-content,
 #pp-button .ppb-content-otp,
 #pp-button .ppb-body,
 #pp-button .content-payment-box {
   background: transparent !important;
-  color: var(--dpk-text) !important;
+  color: var(--pp-text) !important;
 }
 
-/* ---------- Selector de método de pago (los 2 botones grandes) ---------- */
-#pp-button .ppb-row {
-  margin-left: -6px !important;
-  margin-right: -6px !important;
-}
-
-#pp-button .ppb-row > [class*="ppb-col"] {
-  padding-left: 6px !important;
-  padding-right: 6px !important;
-}
-
+/* ---------- Selector de método de pago ---------- */
+/* La grilla (.ppb-row / .ppb-col-*) es Bootstrap: usa gutters propios
+   (margin negativo en la fila + padding en las columnas). NO la tocamos:
+   sobreescribir esos márgenes desacopla las columnas del formulario de
+   tarjeta (MM/AA · CVV). Dejamos que Payphone gobierne el layout; nosotros
+   solo adaptamos color/tipografía. */
+/* Selector de método de pago — estructura real de Payphone:
+     .ppb-mb-3  (contenedor: label + botones)
+       > p.ppb-p.message          (label "Selecciona método de pago")
+       > .ppb-div-btn-control      (wrapper de cada botón)
+           > button.ppb-btn-control  (el "cuadrado")
+               > img.ppb-img         (logo de la marca)
+   El usuario pidió QUITAR el cuadrado y dejar solo los logos centrados.
+   Por eso volvemos transparentes/sin borde tanto el wrapper como el botón,
+   sin tamaño fijo: queda únicamente el logo, a su tamaño natural. */
+#pp-button .ppb-div-btn-control,
+#pp-button .ppb-btn-control,
 #pp-button .btn-card,
 #pp-button .select-btn,
-#pp-button .payment-box > .ppb-row:first-of-type .ppb-col-6 > div,
-#pp-button .payment-box > .ppb-row:first-of-type .ppb-col-6 > button {
-  background: var(--dpk-surface) !important;
-  border: 1px solid var(--dpk-border) !important;
-  border-radius: 12px !important;
-  padding: 14px 12px !important;
-  color: var(--dpk-muted) !important;
-  cursor: pointer !important;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  min-height: 56px !important;
-  box-shadow: none !important;
-}
-
-#pp-button .btn-card:hover,
-#pp-button .select-btn:hover {
-  border-color: var(--dpk-green) !important;
-  background: var(--dpk-green-soft) !important;
-  transform: translateY(-1px) !important;
-}
-
+#pp-button .ppb-btn-control.selected,
+#pp-button .ppb-btn-control.active,
 #pp-button .btn-card.selected,
 #pp-button .select-btn.selected,
 #pp-button .btn-card.active,
 #pp-button .selected {
-  background: var(--dpk-green-soft) !important;
-  border-color: var(--dpk-green) !important;
-  color: var(--dpk-text) !important;
-  box-shadow: 0 0 0 1px var(--dpk-green) inset !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#pp-button .ppb-btn-control:hover,
+#pp-button .ppb-div-btn-control:hover,
+#pp-button .btn-card:hover,
+#pp-button .select-btn:hover {
+  background: transparent !important;
+  border: none !important;
+  transform: translateY(-1px) !important;
+}
+/* Centramos la fila de logos dentro de la card (antes quedaba pegada/saliéndose
+   a la izquierda). Solo afecta al .ppb-mb-3 que contiene los botones de método. */
+#pp-button .ppb-mb-3:has(> .ppb-div-btn-control) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px 14px !important;
+}
+#pp-button .ppb-mb-3:has(> .ppb-div-btn-control) > .message,
+#pp-button .ppb-mb-3:has(> .ppb-div-btn-control) > p {
+  flex-basis: 100% !important;
+  width: 100% !important;
+  text-align: center !important;
+  margin-bottom: 6px !important;
+}
+/* Los logos a un tamaño cómodo y consistente, centrados, sin recorte. */
+#pp-button .ppb-img-btn-control,
+#pp-button .ppb-div-btn-control .ppb-img {
+  height: 30px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  position: static !important;
 }
 
-/* ---------- Inputs ---------- */
-#pp-button .ppb-form-control,
+/* ---------- Inputs ----------
+   OJO: el botón de método (.ppb-btn-control) también lleva la clase
+   .ppb-form-control, así que lo EXCLUIMOS de los estilos de input para que no
+   le vuelva a salir el recuadro blanco con borde. */
+#pp-button .ppb-form-control:not(.ppb-btn-control),
 #pp-button input.ppb-form-control,
 #pp-button input[type="text"],
 #pp-button input[type="tel"],
@@ -385,10 +425,10 @@ p {
 #pp-button input[type="number"],
 #pp-button input[type="password"],
 #pp-button select {
-  background: var(--dpk-dark) !important;
-  border: 1px solid var(--dpk-border) !important;
+  background-color: var(--pp-dark) !important;
+  border: 1px solid var(--pp-border) !important;
   border-radius: 10px !important;
-  color: var(--dpk-text) !important;
+  color: var(--pp-text) !important;
   font-family: inherit !important;
   font-size: 15px !important;
   font-weight: 500 !important;
@@ -400,48 +440,43 @@ p {
   -webkit-appearance: none !important;
   appearance: none !important;
 }
-
 #pp-button input::placeholder,
 #pp-button .ppb-form-control::placeholder {
-  color: rgba(183, 209, 210, 0.32) !important;
+  color: rgba(94, 106, 99, 0.6) !important;
   font-weight: 400 !important;
 }
-
 #pp-button .ppb-form-control:focus,
 #pp-button input:focus,
 #pp-button select:focus {
   outline: none !important;
-  border-color: var(--dpk-green) !important;
-  background: var(--dpk-dark) !important;
-  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+  border-color: var(--pp-green) !important;
+  background-color: var(--pp-dark) !important;
+  box-shadow: 0 0 0 3px var(--pp-green-ring) !important;
 }
-
 #pp-button input:-webkit-autofill,
 #pp-button input:-webkit-autofill:hover,
 #pp-button input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--dpk-text) !important;
-  -webkit-box-shadow: 0 0 0 1000px var(--dpk-dark) inset !important;
-  caret-color: var(--dpk-text) !important;
+  -webkit-text-fill-color: var(--pp-text) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--pp-dark) inset !important;
+  caret-color: var(--pp-text) !important;
   transition: background-color 9999s ease-in-out 0s;
 }
 
-/* ---------- Input group (input + icono) ---------- */
+/* ---------- Input group ---------- */
 #pp-button .ppb-input-group {
   display: flex !important;
   align-items: stretch !important;
   position: relative !important;
-  border: 1px solid var(--dpk-border) !important;
+  border: 1px solid var(--pp-border) !important;
   border-radius: 10px !important;
-  background: var(--dpk-dark) !important;
+  background: var(--pp-dark) !important;
   overflow: hidden !important;
   transition: border-color 0.2s, box-shadow 0.2s !important;
 }
-
 #pp-button .ppb-input-group:focus-within {
-  border-color: var(--dpk-green) !important;
-  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+  border-color: var(--pp-green) !important;
+  box-shadow: 0 0 0 3px var(--pp-green-ring) !important;
 }
-
 #pp-button .ppb-input-group .ppb-input-group-text {
   display: inline-flex !important;
   align-items: center !important;
@@ -449,45 +484,49 @@ p {
   padding: 0 12px !important;
   background: transparent !important;
   border: none !important;
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
   min-width: 40px !important;
 }
-
 #pp-button .ppb-input-group .ppb-input-group-text svg,
 #pp-button .ppb-input-group .ppb-input-group-text img {
   width: 18px !important;
   height: 18px !important;
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
   opacity: 0.65;
-  fill: var(--dpk-muted) !important;
+  fill: var(--pp-muted) !important;
 }
-
 #pp-button .ppb-input-group .ppb-form-control,
 #pp-button .ppb-input-group input {
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  /* Truco flex de Bootstrap: el input dentro del grupo se encoge a 1% y
+     crece con flex, dejando aire para el ícono de marca de la tarjeta.
+     Sin esto el width:100% global aplastaba el ícono (se veía comprimido). */
   flex: 1 1 auto !important;
+  width: 1% !important;
+  min-width: 0 !important;
 }
-
 #pp-button .ppb-input-group .ppb-form-control:focus,
 #pp-button .ppb-input-group input:focus {
   box-shadow: none !important;
   border: none !important;
 }
-
-/* Marca de tarjeta dentro del input (VISA/MC/...) */
 #pp-button .ppb-input-group .ppb-img,
 #pp-button .ppb-input-group img {
   max-height: 24px !important;
   width: auto !important;
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
   margin: 0 10px !important;
 }
 
 /* ---------- Labels ---------- */
 #pp-button .ppb-label,
 #pp-button label {
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
   font-family: inherit !important;
   font-size: 12px !important;
   font-weight: 600 !important;
@@ -496,18 +535,22 @@ p {
   margin-bottom: 6px !important;
   display: block !important;
 }
-
 #pp-button .ppb-text-uppercase {
   text-transform: uppercase !important;
   letter-spacing: 0.04em !important;
 }
 
-/* ---------- Botón Pagar ---------- */
-#pp-button .ppb-btn,
-#pp-button button.ppb-btn,
+/* ---------- Botón Pagar ----------
+   OJO: los tiles del selector de método TAMBIÉN llevan la clase `.ppb-btn`
+   (con `.ppb-btn-control`/`.btn-card`). Por eso el degradado verde + width:100%
+   se "fugaba" a esos tiles y los convertía en un cuadrado verde que aplastaba
+   el logo. Aquí el verde se aplica SOLO a los botones de acción (pagar/continuar)
+   y excluimos explícitamente los tiles de método. */
 #pp-button .ppb-btn-pay,
-#pp-button .ppb-btn-continue {
-  background: linear-gradient(135deg, var(--dpk-green) 0%, var(--dpk-green-deep) 100%) !important;
+#pp-button .ppb-btn-continue,
+#pp-button .ppb-btn:not(.ppb-btn-control):not(.btn-card):not(.select-btn):not(.ppb-btn-close),
+#pp-button button.ppb-btn:not(.ppb-btn-control):not(.btn-card):not(.select-btn):not(.ppb-btn-close) {
+  background: linear-gradient(135deg, var(--pp-green) 0%, var(--pp-green-deep) 100%) !important;
   color: #fff !important;
   border: none !important;
   border-radius: 12px !important;
@@ -519,7 +562,7 @@ p {
   letter-spacing: 0 !important;
   text-transform: none !important;
   cursor: pointer !important;
-  box-shadow: 0 18px 40px -14px rgba(20, 184, 117, 0.55) !important;
+  box-shadow: 0 16px 34px -14px rgba(11, 122, 89, 0.45) !important;
   transition: transform 0.2s, box-shadow 0.2s, filter 0.2s !important;
   min-height: 52px !important;
   display: inline-flex !important;
@@ -527,19 +570,18 @@ p {
   justify-content: center !important;
   gap: 8px !important;
 }
-
-#pp-button .ppb-btn:hover,
 #pp-button .ppb-btn-pay:hover,
-#pp-button .ppb-btn-continue:hover {
+#pp-button .ppb-btn-continue:hover,
+#pp-button .ppb-btn:not(.ppb-btn-control):not(.btn-card):not(.select-btn):not(.ppb-btn-close):hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 24px 60px -12px rgba(20, 184, 117, 0.7) !important;
+  box-shadow: 0 22px 50px -12px rgba(11, 122, 89, 0.55) !important;
   filter: brightness(1.04);
 }
-
-#pp-button .ppb-btn:active {
+#pp-button .ppb-btn-pay:active,
+#pp-button .ppb-btn-continue:active,
+#pp-button .ppb-btn:not(.ppb-btn-control):not(.btn-card):not(.select-btn):not(.ppb-btn-close):active {
   transform: translateY(0) scale(0.99) !important;
 }
-
 #pp-button .ppb-btn:disabled,
 #pp-button .ppb-btn[disabled] {
   opacity: 0.5 !important;
@@ -547,45 +589,28 @@ p {
   transform: none !important;
   filter: grayscale(0.4);
 }
-
-/* Botón secundario "Cerrar" */
 #pp-button .ppb-btn-close.ppb-button {
   background: transparent !important;
-  border: 1px solid var(--dpk-border) !important;
-  color: var(--dpk-muted) !important;
+  border: 1px solid var(--pp-border) !important;
+  color: var(--pp-muted) !important;
   box-shadow: none !important;
 }
 #pp-button .ppb-btn-close.ppb-button:hover {
-  border-color: var(--dpk-green) !important;
-  color: var(--dpk-text) !important;
+  border-color: var(--pp-green) !important;
+  color: var(--pp-text) !important;
 }
 
-/* Pequeños botones de control (cambiar tarjeta, etc.) */
-#pp-button .ppb-div-btn-control {
-  background: transparent !important;
-  border: 1px solid var(--dpk-border) !important;
-  border-radius: 10px !important;
-  padding: 10px !important;
-  cursor: pointer !important;
-  transition: border-color 0.2s, background 0.2s !important;
-}
-#pp-button .ppb-div-btn-control:hover {
-  border-color: var(--dpk-green) !important;
-  background: var(--dpk-green-soft) !important;
-}
-
-/* ---------- Mensajes (errores y descriptivos) ---------- */
+/* ---------- Mensajes ---------- */
 #pp-button .ppb-text-danger,
 #pp-button .ppb-p.ppb-text-danger,
 #pp-button .ppb-error-message,
 #pp-button .ppb-error-message-content,
 #pp-button .ppb-error-message-description {
-  color: #fca5a5 !important;
+  color: #b42318 !important;
   font-size: 13px !important;
   font-family: inherit !important;
   margin-top: 4px !important;
 }
-
 #pp-button .message,
 #pp-button .message-button,
 #pp-button .message-paypment-cash,
@@ -593,12 +618,11 @@ p {
 #pp-button .ppb-p,
 #pp-button .ppb-disclaimer-split,
 #pp-button .info-open-app {
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
   font-family: inherit !important;
   font-size: 13px !important;
   line-height: 1.55 !important;
 }
-
 #pp-button .ppb-p.ppb-text-center,
 #pp-button .ppb-text-center {
   text-align: center !important;
@@ -608,7 +632,7 @@ p {
 #pp-button .ppb-hr,
 #pp-button hr {
   border: none !important;
-  border-top: 1px solid var(--dpk-border) !important;
+  border-top: 1px solid var(--pp-border) !important;
   opacity: 0.55;
   margin: 14px 0 !important;
 }
@@ -616,36 +640,36 @@ p {
   border-top-style: dashed !important;
   opacity: 0.4;
 }
-
 #pp-button h1, #pp-button h2, #pp-button h3, #pp-button h4, #pp-button h5,
 #pp-button .ppb-h2, #pp-button .ppb-h4, #pp-button .ppb-h5 {
-  color: var(--dpk-text) !important;
-  font-family: "Sora", "Inter", sans-serif !important;
+  color: var(--pp-text) !important;
+  font-family: var(--font-display), "Hanken Grotesk", system-ui, sans-serif !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
   margin: 0 0 8px !important;
 }
-
-#pp-button .ppb-h4 {
-  font-size: 18px !important;
-}
-
-#pp-button .ppb-h2 {
-  font-size: 22px !important;
-}
-
+#pp-button .ppb-h4 { font-size: 18px !important; }
+#pp-button .ppb-h2 { font-size: 22px !important; }
 #pp-button .ppb-fw-bold { font-weight: 700 !important; }
-#pp-button .ppb-text-white { color: var(--dpk-text) !important; }
+#pp-button .ppb-text-white { color: var(--pp-text) !important; }
+/* …PERO dentro del botón verde (Pagar/Continuar) el texto DEBE ir blanco.
+   La regla anterior oscurecía `.ppb-text-white` y dejaba "Pagar" casi
+   invisible sobre el verde. Esta regla va después → gana por orden. */
+#pp-button .ppb-btn-pay,
+#pp-button .ppb-btn-pay *,
+#pp-button .ppb-btn-continue,
+#pp-button .ppb-btn-continue * {
+  color: #fff !important;
+}
 #pp-button .ppb-text-amount,
 #pp-button .ppb-text-amount-h4,
 #pp-button .ppb-text-total {
-  color: var(--dpk-text) !important;
-  font-family: "Sora", "Inter", sans-serif !important;
+  color: var(--pp-text) !important;
+  font-family: var(--font-display), "Hanken Grotesk", system-ui, sans-serif !important;
 }
-
 #pp-button .total-paypment-code {
-  background: var(--dpk-surface) !important;
-  border: 1px solid var(--dpk-border) !important;
+  background: var(--pp-surface) !important;
+  border: 1px solid var(--pp-border) !important;
   border-radius: 12px !important;
   padding: 14px !important;
 }
@@ -654,82 +678,88 @@ p {
 #pp-button .ppb-spinner-grow,
 #pp-button .ppb-loading,
 #pp-button .ppb-loading-prepare {
-  color: var(--dpk-green) !important;
+  color: var(--pp-green) !important;
 }
-
 #pp-button .ppb-spinner-grow {
-  background-color: var(--dpk-green) !important;
+  background-color: var(--pp-green) !important;
 }
 
-/* ---------- Imágenes/logos ---------- */
-#pp-button .ppb-img,
+/* ---------- Imágenes / footer ---------- */
 #pp-button .ppb-img-fluid {
   max-width: 100% !important;
   height: auto !important;
 }
-
+/* .ppb-img son los logos de marca (Visa/MC/Diners/Discover) del selector de
+   método. Son hijos flex: sin flex-shrink:0 se aplastan cuando la fila se
+   aprieta. Los fijamos por alto y respetamos su relación de aspecto. */
+#pp-button .ppb-img {
+  max-width: 100% !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
+}
 #pp-button .ppb-footer-image-container {
   display: flex !important;
+  flex-wrap: wrap !important;
   justify-content: center !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 10px 14px !important;
   margin-top: 12px !important;
   padding-top: 12px !important;
-  border-top: 1px solid var(--dpk-border-soft) !important;
+  border-top: 1px solid var(--pp-border-soft) !important;
   opacity: 0.8;
 }
-
-#pp-button .ppb-footer-image {
+/* Los logos del footer (Visa/Mastercard/Payphone) son <img> dentro de un
+   contenedor flex. Sin flex-shrink:0 se aplastaban; los fijamos por alto
+   y respetamos su relación de aspecto. */
+#pp-button .ppb-footer-image,
+#pp-button .ppb-footer-image img {
   max-height: 22px !important;
   width: auto !important;
-  filter: brightness(1.1) contrast(0.95);
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
 }
-
+#pp-button .ppb-footer-image img {
+  margin-right: 0 !important;
+}
 #pp-button .ppb-customer-profile {
   border-radius: 50% !important;
-  border: 2px solid var(--dpk-green) !important;
+  border: 2px solid var(--pp-green) !important;
   padding: 2px !important;
 }
 
-/* ---------- Country selector (input de cédula con bandera) ---------- */
+/* ---------- Country selector ---------- */
 #pp-button .country-selector {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
   padding: 0 10px !important;
-  background: var(--dpk-surface-2) !important;
-  border-right: 1px solid var(--dpk-border) !important;
+  background: var(--pp-surface-2) !important;
+  border-right: 1px solid var(--pp-border) !important;
   cursor: pointer !important;
 }
-
-#pp-button .selected-flag {
-  width: 22px !important;
-  height: 16px !important;
-  border-radius: 2px !important;
-  overflow: hidden !important;
-}
-
+/* .selected-flag es un bloque SÓLIDO que Payphone dibuja (selector de código
+   de país, 86px). Lo dejamos 100% con su diseño original: recolorearlo a verde
+   generaba el "cuadrado verde" que aplastaba los logos en el selector de método.
+   No lo tocamos (ni color ni geometría). Los logs PP-DEBUG lo confirman. */
 #pp-button .selected-code {
   font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
   font-size: 13px !important;
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
 }
-
 #pp-button .country-arrow {
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
   font-size: 10px !important;
 }
-
 #pp-button .country-list {
-  background: var(--dpk-surface-2) !important;
-  border: 1px solid var(--dpk-border) !important;
+  background: var(--pp-surface-2) !important;
+  border: 1px solid var(--pp-border) !important;
   border-radius: 10px !important;
   max-height: 240px !important;
   overflow-y: auto !important;
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 18px 48px -16px rgba(14, 26, 21, 0.22) !important;
   z-index: 50 !important;
 }
-
 #pp-button .country {
   padding: 8px 12px !important;
   display: flex !important;
@@ -737,18 +767,17 @@ p {
   gap: 10px !important;
   cursor: pointer !important;
   font-size: 13px !important;
-  color: var(--dpk-text) !important;
+  color: var(--pp-text) !important;
 }
 #pp-button .country:hover {
-  background: var(--dpk-green-soft) !important;
+  background: var(--pp-green-soft) !important;
 }
-
 #pp-button .country-name {
-  color: var(--dpk-text) !important;
+  color: var(--pp-text) !important;
   font-weight: 500 !important;
 }
 #pp-button .country-code {
-  color: var(--dpk-muted) !important;
+  color: var(--pp-muted) !important;
   font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
 }
 
@@ -759,7 +788,6 @@ p {
   gap: 10px !important;
   margin: 16px 0 !important;
 }
-
 #pp-button .ppb-otp-input,
 #pp-button .ppb-otp-input.ppb-input {
   width: 48px !important;
@@ -767,19 +795,19 @@ p {
   text-align: center !important;
   font-size: 22px !important;
   font-weight: 600 !important;
-  background: var(--dpk-dark) !important;
-  border: 1px solid var(--dpk-border) !important;
+  background: var(--pp-dark) !important;
+  border: 1px solid var(--pp-border) !important;
   border-radius: 10px !important;
-  color: var(--dpk-text) !important;
-  font-family: "Sora", "Inter", sans-serif !important;
+  color: var(--pp-text) !important;
+  font-family: var(--font-display), "Hanken Grotesk", system-ui, sans-serif !important;
 }
 #pp-button .ppb-otp-input:focus {
-  border-color: var(--dpk-green) !important;
-  box-shadow: 0 0 0 3px var(--dpk-green-ring) !important;
+  border-color: var(--pp-green) !important;
+  box-shadow: 0 0 0 3px var(--pp-green-ring) !important;
   outline: none !important;
 }
 
-/* ---------- Espaciado utilitario (asegura ritmo) ---------- */
+/* ---------- Espaciado utilitario ---------- */
 #pp-button .ppb-mb-2 { margin-bottom: 10px !important; }
 #pp-button .ppb-mb-3 { margin-bottom: 14px !important; }
 #pp-button .ppb-mb-4 { margin-bottom: 18px !important; }
@@ -792,9 +820,7 @@ p {
 #pp-button .ppb-me-2 { margin-right: 8px !important; }
 #pp-button .ppb-ps-5 { padding-left: 20px !important; }
 #pp-button .ppb-pe-5 { padding-right: 20px !important; }
-
 #pp-button .ppb-d-flex { display: flex !important; }
 #pp-button .ppb-justify-content-center { justify-content: center !important; }
 #pp-button .ppb-justify-content-end { justify-content: flex-end !important; }
 #pp-button .ppb-align-items-center { align-items: center !important; }
-

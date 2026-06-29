@@ -27,7 +27,7 @@ const withSystem = [
 export default function Comparison() {
   return (
     <section className="relative overflow-hidden bg-canvas py-24 sm:py-28">
-      <div className="mx-auto max-w-5xl px-6">
+      <div className="mx-auto max-w-5xl px-6 2xl:max-w-[1360px]">
         <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           {/* Reveal palabra-por-palabra al hacer scroll (acento → verde marca). */}
           <ScrollHighlight
