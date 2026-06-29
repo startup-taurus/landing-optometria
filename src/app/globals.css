@@ -109,6 +109,16 @@ p {
   text-wrap: pretty;
 }
 
+/* Selector de país del teléfono (y cualquier <select> nativo): en Windows, el popup
+   de <option> NO respeta `color-scheme` y se renderiza blanco en modo oscuro. Forzar
+   fondo/texto con los tokens del tema hace que la lista de códigos siga el cambio de
+   color (oscuro/claro). Probado en Chrome/Edge/Firefox. */
+select option,
+select optgroup {
+  background-color: rgb(var(--surface-2));
+  color: rgb(var(--ink));
+}
+
 @layer utilities {
   /* Kicker mono: etiqueta de instrumento. Uso deliberado, no en cada sección. */
   .kicker {

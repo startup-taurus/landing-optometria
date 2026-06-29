@@ -66,6 +66,9 @@ function money(cents: number): string {
 export default function Pricing() {
   const [form, setForm] = useState<LeadForm>(INITIAL);
   const [stage, setStage] = useState<Stage>("form");
+  // Envío en curso: el botón muestra el spinner y el formulario sigue visible (no
+  // saltamos a un stage aparte) para que el feedback ocurra SOBRE el botón.
+  const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [initData, setInitData] = useState<InitResult | null>(null);
 
@@ -109,13 +112,15 @@ export default function Pricing() {
       setErrorMsg("Debes autorizar la renovación automática para continuar.");
       return;
     }
-    setStage("loading");
+    setSubmitting(true);
     try {
       setInitData(await callInit(form));
       setStage("pay");
     } catch (err) {
       setErrorMsg((err as Error).message);
       setStage("error");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -175,7 +180,12 @@ export default function Pricing() {
 
             <div className="border-t border-line bg-surface-2/40 p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-9">
               {stage === "form" && (
-                <FormStage form={form} update={update} onSubmit={handleSubmit} />
+                <FormStage
+                  form={form}
+                  update={update}
+                  onSubmit={handleSubmit}
+                  submitting={submitting}
+                />
               )}
 
               {stage === "loading" && (
@@ -347,10 +357,12 @@ function FormStage({
   form,
   update,
   onSubmit,
+  submitting,
 }: {
   form: LeadForm;
   update: <K extends keyof LeadForm>(k: K, v: LeadForm[K]) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  submitting: boolean;
 }) {
   return (
     <form onSubmit={onSubmit}>
@@ -393,7 +405,7 @@ function FormStage({
         )}
 
         <div className="pt-3">
-          <Button size="lg" className="w-full justify-center">
+          <Button size="lg" loading={submitting} className="w-full justify-center">
             <Lock className="h-4 w-4" strokeWidth={2.2} />
             Continuar al pago seguro
           </Button>

@@ -50,6 +50,8 @@ function money(cents: number): string {
 export default function TestCheckout() {
   const [form, setForm] = useState<Form>(INITIAL);
   const [stage, setStage] = useState<Stage>("form");
+  // Envío en curso → spinner en el botón (el formulario sigue visible).
+  const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [initData, setInitData] = useState<InitResult | null>(null);
 
@@ -92,13 +94,15 @@ export default function TestCheckout() {
       setErrorMsg("Debes autorizar la renovación automática para continuar.");
       return;
     }
-    setStage("loading");
+    setSubmitting(true);
     try {
       setInitData(await callInit(form));
       setStage("pay");
     } catch (err) {
       setErrorMsg((err as Error).message);
       setStage("error");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -161,7 +165,7 @@ export default function TestCheckout() {
                     </>
                   )}
                   <div className="pt-3">
-                    <Button size="lg" className="w-full justify-center">
+                    <Button size="lg" loading={submitting} className="w-full justify-center">
                       <Lock className="h-4 w-4" strokeWidth={2.2} /> Continuar al pago de prueba
                     </Button>
                   </div>
