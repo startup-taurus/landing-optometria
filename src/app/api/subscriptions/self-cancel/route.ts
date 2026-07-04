@@ -3,6 +3,7 @@ import { hasDatabase } from "@/lib/db";
 import { cancelSubscription, getSubscription } from "@/lib/subscriptions";
 import { verifyCancelToken } from "@/lib/cancel-token";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { optometryEnabled, syncOptometrySubscription } from "@/lib/optometry";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,5 +49,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "No pudimos cancelar. Intenta de nuevo." }, { status: 500 });
   }
   console.log(`[subscriptions/self-cancel] cancelada por el cliente id=${id}`);
+  if (optometryEnabled()) {
+    try {
+      await syncOptometrySubscription({ externalSubscriptionId: id, status: "canceled" });
+    } catch (err) {
+      console.error(
+        `[subscriptions/self-cancel] sync optometria fallo id=${id}:`,
+        (err as Error).message
+      );
+    }
+  }
   return NextResponse.json({ success: true });
 }

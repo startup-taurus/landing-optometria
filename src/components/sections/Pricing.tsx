@@ -17,10 +17,22 @@ import PayphoneBox from "@/components/payphone/PayphoneBox";
 import { PhoneCountryField } from "@/components/payphone/PhoneCountryField";
 import { fadeInUp, VIEWPORT_DEFAULT } from "@/lib/animations";
 import { TOKENIZATION_ENABLED, RECURRING_CONSENT_TEXT } from "@/lib/consent";
-import { DEFAULT_COUNTRY, countryByIso } from "@/lib/countries";
+import {
+  DEFAULT_COUNTRY,
+  countryByIso,
+  isValidPhone,
+  isValidDocumentId,
+} from "@/lib/countries";
+import {
+  PLAN_BASE_CENTS,
+  PLAN_TAX_CENTS,
+  PLAN_TOTAL_CENTS,
+  TAX_RATE_PCT,
+} from "@/lib/payphone-constants";
 
 interface LeadForm {
   name: string;
+  opticaName: string;
   email: string;
   phone: string;
   countryIso: string;
@@ -30,6 +42,7 @@ interface LeadForm {
 
 const INITIAL: LeadForm = {
   name: "",
+  opticaName: "",
   email: "",
   phone: "",
   countryIso: DEFAULT_COUNTRY.iso,
@@ -76,6 +89,22 @@ export default function Pricing() {
     setForm((s) => ({ ...s, [key]: value }));
   }
 
+  // Validez del formulario para bloquear el botón: MISMAS reglas que valida el
+  // servidor en /init (nombre, email, teléfono, cédula/RUC y consentimiento). Evita
+  // llegar a la Cajita con datos que el pago rechazaría, y que un teléfono malo
+  // quede guardado y luego reviente el cobro recurrente.
+  const trimmedName = form.name.trim();
+  const trimmedOptica = form.opticaName.trim();
+  const formValid =
+    trimmedName.length >= 2 &&
+    trimmedName.length <= 80 &&
+    (!trimmedOptica ||
+      (trimmedOptica.length >= 3 && trimmedOptica.length <= 100)) &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) &&
+    isValidPhone(form.phone, form.countryIso) &&
+    (!TOKENIZATION_ENABLED ||
+      (isValidDocumentId(form.documentId) && form.consent));
+
   // Llama a /init y devuelve los datos del intento (o lanza con el mensaje de error).
   const callInit = useCallback(async (payload: LeadForm): Promise<InitResult> => {
     const dial = countryByIso(payload.countryIso)?.dial ?? DEFAULT_COUNTRY.dial;
@@ -84,6 +113,7 @@ export default function Pricing() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: payload.name,
+        opticaName: payload.opticaName,
         email: payload.email,
         phone: payload.phone,
         countryCode: dial,
@@ -185,6 +215,7 @@ export default function Pricing() {
                   update={update}
                   onSubmit={handleSubmit}
                   submitting={submitting}
+                  valid={formValid}
                 />
               )}
 
@@ -307,16 +338,23 @@ function OrderSummary() {
         ))}
       </ul>
 
-      <div className="mt-2 flex items-baseline justify-between border-t border-line pt-5">
-        <span className="font-display text-base font-semibold text-ink">Plan Único</span>
-        <div className="text-right">
-          <span className="data text-2xl font-bold text-ink">$30.00</span>
-          <span className="ml-1.5 text-[11px] text-muted">/ mes</span>
+      <div className="mt-2 border-t border-line pt-5">
+        <div className="flex items-baseline justify-between py-1">
+          <span className="text-sm text-ink-2">Plan mensual</span>
+          <span className="data text-sm font-semibold text-ink">{money(PLAN_BASE_CENTS)}</span>
+        </div>
+        <div className="flex items-baseline justify-between py-1">
+          <span className="text-sm text-ink-2">IVA ({TAX_RATE_PCT}%)</span>
+          <span className="data text-sm font-semibold text-ink">+ {money(PLAN_TAX_CENTS)}</span>
+        </div>
+        <div className="mt-1 flex items-baseline justify-between border-t border-dashed border-line pt-2.5">
+          <span className="font-display text-base font-semibold text-ink">Total al mes</span>
+          <div className="text-right">
+            <span className="data text-2xl font-bold text-ink">{money(PLAN_TOTAL_CENTS)}</span>
+            <span className="ml-1.5 text-[11px] text-muted">USD</span>
+          </div>
         </div>
       </div>
-      <p className="mt-1.5 text-[11px] leading-snug text-muted">
-        + IVA 15% — se calcula y muestra al confirmar el pago.
-      </p>
 
       <div className="mt-6 flex items-center gap-2 rounded-lg border border-brand/25 bg-brand/[0.06] px-3 py-2.5">
         <Lock className="h-3.5 w-3.5 shrink-0 text-brand-ink" strokeWidth={2} />
@@ -358,11 +396,13 @@ function FormStage({
   update,
   onSubmit,
   submitting,
+  valid,
 }: {
   form: LeadForm;
   update: <K extends keyof LeadForm>(k: K, v: LeadForm[K]) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   submitting: boolean;
+  valid: boolean;
 }) {
   return (
     <form onSubmit={onSubmit}>
@@ -380,6 +420,15 @@ function FormStage({
           onChange={(v) => update("name", v)}
           required
           autoComplete="name"
+        />
+        <Field
+          label="Nombre de tu óptica"
+          type="text"
+          placeholder="Óptica Visión Clara"
+          value={form.opticaName}
+          onChange={(v) => update("opticaName", v)}
+          required
+          autoComplete="organization"
         />
         <Field
           label="Correo electrónico"
@@ -405,7 +454,12 @@ function FormStage({
         )}
 
         <div className="pt-3">
-          <Button size="lg" loading={submitting} className="w-full justify-center">
+          <Button
+            size="lg"
+            loading={submitting}
+            disabled={!valid}
+            className="w-full justify-center"
+          >
             <Lock className="h-4 w-4" strokeWidth={2.2} />
             Continuar al pago seguro
           </Button>
@@ -424,12 +478,12 @@ function PriceBreakdown({ initData }: { initData: InitResult }) {
   return (
     <div className="mb-4 rounded-xl border border-line bg-surface p-4">
       <div className="flex items-baseline justify-between py-1">
-        <span className="text-sm text-ink-2">Plan Único</span>
+        <span className="text-sm text-ink-2">Plan mensual</span>
         <span className="data text-sm font-semibold text-ink">{money(initData.amountWithTax)}</span>
       </div>
       <div className="flex items-baseline justify-between py-1">
-        <span className="text-sm text-ink-2">IVA (15%)</span>
-        <span className="data text-sm font-semibold text-ink">{money(initData.tax)}</span>
+        <span className="text-sm text-ink-2">IVA ({TAX_RATE_PCT}%)</span>
+        <span className="data text-sm font-semibold text-ink">+ {money(initData.tax)}</span>
       </div>
       <div className="mt-1 flex items-baseline justify-between border-t border-dashed border-line pt-2.5">
         <span className="font-display text-base font-semibold text-ink">Total a pagar</span>

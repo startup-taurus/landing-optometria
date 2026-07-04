@@ -1,4 +1,5 @@
-import type { StoredTransaction } from "./payphone";
+import { computeAmounts, type StoredTransaction } from "./payphone";
+import { PLAN_TOTAL_CENTS, TAX_RATE_PCT } from "./payphone-constants";
 import { WHATSAPP_DISPLAY } from "./contact";
 
 interface SendArgs {
@@ -8,8 +9,19 @@ interface SendArgs {
 }
 
 function fmtAmountCents(cents?: number): string {
-  if (typeof cents !== "number") return "$30.00";
+  if (typeof cents !== "number") return fmtAmountCents(PLAN_TOTAL_CENTS);
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+// Filas del desglose base + IVA + total para los recibos (el total guardado en la
+// transacción/suscripción INCLUYE el IVA; aquí solo se separa para mostrarlo).
+function amountBreakdownRows(totalCents?: number): string {
+  const total = typeof totalCents === "number" ? totalCents : PLAN_TOTAL_CENTS;
+  const parts = computeAmounts(total);
+  return `
+      ${row("Plan (base)", fmtAmountCents(parts.amountWithTax))}
+      ${row(`IVA (${TAX_RATE_PCT}%)`, `+ ${fmtAmountCents(parts.tax)}`)}
+      ${row("Total cobrado", fmtAmountCents(parts.amount))}`;
 }
 
 function escapeHtml(s: string): string {
@@ -88,7 +100,8 @@ function row(label: string, value: string): string {
 
 export async function sendCustomerReceipt(
   tx: StoredTransaction,
-  cancelUrl?: string
+  cancelUrl?: string,
+  access?: { setPasswordUrl?: string; loginUrl?: string }
 ): Promise<void> {
   // Bloque de gestión/cancelación self-service. Solo cuando hay suscripción
   // (cobro recurrente): el cliente DEBE guardar este enlace para cancelar cuando
@@ -101,16 +114,42 @@ export async function sendCustomerReceipt(
       <p style="margin:0"><a href="${cancelUrl}" style="color:${BRAND_COLOR};font-size:14px;font-weight:700;word-break:break-all">Gestionar o cancelar mi suscripción</a></p>
     </div>`
     : "";
+  // Bloque de acceso al sistema. Optometría crea la cuenta al pagar y devuelve estos
+  // enlaces: `setPasswordUrl` (cliente nuevo, crea su contraseña) o solo `loginUrl`
+  // (re-compra: ya tenía cuenta). Si no llegan (integración apagada/falló), se usa el
+  // texto de respaldo de "en 24h te enviamos credenciales".
+  const setUrl = access?.setPasswordUrl;
+  const loginUrl = access?.loginUrl;
+  const introLine =
+    setUrl || loginUrl
+      ? `<p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago y <strong>tu cuenta ya está creada</strong>.</p>`
+      : `<p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago correctamente.</p>
+    <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y un correo del equipo de soporte con los pasos para empezar a usar Dioptrika.</p>`;
+  const accessBlock = setUrl
+    ? `
+    <div style="margin:18px 0;padding:16px;border:1px solid ${BRAND_COLOR}40;border-radius:12px;background:${BRAND_COLOR}14">
+      <p style="margin:0 0 10px;color:#FFFFFF;font-size:15px;font-weight:700">Activa tu cuenta</p>
+      <p style="margin:0 0 12px;color:#B7D1D2;font-size:13px">Crea tu contraseña para empezar a usar Dioptrika (el enlace vence en 72 horas):</p>
+      <p style="margin:0 0 14px"><a href="${setUrl}" style="display:inline-block;background:${BRAND_COLOR};color:#04231A;font-size:14px;font-weight:700;text-decoration:none;padding:12px 20px;border-radius:10px">Crear mi contraseña</a></p>
+      ${loginUrl ? `<p style="margin:0;color:#B7D1D2;font-size:13px">Luego ingresa en: <a href="${loginUrl}" style="color:${BRAND_COLOR};font-weight:700;word-break:break-all">${loginUrl}</a></p>` : ""}
+    </div>`
+    : loginUrl
+      ? `
+    <div style="margin:18px 0;padding:16px;border:1px solid ${BRAND_COLOR}40;border-radius:12px;background:${BRAND_COLOR}14">
+      <p style="margin:0 0 8px;color:#FFFFFF;font-size:15px;font-weight:700">Tu cuenta sigue activa</p>
+      <p style="margin:0;color:#B7D1D2;font-size:13px">Ingresa con tu cuenta de siempre en: <a href="${loginUrl}" style="color:${BRAND_COLOR};font-weight:700;word-break:break-all">${loginUrl}</a></p>
+    </div>`
+      : "";
   const body = `
-    <p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago correctamente.</p>
-    <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y un correo del equipo de soporte con los pasos para empezar a usar Dioptrika.</p>
+    ${introLine}
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
       ${row("Plan", "Dioptrika — Plan Único mensual")}
-      ${row("Monto", fmtAmountCents(tx.amount))}
+      ${amountBreakdownRows(tx.amount)}
       ${row("Referencia", tx.clientTransactionId)}
       ${tx.authorizationCode ? row("Autorización", tx.authorizationCode) : ""}
       ${tx.cardBrand && tx.lastDigits ? row("Tarjeta", `${tx.cardBrand} ···· ${tx.lastDigits}`) : ""}
     </table>
+    ${accessBlock}
     ${cancelBlock}
     <p style="color:#7d9999;font-size:13px">Guarda este correo como comprobante. Si tienes dudas, escríbenos por WhatsApp al <strong>+593 99 592 3599</strong>.</p>
   `;
@@ -150,7 +189,7 @@ export async function sendInternalNotification(tx: StoredTransaction): Promise<v
   `;
   await sendViaResend({
     to: recipients,
-    subject: `Nueva venta Dioptrika $30 — ${tx.lead.name}`,
+    subject: `Nueva venta Dioptrika ${fmtAmountCents(tx.amount)} — ${tx.lead.name}`,
     html: shell("Nueva venta confirmada", body),
   });
 }
@@ -170,7 +209,7 @@ export async function sendAmountMismatchAlert(
     <p style="color:#ffb4b4;font-weight:600">⚠️ Pago APROBADO por Payphone con un monto que NO coincide con el plan.</p>
     <p>Revisar en el panel de Payphone y <strong>reembolsar manualmente</strong> si corresponde. NO se entregaron credenciales.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
-      ${row("Esperado", "$30.00")}
+      ${row("Esperado", fmtAmountCents(tx.amount))}
       ${row("Cobrado", fmtAmountCents(chargedCents))}
       ${row("Nombre", tx.lead.name)}
       ${row("Email", tx.lead.email)}
@@ -207,7 +246,7 @@ export async function sendRenewalReceipt(input: {
     <p>¡Hola ${escapeHtml(input.name)}! Renovamos tu plan automáticamente.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
       ${row("Plan", input.planLabel)}
-      ${row("Monto", fmtAmountCents(input.amountCents))}
+      ${amountBreakdownRows(input.amountCents)}
       ${row("Referencia", input.reference)}
       ${input.authorizationCode ? row("Autorización", input.authorizationCode) : ""}
       ${input.cardBrand && input.lastDigits ? row("Tarjeta", `${input.cardBrand} ···· ${input.lastDigits}`) : ""}
@@ -237,7 +276,7 @@ export async function sendDunningEmail(input: {
     <p>Hola ${escapeHtml(input.name)}, no pudimos procesar la renovación de tu plan.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #1D4650">
       ${row("Plan", input.planLabel)}
-      ${row("Monto", fmtAmountCents(input.amountCents))}
+      ${row("Monto (IVA incluido)", fmtAmountCents(input.amountCents))}
     </table>
     ${retryLine}
     <p style="color:#7d9999;font-size:13px">¿Necesitas ayuda? Escríbenos por WhatsApp al <strong>${WHATSAPP_DISPLAY}</strong>.</p>

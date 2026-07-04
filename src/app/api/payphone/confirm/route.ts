@@ -8,11 +8,23 @@ import {
   type StoredTransaction,
 } from "@/lib/payphone";
 import { getTransaction, saveTransaction } from "@/lib/transactions";
-import { sendCustomerReceipt, sendInternalNotification } from "@/lib/email";
+import {
+  sendCustomerReceipt,
+  sendInternalNotification,
+  sendAmountMismatchAlert,
+} from "@/lib/email";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { hasDatabase } from "@/lib/db";
 import { open } from "@/lib/crypto-vault";
-import { createSubscription, type BillingCycle } from "@/lib/subscriptions";
+import {
+  createSubscription,
+  getSubscription,
+  type BillingCycle,
+} from "@/lib/subscriptions";
+import {
+  optometryEnabled,
+  provisionOptometryAccount,
+} from "@/lib/optometry";
 import { RECURRING_CONSENT_TEXT } from "@/lib/consent";
 import { signCancelToken } from "@/lib/cancel-token";
 
@@ -167,6 +179,85 @@ async function maybeCreateSubscription(
       /* best-effort */
     }
     return null;
+  }
+}
+
+// El cliente YA pagó pero su cuenta no se pudo crear en el sistema de optometría:
+// sin este aviso el fallo solo queda en la terminal y nadie provisiona al cliente.
+async function alertProvisioningGap(
+  stored: StoredTransaction,
+  subscriptionId: string,
+  reason: string
+): Promise<void> {
+  try {
+    await sendInternalNotification({
+      ...stored,
+      planLabel: `${stored.planLabel || ""} ⚠️ ALTA EN OPTOMETRÍA FALLÓ (${reason}) — crear la cuenta manualmente · sub=${subscriptionId}`,
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
+// Accesos que optometría devuelve al crear la cuenta, para incluirlos en el recibo
+// (un solo correo): enlace para crear contraseña + URL de login del sistema.
+type OptometryAccess = { setPasswordUrl?: string; loginUrl?: string };
+
+async function provisionOptometry(
+  stored: StoredTransaction,
+  pp: PayphoneConfirmResponse,
+  subscriptionId: string
+): Promise<OptometryAccess> {
+  if (!optometryEnabled()) return {};
+  try {
+    let currentPeriodEnd: string | null = null;
+    try {
+      const sub = await getSubscription(subscriptionId);
+      currentPeriodEnd = sub?.nextChargeAt ?? null;
+    } catch (err) {
+      console.error(
+        "[payphone/confirm] no se pudo leer la suscripción para la provisión:",
+        (err as Error).message
+      );
+    }
+    const documentId = (stored.documentId || pp.document || "").toString();
+    const result = await provisionOptometryAccount({
+      opticaName: (stored.opticaName || stored.lead.name).toString(),
+      ownerName: stored.lead.name,
+      adminEmail: stored.lead.email,
+      phone: stored.lead.phone,
+      documentId,
+      externalSubscriptionId: subscriptionId,
+      planCode: stored.planId || "unico",
+      amountCents: typeof stored.amount === "number" ? stored.amount : undefined,
+      currency: "USD",
+      billingCycle: "monthly",
+      cardBrand: pp.cardBrand ?? null,
+      cardLast4: pp.lastDigits ?? null,
+      currentPeriodEnd,
+      status: "active",
+    });
+    if (!result.ok) {
+      console.error(
+        `[payphone/confirm] alta en el sistema de optometria fallo sub=${subscriptionId}: ${result.error}`
+      );
+      await alertProvisioningGap(stored, subscriptionId, result.error ?? "error");
+      return {};
+    }
+    console.log(
+      `[payphone/confirm] alta en el sistema de optometria OK sub=${subscriptionId}`
+    );
+    // La respuesta viene envuelta por el TransformInterceptor: { messageKey, data }.
+    const inner =
+      (result.data as { data?: OptometryAccess } | null)?.data ?? {};
+    return { setPasswordUrl: inner.setPasswordUrl, loginUrl: inner.loginUrl };
+  } catch (err) {
+    console.error(
+      `[payphone/confirm] error avisando al sistema de optometria sub=${subscriptionId}:`,
+      (err as Error).message
+    );
+    await alertProvisioningGap(stored, subscriptionId, (err as Error).message);
+    return {};
   }
 }
 
@@ -347,6 +438,14 @@ export async function POST(req: Request) {
       console.error("[payphone/confirm] error guardando:", (err as Error).message);
     }
 
+    if (statusApproved && !amountOk) {
+      try {
+        await sendAmountMismatchAlert(updated, Number(payphoneResponse.amount));
+      } catch {
+        /* best-effort */
+      }
+    }
+
     if (approved) {
       // 1) Cobro recurrente: crear la suscripción con la tarjeta tokenizada PRIMERO,
       //    para poder incluir el enlace de cancelación self-service en el recibo.
@@ -361,13 +460,26 @@ export async function POST(req: Request) {
         subscriptionId = subInfo?.id ?? null;
       }
 
-      // 2) Recibo al cliente + aviso interno. Con suscripción creada, el recibo
-      //    incluye el enlace para gestionar/cancelar (que el cliente debe guardar).
+      // 2) Alta en optometría ANTES del recibo: así el correo (ÚNICO) puede incluir
+      //    el enlace para crear la contraseña + la URL de login del sistema. Es
+      //    bloqueante pero acotado (timeout ~10s); si falla o está apagado, devuelve
+      //    vacío y el recibo usa el texto de respaldo.
+      let access: OptometryAccess = {};
+      if (subscriptionId) {
+        access = await provisionOptometry(
+          updated,
+          payphoneResponse,
+          subscriptionId
+        );
+      }
+
+      // 3) Recibo al cliente + aviso interno. Con la suscripción creada, el recibo
+      //    incluye el enlace para gestionar/cancelar y los accesos al sistema.
       if (willEmail) {
         const cancelUrl = subscriptionId ? buildCancelUrl(subscriptionId) : undefined;
         try {
           await Promise.all([
-            sendCustomerReceipt(updated, cancelUrl),
+            sendCustomerReceipt(updated, cancelUrl, access),
             sendInternalNotification(updated),
           ]);
         } catch (err) {

@@ -27,27 +27,33 @@ export const PAYPHONE_TOKEN_CHARGE_URL = `${PAYPHONE_API_BASE}/api/transaction/w
 // Constantes puras viven en payphone-constants.ts (sin imports de Node) para que
 // los componentes cliente puedan importarlas sin arrastrar crypto/https. Aquí se
 // re-exportan para el código de servidor que ya las usa desde "@/lib/payphone".
-import { PLAN_CURRENCY, PLAN_LABEL, PLAN_REFERENCE } from "./payphone-constants";
-export { PLAN_CURRENCY, PLAN_LABEL, PLAN_REFERENCE };
+import {
+  PLAN_CURRENCY,
+  PLAN_LABEL,
+  PLAN_REFERENCE,
+  TAX_RATE,
+  PLAN_TOTAL_CENTS,
+} from "./payphone-constants";
+export { PLAN_CURRENCY, PLAN_LABEL, PLAN_REFERENCE, TAX_RATE };
 
-// IVA Ecuador 15%. Los montos del catálogo son el TOTAL que paga el cliente (IVA
+// IVA Ecuador 15% (TAX_RATE vive en payphone-constants.ts junto con el precio base;
+// aquí solo se consume). Los montos del catálogo son el TOTAL que paga el cliente (IVA
 // INCLUIDO). computeAmounts() lo desglosa con PRICES_INCLUDE_TAX=true en lo que pide
 // Payphone: amount = amountWithTax(base) + tax. Mantener `true` deja el cálculo
 // IDEMPOTENTE (la suscripción guarda el total y el cron lo re-desglosa igual, sin
 // re-sumar IVA). El precio del plan ($30) es la BASE; el IVA ($4.50) se suma → $34.50.
-export const TAX_RATE = 0.15;
 export const PRICES_INCLUDE_TAX = true;
 
 export type Billing = "monthly" | "annual";
 
 // Catálogo de planes cobrables — TOTAL en CENTAVOS USD (base + IVA 15%).
-//   Plan Único: base $30.00 + IVA 15% ($4.50) = $34.50 total (3450).
+//   Plan Único: PLAN_TOTAL_CENTS = base $30.00 + IVA 15% ($4.50) = $34.50 (3450).
 // (Dioptrika solo vende el plan mensual; no hay opción anual → `annual` ausente.)
 export const PLAN_CATALOG: Record<
   string,
   { label: string; monthly: number; annual?: number }
 > = {
-  unico: { label: "Plan Único", monthly: 3450 }, // $30.00 + IVA 15% = $34.50
+  unico: { label: "Plan Único", monthly: PLAN_TOTAL_CENTS },
   // Plan de prueba ($1 + IVA = $1.15). NO es un tier público (vive solo en /prueba).
   // Solo cobrable cuando PAYPHONE_TEST_MODE === "true" (lo valida /api/payphone/init),
   // para validar el cobro recurrente tokenizado en sandbox.
@@ -104,6 +110,7 @@ export interface StoredTransaction {
   createdAt: string;
   confirmedAt?: string;
   lead: LeadInput;
+  opticaName?: string;
   // Plan/monto esperado (para validar el cobro en la confirmación).
   planId?: string;
   billing?: Billing;

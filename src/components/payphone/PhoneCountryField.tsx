@@ -1,6 +1,6 @@
 'use client';
 
-import { COUNTRIES, DEFAULT_COUNTRY, countryByIso } from "@/lib/countries";
+import { COUNTRIES, DEFAULT_COUNTRY, countryByIso, isValidPhone } from "@/lib/countries";
 
 // Campo de teléfono con selector de país NATIVO (default Ecuador). El <select>
 // nativo abre el picker del SO en móvil (touch-friendly, sin recortes ni problemas
@@ -27,7 +27,7 @@ export function PhoneCountryField({
 
   const digits = value.replace(/\D/g, "");
   const ecLocal = digits.replace(/^593/, "").replace(/^0/, "");
-  const valid = isEC ? /^9\d{8}$/.test(ecLocal) : digits.replace(/^0+/, "").length >= 6;
+  const valid = isValidPhone(value, countryIso);
 
   const hint = isEC
     ? value

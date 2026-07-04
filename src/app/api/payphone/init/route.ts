@@ -52,6 +52,7 @@ export async function POST(req: Request) {
     documentId?: string;
     consent?: boolean;
     countryCode?: string;
+    opticaName?: string;
   };
   try {
     body = (await req.json()) as typeof body;
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
   }
 
   const name = (body.name || "").toString().trim();
+  const opticaName = (body.opticaName || "").toString().trim();
   const email = (body.email || "").toString().trim().toLowerCase();
   const phoneRaw = (body.phone || "").toString().trim();
   // Código de país del selector (solo dígitos). Default Ecuador (593).
@@ -74,6 +76,9 @@ export async function POST(req: Request) {
 
   if (name.length < 2 || name.length > 80) {
     return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
+  }
+  if (opticaName && (opticaName.length < 3 || opticaName.length > 100)) {
+    return NextResponse.json({ error: "Nombre de la óptica inválido" }, { status: 400 });
   }
   if (!isEmail(email) || email.length > 120) {
     return NextResponse.json({ error: "Email inválido" }, { status: 400 });
@@ -128,6 +133,7 @@ export async function POST(req: Request) {
       status: "pending",
       createdAt: new Date().toISOString(),
       lead: { name, email, phone },
+      ...(opticaName ? { opticaName } : {}),
       planId,
       billing,
       planLabel,

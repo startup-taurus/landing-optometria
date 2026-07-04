@@ -21,8 +21,10 @@ import {
   markChargeDeclined,
   markChargeNeedsReconciliation,
   getChargeCredentials,
+  addPeriod,
   type Subscription,
 } from "@/lib/subscriptions";
+import { optometryEnabled, syncOptometrySubscription } from "@/lib/optometry";
 import {
   sendRenewalReceipt,
   sendDunningEmail,
@@ -51,6 +53,23 @@ function authorized(req: Request): boolean {
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
+}
+
+async function syncOptometryStatus(
+  subscriptionId: string,
+  status: string,
+  currentPeriodEnd?: string | null
+): Promise<void> {
+  if (!optometryEnabled()) return;
+  try {
+    await syncOptometrySubscription({
+      externalSubscriptionId: subscriptionId,
+      status,
+      currentPeriodEnd: currentPeriodEnd ?? null,
+    });
+  } catch (err) {
+    console.error(`[cron] sync optometria fallo sub=${subscriptionId}:`, (err as Error).message);
+  }
 }
 
 // Backoff entre reintentos de cobro rechazado.
@@ -175,6 +194,11 @@ async function chargeOne(sub: Subscription): Promise<"approved" | "declined" | "
       authorizationCode: resp.authorizationCode ?? null,
       newCardToken: resp.cardToken ?? null,
     });
+    await syncOptometryStatus(
+      sub.id,
+      "active",
+      addPeriod(sub.nextChargeAt, sub.cycle, sub.billingAnchorDay)
+    );
     try {
       await sendRenewalReceipt({
         name: sub.name,
@@ -202,6 +226,9 @@ async function chargeOne(sub: Subscription): Promise<"approved" | "declined" | "
       backoffMs: backoffMs(sub),
       nowIso: new Date().toISOString(),
     });
+    if (pastDue) {
+      await syncOptometryStatus(sub.id, "past_due");
+    }
     try {
       await sendDunningEmail({
         name: sub.name,
@@ -247,6 +274,7 @@ async function chargeOne(sub: Subscription): Promise<"approved" | "declined" | "
         `[cron] validación rechazada PERSISTENTE sub=${sub.id} (${MAX_RETRIES} intentos) ` +
           `→ suscripción en pausa, avisando a soporte`
       );
+      await syncOptometryStatus(sub.id, "past_due");
       try {
         await sendChargeRejectedAlert({
           subscriptionId: sub.id,

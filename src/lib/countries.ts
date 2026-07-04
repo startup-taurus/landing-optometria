@@ -32,3 +32,26 @@ export const DEFAULT_COUNTRY = COUNTRIES[0]; // Ecuador
 export function countryByIso(iso: string): Country | undefined {
   return COUNTRIES.find((c) => c.iso === iso);
 }
+
+// Validez del teléfono — FUENTE ÚNICA (la usan el campo del checkout y el gate del
+// botón "Continuar al pago"). Refleja la validación del servidor (`normalizePhone`
+// en payphone.ts): Ecuador = celular `9XXXXXXXX` tras quitar 0/593; resto = 6 a 14
+// dígitos. Si esto pasa, /init no la rechaza y la Cajita se monta con un número que
+// el cobro recurrente podrá reutilizar (misma regla en ambos lados).
+export function isValidPhone(value: string, countryIso: string): boolean {
+  const country = countryByIso(countryIso) ?? DEFAULT_COUNTRY;
+  const digits = (value || "").replace(/\D/g, "");
+  if (!digits) return false;
+  if (country.dial === "593") {
+    const local = digits.replace(/^593/, "").replace(/^0/, "");
+    return /^9\d{8}$/.test(local);
+  }
+  const local = digits.replace(/^0+/, "");
+  return local.length >= 6 && local.length <= 14;
+}
+
+// Cédula (10 díg.) o RUC (13 díg.) ecuatoriano. Compartida por el campo y el gate.
+export function isValidDocumentId(value: string): boolean {
+  const digits = (value || "").replace(/\D/g, "");
+  return /^\d{10}$/.test(digits) || /^\d{13}$/.test(digits);
+}
